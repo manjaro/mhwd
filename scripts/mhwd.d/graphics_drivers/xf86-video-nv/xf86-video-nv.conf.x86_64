@@ -1,0 +1,31 @@
+# mhwd Driver Config
+
+INCLUDE="translatedtext"
+
+NAME="xf86-video-nv"
+FREEDRIVER="true"
+PREFEROVER="xf86-video-vesa"
+DEPENDS="!libgl !lib32-libgl xf86-video-nv"
+CHECKDEPENDS="xf86-video-nv"
+CONFLICTS="${closeddrivers}"
+
+XORGDEVICEDRIVER="nv"
+
+CLASSID="0300"
+VENDORIDS="10de"
+DEVICEIDS="* !05E6 !0CA3"
+
+
+
+
+
+default()
+{
+	mhwd_Xorg_Configure
+	mhwd_add_DRI
+	mhwd_add_Backspace
+	mhwd_add_Compositing
+}
+
+
+add_configure_hook default default

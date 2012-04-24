@@ -1,0 +1,46 @@
+# mhwd Driver Config
+
+INCLUDE="translatedtext"
+
+NAME="broadcom"
+FREEDRIVER="true"
+PREFEROVER=""
+DEPENDS=""
+CONFLICTS=""
+
+CLASSID="0200"
+VENDORIDS="14e4"
+DEVICEIDS="*"
+
+MODULES="broadcom"
+
+
+
+remove()
+{	
+	if [ -f "/etc/rc.d/functions.d/broadcom-ethernet" ]; then
+		rm -fr /etc/rc.d/functions.d/broadcom-ethernet
+	fi
+}
+
+
+default()
+{
+	mhwd_unload_Module tg3
+
+	mhwd_load_Module broadcom
+	mhwd_load_Module tg3
+
+	echo "broadcom-ethernet()" > /etc/rc.d/functions.d/broadcom-ethernet
+	echo "{" >> /etc/rc.d/functions.d/broadcom-ethernet
+	echo "	modprobe -r tg3" >> /etc/rc.d/functions.d/broadcom-ethernet
+	echo "	modprobe tg3" >> /etc/rc.d/functions.d/broadcom-ethernet
+	echo "}" >> /etc/rc.d/functions.d/broadcom-ethernet
+	echo "" >> /etc/rc.d/functions.d/broadcom-ethernet
+	echo "" >> /etc/rc.d/functions.d/broadcom-ethernet
+	echo "add_hook sysinit_end broadcom-ethernet" >> /etc/rc.d/functions.d/broadcom-ethernet
+}
+
+
+add_remove_hook remove
+add_configure_hook default default

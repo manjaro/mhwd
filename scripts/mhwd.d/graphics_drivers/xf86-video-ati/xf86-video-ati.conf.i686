@@ -1,0 +1,31 @@
+# mhwd Driver Config
+
+INCLUDE="translatedtext"
+
+NAME="xf86-video-ati"
+FREEDRIVER="true"
+PREFEROVER="xf86-video-r128 xf86-video-vesa"
+DEPENDS="xf86-video-ati ati-dri !libgl"
+CHECKDEPENDS="xf86-video-ati"
+CONFLICTS="${closeddrivers}"
+
+XORGDEVICEDRIVER="radeon"
+
+CLASSID="0300"
+VENDORIDS="1002"
+DEVICEIDS="*"
+
+
+
+
+
+default()
+{
+	mhwd_Xorg_Configure
+	mhwd_add_DRI
+	mhwd_add_Backspace
+	mhwd_add_Compositing
+}
+
+
+add_configure_hook default default

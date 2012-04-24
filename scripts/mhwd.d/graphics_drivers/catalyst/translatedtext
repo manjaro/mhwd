@@ -1,0 +1,14 @@
+# Text translated
+
+# Standard
+PREFERINFO="Experimental"
+INFO="Closed ati video driver."
+
+# German
+PREFERINFO[de]="Experimentell"
+INFO[de]="Closed Source Ati Grafiktreiber."
+
+# French
+PREFERINFO[fr]="Expérimental"
+INFO[fr]="Pilote vidéo ati propriétaire."
+

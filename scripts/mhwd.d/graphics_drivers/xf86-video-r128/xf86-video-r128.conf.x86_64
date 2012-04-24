@@ -1,0 +1,31 @@
+# mhwd Driver Config
+
+INCLUDE="translatedtext"
+
+NAME="xf86-video-r128"
+FREEDRIVER="true"
+PREFEROVER="xf86-video-vesa"
+DEPENDS="xf86-video-r128 r128-dri lib32-r128-dri !libgl !lib32-libgl"
+CHECKDEPENDS="xf86-video-r128"
+CONFLICTS="${closeddrivers}"
+
+XORGDEVICEDRIVER="r128"
+
+CLASSID="0300"
+VENDORIDS="1002"
+DEVICEIDS="*"
+
+
+
+
+
+default()
+{
+	mhwd_Xorg_Configure
+	mhwd_add_DRI
+	mhwd_add_Backspace
+	mhwd_add_Compositing
+}
+
+
+add_configure_hook default default

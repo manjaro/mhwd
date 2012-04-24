@@ -1,0 +1,14 @@
+# Text translated
+
+# Standard
+PREFERINFO="Preferred"
+INFO="X.org ati video driver. Standard open source driver for ati graphic cards."
+
+# German
+PREFERINFO[de]="Empfohlen"
+INFO[de]="X.org Ati Grafiktreiber. Standard Open Source Treiber für Ati Grafikkarten."
+
+# French
+PREFERINFO[fr]="Préféré"
+INFO[fr]="Pilote vidéo X.org ati. Pilote libre standard pour les cartes graphiques ati."
+

@@ -1,0 +1,31 @@
+# mhwd Driver Config
+
+INCLUDE="translatedtext"
+
+NAME="xf86-video-vesa"
+FREEDRIVER="true"
+PREFEROVER=""
+DEPENDS="!libgl xf86-video-vesa"
+CHECKDEPENDS="xf86-video-vesa"
+CONFLICTS="${closeddrivers}"
+
+XORGDEVICEDRIVER="vesa"
+
+CLASSID="0300"
+VENDORIDS="*"
+DEVICEIDS="*"
+
+
+
+
+
+default()
+{
+	mhwd_Xorg_Configure
+	mhwd_add_DRI
+	mhwd_add_Backspace
+	mhwd_add_Compositing
+}
+
+
+add_configure_hook default default

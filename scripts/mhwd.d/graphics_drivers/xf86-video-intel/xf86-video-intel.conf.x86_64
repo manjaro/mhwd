@@ -1,0 +1,31 @@
+# mhwd Driver Config
+
+INCLUDE="translatedtext"
+
+NAME="xf86-video-intel"
+FREEDRIVER="true"
+PREFEROVER="xf86-video-vesa"
+DEPENDS="xf86-video-intel intel-dri lib32-intel-dri !libgl !lib32-libgl"
+CHECKDEPENDS="xf86-video-intel"
+CONFLICTS="${closeddrivers}"
+
+XORGDEVICEDRIVER="intel intel-legacy"
+
+CLASSID="0300"
+VENDORIDS="8086"
+DEVICEIDS="*"
+
+
+
+
+
+default()
+{
+	mhwd_Xorg_Configure
+	mhwd_add_DRI
+	mhwd_add_Backspace
+	mhwd_add_Compositing
+}
+
+
+add_configure_hook default default

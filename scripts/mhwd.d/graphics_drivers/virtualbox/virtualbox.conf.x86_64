@@ -1,0 +1,53 @@
+# mhwd Driver Config
+
+INCLUDE="translatedtext"
+
+NAME="virtualbox"
+FREEDRIVER="true"
+PREFEROVER="xf86-video-vesa"
+DEPENDS="!libgl !lib32-libgl virtualbox-archlinux-modules virtualbox-archlinux-additions"
+CHECKDEPENDS="virtualbox-archlinux-modules virtualbox-archlinux-additions"
+CONFLICTS="${closeddrivers}"
+
+XORGDEVICEDRIVER="vboxvideo"
+
+CLASSID="0300"
+VENDORIDS="80ee"
+DEVICEIDS="*"
+
+MODULES="vboxguest vboxsf vboxvideo"
+
+
+
+
+default()
+{
+	mhwd_Xorg_Configure
+
+	sed -i /'Section.*"InputDevice"'/,/'EndSection'/s/'.*"Mouse0"'/"MouseStart\nMouseEnd"/g $1
+	sed -i '/MouseEnd/,/EndSection/d' $1
+	sed -i 's|MouseStart|\tIdentifier  "Mouse0"\n\tDriver      "vboxmouse"\n\tOption      "Device" "/dev/vboxguest"\n\tOption      "CorePointer" "yes"\nEndSection|g' $1
+
+	mhwd_add_Backspace
+	mhwd_add_Compositing
+
+
+	echo "#!/bin/bash" > /etc/profile.d/VBoxClient.sh
+	echo "" >> /etc/profile.d/VBoxClient.sh
+	echo "/usr/bin/VBoxClient-all &" >> /etc/profile.d/VBoxClient.sh
+
+	mhwd_load_Module vboxguest
+	mhwd_load_Module vboxsf
+	mhwd_load_Module vboxvideo
+}
+
+
+remove()
+{
+	if [ -e /etc/profile.d/VBoxClient.sh ]; then
+		rm /etc/profile.d/VBoxClient.sh
+	fi
+}
+
+add_remove_hook remove
+add_configure_hook default default

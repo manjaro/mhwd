@@ -1,0 +1,14 @@
+# Text translated
+
+# Standard
+PREFERINFO="Preferred for older graphic cards"
+INFO="Closed nvidia-173xx video driver. If the closed driver nvidia is not supported, then this is the right option."
+
+# German
+PREFERINFO[de]="Empfohlen für ältere Grafikkarten"
+INFO[de]="Closed Source Nvidia-173xx Grafiktreiber. Wenn der Closed Source Nvidia Treiber nicht unterstützt wird, dann ist dieser Treiber die richtige Wahl."
+
+# French
+PREFERINFO[fr]="Préféré pour les cartes graphiques anciennes"
+INFO[fr]="Pilote vidéo nvidia-173xx propriétaire. Si le pilote vidéo nvidia propriétaire n'est pas supporté, ceci est la bonne option."
+

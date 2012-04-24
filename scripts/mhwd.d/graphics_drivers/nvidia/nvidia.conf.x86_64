@@ -1,0 +1,41 @@
+# mhwd Driver Config
+
+INCLUDE="translatedtext"
+
+NAME="nvidia"
+FREEDRIVER="false"
+PREFEROVER="nvidia-173xx xf86-video-vesa"
+DEPENDS="!nvidia-utils nvidia !lib32-nvidia-utils"
+CHECKDEPENDS="nvidia"
+CONFLICTS="catalyst nvidia-173xx ${freedrivers}"
+
+XORGDEVICEDRIVER="nvidia"
+
+CLASSID="0300"
+VENDORIDS="10de"
+DEVICEIDS="0040 0042 0044 0046 0048 004d 0090 0092 0094 0099 009d 00c0 00c2 00c8 00cc 00cd 0140 0142 0145 0146 0149 014a 014c 014e 0160 0162 0165 0166 0168 016a 016d 016e 0191 0193 0197 019e 01d1 01d3 01d5 01d7 01d9 01db 01de 0210 0212 0218 021e 0221 0228 0240 0242 0244 0247 0248 024a 024c 024e 0290 0292 0294 0296 0298 029a 029c 029f 02e0 02e1 02e2 02e3 02e4 0390 0392 0394 0397 0399 039b 039e 03d1 03d3 03d5 03d7 03d9 03db 03dd 03df 0401 0403 0405 0407 0409 040b 040d 040e 0410 0420 0422 0424 0426 0428 042a 042d 042f 0530 0532 053b 053f 05e0 05e2 05e4 05e6 05e8 05ea 05ec 05ee 05f0 05f2 05f4 05f6 05f8 05fa 05fc 05fe 0600 0602 0604 0606 0609 060b 060d 060f 0610 0612 0614 0616 0618 061a 061d 061f 0621 0622 0625 0626 0628 062a 062c 062e 0630 0632 0634 0637 0639 063b 063d 063f 0640 0642 0644 0646 0648 064a 064c 064e 0650 0652 0654 0656 0658 065b 065c 065e 06c0 06c2 06c4 06c6 06c8 06cb 06d1 06d8 06da 06dc 06de 06e0 06e2 06e4 06e7 06e8 06ea 06ec 06f1 06f8 06fa 06ff 07e1 07e3 07e5 07e7 07e9 07eb 07ed 07ef 0840 0843 0844 0847 0849 084b 084d 0850 0852 0854 0856 0858 085a 085c 085e 0860 0861 0863 0865 0867 086a 086c 086e 0870 0871 0873 0876 087a 087d 08a0 08a2 08a4 08b0 08b2 08b8 0a21 0a23 0a27 0a28 0a2a 0a2c 0a34 0a38 0a3c 0a3f 0a61 0a63 0a65 0a67 0a69 0a6c 0a6f 0a71 0a73 0a75 0a79 0a7c 0a7e 0ca0 0ca3 0ca5 0ca8 0cac 0cad 0caf 0cb1 0dc0 0dc2 0dc5 0dca 0dcc 0dce 0dd0 0dd2 0dd6 0dda 0ddf 0de1 0de4 0de9 0deb 0ded 0def 0df1 0df3 0df5 0df7 0df8 0dfa 0dfe 0e20 0e21 0e23 0e25 0e31 0e38 0e3b 0e3f 0fa0 0fd1 0fd3 0ff0 0ffc 1041 1050 1052 1055 1057 1070 107d 107f 1081 1084 1088 108e 1094 1098 109b 10c3 10c4 10d8 1142 1144 1146 114a 11a0 11b0 11bd 11f0 1201 1203 1210 1212 1218 1240 1243 1245 1246 1248 1250 1258"
+
+
+
+default()
+{
+	nvidia-xconfig -o "$1" --composite &>/dev/null
+	mhwd_add_Backspace
+	mhwd_add_Compositing
+	
+	#Load module if X is not running
+	if [ ! "$(pidof X)" ];	then
+		mhwd_load_Module nvidia
+	fi
+}
+
+
+fix_screen_flickering()
+{
+	sed -i /'Section "Device"'/,/'EndSection'/s/'EndSection'/"\tOption \"NoLogo\" \"1\"\n\tOption \"RegistryDwords\" \"PowerMizerEnable=0x1; PerfLevelSrc=0x2222; PowerMizerDefault=0x2; PowerMizerDefaultAC=0x1\"\nEndSection"/g "$1"
+}
+
+
+add_configure_hook default default
+add_configure_hook "id0400 id0401 id0402 id0403 id0407 id0409 id0425" "default fix_screen_flickering"
+
