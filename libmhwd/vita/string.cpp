@@ -5,7 +5,7 @@
  * Licensed under the terms of the MIT/X11 license.
  * Copyright (c) 2008 Vita Smid <me@ze.phyr.us>
  *
- * $Id: string.cpp 6 2008-07-10 16:41:38Z zephyr $
+ * $Id: string.cpp 17 2008-08-11 17:46:13Z zephyr $
  */
 
 #include <string.hpp>

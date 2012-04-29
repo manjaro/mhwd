@@ -17,6 +17,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "hwd.h"
-#include "device.h"
-#include "config.h"
+
+#define MHWD_CONFIG_END "mhwd"
+#define MHWD_USB_CONFIG_DIR "/var/lib/mhwd/usb"
+#define MHWD_PCI_CONFIG_DIR "/var/lib/mhwd/pci"

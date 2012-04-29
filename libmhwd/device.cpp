@@ -24,9 +24,9 @@
 mhwd::Device::Device(hd_t *hd, TYPE type) {
     Device::type = type;
 
-    ClassID = from_Hex(hd->base_class.id, 2) + from_Hex(hd->sub_class.id, 2);
-    VendorID = from_Hex(hd->vendor.id, 4);
-    DeviceID = from_Hex(hd->device.id, 4);
+    ClassID = from_Hex(hd->base_class.id, 2) + from_Hex(hd->sub_class.id, 2).toLower();
+    VendorID = from_Hex(hd->vendor.id, 4).toLower();
+    DeviceID = from_Hex(hd->device.id, 4).toLower();
     ClassName = from_CharArray(hd->base_class.name);
     VendorName = from_CharArray(hd->vendor.name);
     DeviceName = from_CharArray(hd->device.name);
@@ -39,7 +39,25 @@ mhwd::Device::Device(hd_t *hd, TYPE type) {
 
 
 
-string mhwd::Device::from_Hex(uint16_t hexnum, int fill) {
+void mhwd::Device::addConfig(mhwd::Config& config) {
+    for (vector<mhwd::Config>::const_iterator iterator = configs.begin(); iterator != configs.end(); iterator++) {
+        if (config == *iterator)
+            return;
+    }
+
+    for (vector<mhwd::Config>::iterator iterator = configs.begin(); iterator != configs.end(); iterator++) {
+        if (config.getPriority() > (*iterator).getPriority()) {
+            configs.insert(iterator, config);
+            return;
+        }
+    }
+
+    configs.push_back(config);
+}
+
+
+
+Vita::string mhwd::Device::from_Hex(uint16_t hexnum, int fill) {
     stringstream stream;
     stream << hex << setfill('0') << setw(fill) << hexnum;
     return stream.str();
@@ -47,9 +65,10 @@ string mhwd::Device::from_Hex(uint16_t hexnum, int fill) {
 
 
 
-string mhwd::Device::from_CharArray(char* c) {
+Vita::string mhwd::Device::from_CharArray(char* c) {
     if (c == NULL)
         return "";
 
     return string(c);
 }
+

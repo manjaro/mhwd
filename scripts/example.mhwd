@@ -1,0 +1,72 @@
+# mhwd Driver Config
+
+##
+## This is important for libmhwd
+##
+
+INCLUDE="anything"
+
+NAME="nvidia"
+FREEDRIVER="false"
+PRIORITY="1"
+
+CLASSIDS="0300"
+VENDORIDS="10de"
+DEVICEIDS="0040 0042 0044"
+
+CLASSIDS="0300"
+VENDORIDS="1001"
+DEVICEIDS="0030 0122 0123"
+
+##
+## This is important for the bash script
+##
+
+# Dependencies
+DEPENDS="nvidia-utils nvidia"
+DEPENDS-i686="something"
+DEPENDS-x86_64="lib32-nvidia-utils"
+
+# Driver config depends
+# This is a mhwd driver config -> nouveau -> should install the mhwd nouveau driver config
+DEPENDSMHWD="nouveau"
+DEPENDSMHWD-i686=""
+DEPENDSMHWD-x86_64=""
+
+
+# Conflicts
+CONFLICTS="catalyst nvidia-173xx"
+CONFLICTS-i686=""
+CONFLICTS-x86_64=""
+
+# Driver config conflicts
+# This is a mhwd driver config -> nouveau -> should remove and uninstall with the nouveau driver config rules instead of just removing the pacman package
+CONFLICTSMHWD="nouveau"
+CONFLICTSMHWD-i686=""
+CONFLICTSMHWD-x86_64=""
+
+
+
+pre_install() {
+	# Before package operations
+}
+
+
+
+post_install()
+{
+	# After package operations -> so configuration
+}
+
+
+post_remove()
+{
+	# Before package operations
+}
+
+
+post_remove()
+{
+	# After package operations -> so clear all configuration...
+}
+

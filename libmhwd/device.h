@@ -27,13 +27,17 @@
 #include <vector>
 #include <hd.h>
 #include "string.hpp"
+#include "config.h"
 
 using namespace std;
+
 
 namespace mhwd {
     class Device
     {
     public:
+        friend class hwd;
+
         enum TYPE { TYPE_PCI, TYPE_USB };
 
         Device(hd_t *hd, TYPE type);
@@ -45,13 +49,16 @@ namespace mhwd {
         string getClassID() { return ClassID; }
         string getDeviceID() { return DeviceID; }
         string getVendorID() { return VendorID; }
+        vector<mhwd::Config> getConfigs() { return configs; }
 
-    private:       
+    private:
         string ClassName, DeviceName, VendorName, ClassID, DeviceID, VendorID;
         TYPE type;
+        vector<mhwd::Config> configs;
 
-        string from_Hex(uint16_t hexnum, int fill = 4);
-        string from_CharArray(char* c);
+        void addConfig(Config& config);
+        Vita::string from_Hex(uint16_t hexnum, int fill = 4);
+        Vita::string from_CharArray(char* c);
     };
 }
 
