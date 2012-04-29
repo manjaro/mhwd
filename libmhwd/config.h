@@ -56,6 +56,7 @@ namespace mhwd {
         bool readConfig(const Vita::string path);
         vector<string> getIDs(Vita::string str);
         inline void addNewIDsGroup();
+        Vita::string getRightPath(Vita::string str);
     };
 }
 

@@ -16,14 +16,13 @@ using namespace std;
 
 int main (int argc, char *argv[])
 {
-    mhwd::hwd::printUSBDetails();
-
-    /*vector<mhwd::Device*> devices = mhwd::hwd::getPCIDevices();
+    vector<mhwd::Device*> devices = mhwd::hwd::getPCIDevices();
 
     for (vector<mhwd::Device*>::const_iterator iterator = devices.begin(); iterator != devices.end(); iterator++) {
         vector<mhwd::Config> configs = (*iterator)->getConfigs();
 
-        cout << (*iterator)->getClassName() << ": ";
+        if (!configs.empty())
+            cout << (*iterator)->getClassName() << ": ";
 
         for (vector<mhwd::Config>::const_iterator iterator = configs.begin(); iterator != configs.end(); iterator++) {
             mhwd::Config config = (*iterator);
@@ -31,8 +30,9 @@ int main (int argc, char *argv[])
             cout << config.getName() << " ";
         }
 
-        cout << endl;
-    }+/
+        if (!configs.empty())
+            cout << endl;
+    }
 
     /*for(unsigned int i = 0; i < devices.size(); i++) {
         cout << setw(30) << devices[i]->getClassName();

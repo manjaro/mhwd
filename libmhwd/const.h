@@ -20,4 +20,4 @@
 
 #define MHWD_CONFIG_END "mhwd"
 #define MHWD_USB_CONFIG_DIR "/var/lib/mhwd/usb"
-#define MHWD_PCI_CONFIG_DIR "/var/lib/mhwd/pci"
+#define MHWD_PCI_CONFIG_DIR "." //"/var/lib/mhwd/pci"

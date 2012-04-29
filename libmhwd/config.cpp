@@ -69,9 +69,41 @@ bool mhwd::Config::readConfig(const Vita::string path) {
         key = parts.front().trim().toLower();
         value = parts.back().trim("\"").trim();
 
+        // Read in extern file
+        if (value.size() > 1 && value.substr(0, 1) == ">") {
+            ifstream file(getRightPath(value.substr(1)).c_str(), ios::in);
+            if (!file.is_open())
+                return false;
+
+            Vita::string line;
+            value.clear();
+
+            while (!file.eof()) {
+                getline(file, line);
+
+                size_t pos = line.find_first_of('#');
+                if (pos != string::npos)
+                    line.erase(pos);
+
+                if (line.trim().empty())
+                    continue;
+
+                value += " " + line.trim();
+            }
+
+            file.close();
+
+            value = value.trim();
+
+            // remove all multiple spaces
+            while (value.find("  ") != string::npos) {
+                value = value.replace("  ", " ");
+            }
+        }
+
 
         if (key == "include") {
-            readConfig(value);
+            readConfig(getRightPath(value));
         }
         else if (key == "name") {
             name = value;
@@ -146,4 +178,15 @@ vector<string> mhwd::Config::getIDs(Vita::string str) {
 void mhwd::Config::addNewIDsGroup() {
     IDsGroup group;
     IDs.push_back(group);
+}
+
+
+
+Vita::string mhwd::Config::getRightPath(Vita::string str) {
+    str = str.trim();
+
+    if (str.size() <= 0 || str.substr(0, 1) == "/")
+        return str;
+
+    return path.substr(0, path.find_last_of('/')) + "/" + str;
 }
