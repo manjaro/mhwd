@@ -29,8 +29,6 @@
 #include "string.hpp"
 #include "config.h"
 
-using namespace std;
-
 
 namespace mhwd {
     class Device
@@ -43,18 +41,18 @@ namespace mhwd {
         Device(hd_t *hd, TYPE type);
 
         TYPE getType() { return type; }
-        string getClassName() { return ClassName; }
-        string getDeviceName() { return DeviceName; }
-        string getVendorName() { return VendorName; }
-        string getClassID() { return ClassID; }
-        string getDeviceID() { return DeviceID; }
-        string getVendorID() { return VendorID; }
-        vector<mhwd::Config> getConfigs() { return configs; }
+        std::string getClassName() { return ClassName; }
+        std::string getDeviceName() { return DeviceName; }
+        std::string getVendorName() { return VendorName; }
+        std::string getClassID() { return ClassID; }
+        std::string getDeviceID() { return DeviceID; }
+        std::string getVendorID() { return VendorID; }
+        std::vector<mhwd::Config> getConfigs() { return configs; }
 
     private:
-        string ClassName, DeviceName, VendorName, ClassID, DeviceID, VendorID;
+        std::string ClassName, DeviceName, VendorName, ClassID, DeviceID, VendorID;
         TYPE type;
-        vector<mhwd::Config> configs;
+        std::vector<mhwd::Config> configs;
 
         void addConfig(Config& config);
         Vita::string from_Hex(uint16_t hexnum, int fill = 4);

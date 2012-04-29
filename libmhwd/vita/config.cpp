@@ -52,20 +52,20 @@ bool config::loadFile(string path) {
 }
 
 	bool config::saveFile(string path) const {
-		std::ofstream file(path.c_str(), std::ios::out);
+        std::ofstream file(path.c_str(), std::ios::out);
 
-		if (!file.is_open()) {
-			return false;
-		}
+        if (!file.is_open()) {
+            return false;
+        }
 
-		std::map<string, string>::const_iterator iter;
+        std::map<string, string>::const_iterator iter;
 
-		for (iter = values.begin(); iter != values.end(); iter++){
-			file << iter->first << " = " << iter->second << std::endl;
-		}
+        for (iter = values.begin(); iter != values.end(); iter++){
+            file << iter->first << " = " << iter->second << std::endl;
+        }
 
-		file.close();
-		return true;
+        file.close();
+        return true;
 	}
 
 	string config::get(string key) {

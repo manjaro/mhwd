@@ -24,38 +24,41 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include "const.h"
 #include "string.hpp"
-
-using namespace std;
+#include "database.h"
 
 
 namespace mhwd {
     class Config
     {
     public:
-        Config(string path);
+        Config(std::string path);
         bool operator==(const Config& compare);
 
+        bool isInstalled();
         bool isValid() { return configValid; }
-        string getName() { return name; }
-        string getInfo() { return info; }
+        std::string getName() { return name; }
+        std::string getInfo() { return info; }
         bool getIsFreeDriver() { return freedriver; }
         int getPriority() { return priority; }
 
         struct IDsGroup {
-            vector<string> classIDs, vendorIDs, deviceIDs;
+            std::vector<std::string> classIDs, vendorIDs, deviceIDs;
         };
 
-        vector<IDsGroup> getIDsGroups() { return IDs; }
+        std::vector<IDsGroup> getIDsGroups() { return IDs; }
 
     private:
-        string path, name, info;
-        vector<IDsGroup> IDs;
+        static Database db;
+
+        std::string path, name, info;
+        std::vector<IDsGroup> IDs;
         bool configValid, freedriver;
         int priority;
 
         bool readConfig(const Vita::string path);
-        vector<string> getIDs(Vita::string str);
+        std::vector<std::string> getIDs(Vita::string str);
         inline void addNewIDsGroup();
         Vita::string getRightPath(Vita::string str);
     };

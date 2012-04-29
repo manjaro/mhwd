@@ -40,12 +40,12 @@ mhwd::Device::Device(hd_t *hd, TYPE type) {
 
 
 void mhwd::Device::addConfig(mhwd::Config& config) {
-    for (vector<mhwd::Config>::const_iterator iterator = configs.begin(); iterator != configs.end(); iterator++) {
+    for (std::vector<mhwd::Config>::const_iterator iterator = configs.begin(); iterator != configs.end(); iterator++) {
         if (config == *iterator)
             return;
     }
 
-    for (vector<mhwd::Config>::iterator iterator = configs.begin(); iterator != configs.end(); iterator++) {
+    for (std::vector<mhwd::Config>::iterator iterator = configs.begin(); iterator != configs.end(); iterator++) {
         if (config.getPriority() > (*iterator).getPriority()) {
             configs.insert(iterator, config);
             return;
@@ -58,8 +58,8 @@ void mhwd::Device::addConfig(mhwd::Config& config) {
 
 
 Vita::string mhwd::Device::from_Hex(uint16_t hexnum, int fill) {
-    stringstream stream;
-    stream << hex << setfill('0') << setw(fill) << hexnum;
+    std::stringstream stream;
+    stream << std::hex << std::setfill('0') << std::setw(fill) << hexnum;
     return stream.str();
 }
 
@@ -69,6 +69,6 @@ Vita::string mhwd::Device::from_CharArray(char* c) {
     if (c == NULL)
         return "";
 
-    return string(c);
+    return std::string(c);
 }
 

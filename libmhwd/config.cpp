@@ -20,12 +20,19 @@
 #include "config.h"
 
 
+// Static variables
 
-mhwd::Config::Config(string path)
+mhwd::Database mhwd::Config::db(MHWD_DATABASE_PATH);
+
+
+// Methods
+
+
+mhwd::Config::Config(std::string path) :
+    path(path)
 {
     priority = 0;
     freedriver = true;
-    Config::path = path;
 
     configValid = readConfig(path);
 }
@@ -34,6 +41,16 @@ mhwd::Config::Config(string path)
 
 bool mhwd::Config::operator==(const mhwd::Config& compare) {
     return (path == compare.path);
+}
+
+
+
+bool mhwd::Config::isInstalled() {
+    if (!db.isValid())
+        return false;
+    // TODO: Warning!
+
+    return db.isAvailable(name);
 }
 
 
@@ -47,19 +64,19 @@ bool mhwd::Config::readConfig(const Vita::string path) {
     if (IDs.empty())
         addNewIDsGroup();
 
-    ifstream file(path.c_str(), ios::in);
+    std::ifstream file(path.c_str(), std::ios::in);
 
     if (!file.is_open())
         return false;
 
     Vita::string line, key, value;
-    vector<Vita::string> parts;
+    std::vector<Vita::string> parts;
 
     while (!file.eof()) {
         getline(file, line);
 
         size_t pos = line.find_first_of('#');
-        if (pos != string::npos)
+        if (pos != std::string::npos)
             line.erase(pos);
 
         if (line.trim().empty())
@@ -71,7 +88,7 @@ bool mhwd::Config::readConfig(const Vita::string path) {
 
         // Read in extern file
         if (value.size() > 1 && value.substr(0, 1) == ">") {
-            ifstream file(getRightPath(value.substr(1)).c_str(), ios::in);
+            std::ifstream file(getRightPath(value.substr(1)).c_str(), std::ios::in);
             if (!file.is_open())
                 return false;
 
@@ -82,7 +99,7 @@ bool mhwd::Config::readConfig(const Vita::string path) {
                 getline(file, line);
 
                 size_t pos = line.find_first_of('#');
-                if (pos != string::npos)
+                if (pos != std::string::npos)
                     line.erase(pos);
 
                 if (line.trim().empty())
@@ -96,7 +113,7 @@ bool mhwd::Config::readConfig(const Vita::string path) {
             value = value.trim();
 
             // remove all multiple spaces
-            while (value.find("  ") != string::npos) {
+            while (value.find("  ") != std::string::npos) {
                 value = value.replace("  ", " ");
             }
         }
@@ -145,7 +162,7 @@ bool mhwd::Config::readConfig(const Vita::string path) {
     file.close();
 
     // Append * to all empty vectors
-    for (vector<IDsGroup>::iterator iterator = IDs.begin(); iterator != IDs.end(); iterator++) {
+    for (std::vector<IDsGroup>::iterator iterator = IDs.begin(); iterator != IDs.end(); iterator++) {
         if ((*iterator).classIDs.empty())
             (*iterator).classIDs.push_back("*");
 
@@ -161,11 +178,11 @@ bool mhwd::Config::readConfig(const Vita::string path) {
 
 
 
-vector<string> mhwd::Config::getIDs(Vita::string str) {
-    vector<Vita::string> work = str.toLower().explode(" ");
-    vector<string> final;
+std::vector<std::string> mhwd::Config::getIDs(Vita::string str) {
+    std::vector<Vita::string> work = str.toLower().explode(" ");
+    std::vector<std::string> final;
 
-    for (vector<Vita::string>::const_iterator iterator = work.begin(); iterator != work.end(); iterator++) {
+    for (std::vector<Vita::string>::const_iterator iterator = work.begin(); iterator != work.end(); iterator++) {
         if (*iterator != "")
             final.push_back(*iterator);
     }

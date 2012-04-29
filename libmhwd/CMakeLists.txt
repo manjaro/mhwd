@@ -6,6 +6,7 @@ set( HEADERS
     const.h
     device.h
     config.h
+    database.h
     vita/config.hpp
     vita/string.hpp
 )
@@ -14,6 +15,7 @@ set( SOURCES
     hwd.cpp
     device.cpp
     config.cpp
+    database.cpp
     vita/config.cpp
     vita/string.cpp
 )

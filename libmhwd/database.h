@@ -17,8 +17,36 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef DATABASE_H
+#define DATABASE_H
 
-#define MHWD_CONFIG_END "mhwd"
-#define MHWD_USB_CONFIG_DIR "/var/lib/mhwd/usb"
-#define MHWD_PCI_CONFIG_DIR "." //"/var/lib/mhwd/pci"
-#define MHWD_DATABASE_PATH "/var/lib/mhwd/local.db"
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <vector>
+#include "string.hpp"
+
+
+namespace mhwd {
+    class Database
+    {
+    public:
+        Database(std::string path);
+
+        std::vector<std::string> getContent() { return content; }
+        bool setContent(std::vector<std::string> content);
+        bool add(std::string str);
+        bool remove(std::string str);
+        bool isAvailable(std::string str);
+        bool isValid() { return valid; }
+
+    private:
+        std::string path;
+        bool valid;
+        std::vector<std::string> content;
+
+        bool readDatabase();
+    };
+}
+
+#endif // DATABASE_H

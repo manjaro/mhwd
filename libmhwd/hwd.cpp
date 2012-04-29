@@ -23,7 +23,7 @@
 // Static variables
 
 
-vector<mhwd::Device*> mhwd::hwd::USBDevices, mhwd::hwd::PCIDevices;
+std::vector<mhwd::Device*> mhwd::hwd::USBDevices, mhwd::hwd::PCIDevices;
 
 
 
@@ -31,7 +31,7 @@ vector<mhwd::Device*> mhwd::hwd::USBDevices, mhwd::hwd::PCIDevices;
 
 
 
-vector<mhwd::Device*> mhwd::hwd::getUSBDevices() {
+std::vector<mhwd::Device*> mhwd::hwd::getUSBDevices() {
     if (USBDevices.empty())
         update();
 
@@ -40,7 +40,7 @@ vector<mhwd::Device*> mhwd::hwd::getUSBDevices() {
 
 
 
-vector<mhwd::Device*> mhwd::hwd::getPCIDevices() {
+std::vector<mhwd::Device*> mhwd::hwd::getPCIDevices() {
     if (PCIDevices.empty())
         update();
 
@@ -75,12 +75,12 @@ void mhwd::hwd::printPCIDetails() {
 
 
 
-vector<mhwd::Device*> mhwd::hwd::getDevices(Device::TYPE type) {
-    vector<Device*> devices;
+std::vector<mhwd::Device*> mhwd::hwd::getDevices(Device::TYPE type) {
+    std::vector<mhwd::Device*> devices;
     hd_data_t *hd_data;
     hd_t *hd;
     hw_item hw;
-    string configDir;
+    std::string configDir;
 
     if (type == Device::TYPE_USB) {
         hw = hw_usb;
@@ -111,7 +111,7 @@ vector<mhwd::Device*> mhwd::hwd::getDevices(Device::TYPE type) {
 
 
 
-void mhwd::hwd::setMatchingConfigs(vector<mhwd::Device*>* devices, const string configDir) {
+void mhwd::hwd::setMatchingConfigs(std::vector<mhwd::Device*>* devices, const std::string configDir) {
     struct dirent *dir;
     DIR *d = opendir(configDir.c_str());
 
@@ -140,7 +140,7 @@ void mhwd::hwd::setMatchingConfigs(vector<mhwd::Device*>* devices, const string 
 
 
 
-void mhwd::hwd::setMatchingConfig(vector<mhwd::Device*>* devices, const string configPath) {
+void mhwd::hwd::setMatchingConfig(std::vector<mhwd::Device*>* devices, const std::string configPath) {
     mhwd::Config config(configPath);
 
     // Check if config is valid
@@ -148,18 +148,18 @@ void mhwd::hwd::setMatchingConfig(vector<mhwd::Device*>* devices, const string c
         return;
     // TODO: print warning!
 
-    vector<mhwd::Device*> foundDevices;
-    vector<mhwd::Config::IDsGroup> IDsGroups = config.getIDsGroups();
+    std::vector<mhwd::Device*> foundDevices;
+    std::vector<mhwd::Config::IDsGroup> IDsGroups = config.getIDsGroups();
 
-    for (vector<mhwd::Config::IDsGroup>::const_iterator i_idsgroup = IDsGroups.begin(); i_idsgroup != IDsGroups.end(); i_idsgroup++) {
+    for (std::vector<mhwd::Config::IDsGroup>::const_iterator i_idsgroup = IDsGroups.begin(); i_idsgroup != IDsGroups.end(); i_idsgroup++) {
         bool foundDevice = false;
 
         // Check all devices
-        for (vector<mhwd::Device*>::iterator i_device = devices->begin(); i_device != devices->end(); i_device++) {
+        for (std::vector<mhwd::Device*>::iterator i_device = devices->begin(); i_device != devices->end(); i_device++) {
             bool found = false;
 
             // Check class ids
-            for (vector<string>::const_iterator iterator = (*i_idsgroup).classIDs.begin(); iterator != (*i_idsgroup).classIDs.end(); iterator++) {
+            for (std::vector<std::string>::const_iterator iterator = (*i_idsgroup).classIDs.begin(); iterator != (*i_idsgroup).classIDs.end(); iterator++) {
                 if (*iterator == "*" || *iterator == (*i_device)->ClassID) {
                     found = true;
                     break;
@@ -172,7 +172,7 @@ void mhwd::hwd::setMatchingConfig(vector<mhwd::Device*>* devices, const string c
             // Check vendor ids
             found = false;
 
-            for (vector<string>::const_iterator iterator = (*i_idsgroup).vendorIDs.begin(); iterator != (*i_idsgroup).vendorIDs.end(); iterator++) {
+            for (std::vector<std::string>::const_iterator iterator = (*i_idsgroup).vendorIDs.begin(); iterator != (*i_idsgroup).vendorIDs.end(); iterator++) {
                 if (*iterator == "*" || *iterator == (*i_device)->VendorID) {
                     found = true;
                     break;
@@ -185,7 +185,7 @@ void mhwd::hwd::setMatchingConfig(vector<mhwd::Device*>* devices, const string c
             // Check device ids
             found = false;
 
-            for (vector<string>::const_iterator iterator = (*i_idsgroup).deviceIDs.begin(); iterator != (*i_idsgroup).deviceIDs.end(); iterator++) {
+            for (std::vector<std::string>::const_iterator iterator = (*i_idsgroup).deviceIDs.begin(); iterator != (*i_idsgroup).deviceIDs.end(); iterator++) {
                 if (*iterator == "*" || *iterator == (*i_device)->DeviceID) {
                     found = true;
                     break;
@@ -205,7 +205,7 @@ void mhwd::hwd::setMatchingConfig(vector<mhwd::Device*>* devices, const string c
 
 
     // Set config to all matching devices
-    for (vector<mhwd::Device*>::iterator iterator = foundDevices.begin(); iterator != foundDevices.end(); iterator++) {
+    for (std::vector<mhwd::Device*>::iterator iterator = foundDevices.begin(); iterator != foundDevices.end(); iterator++) {
         (*iterator)->addConfig(config);
     }
 }
