@@ -142,6 +142,12 @@ void mhwd::hwd::setMatchingConfigs(vector<mhwd::Device*>* devices, const string 
 
 void mhwd::hwd::setMatchingConfig(vector<mhwd::Device*>* devices, const string configPath) {
     mhwd::Config config(configPath);
+
+    // Check if config is valid
+    if (!config.isValid())
+        return;
+    // TODO: print warning!
+
     vector<mhwd::Device*> foundDevices;
     vector<mhwd::Config::IDsGroup> IDsGroups = config.getIDsGroups();
 

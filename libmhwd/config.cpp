@@ -27,7 +27,7 @@ mhwd::Config::Config(string path)
     freedriver = true;
     Config::path = path;
 
-    readConfig(path);
+    configValid = readConfig(path);
 }
 
 

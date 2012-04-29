@@ -36,6 +36,7 @@ namespace mhwd {
         Config(string path);
         bool operator==(const Config& compare);
 
+        bool isValid() { return configValid; }
         string getName() { return name; }
         string getInfo() { return info; }
         bool getIsFreeDriver() { return freedriver; }
@@ -50,7 +51,7 @@ namespace mhwd {
     private:
         string path, name, info;
         vector<IDsGroup> IDs;
-        bool freedriver;
+        bool configValid, freedriver;
         int priority;
 
         bool readConfig(const Vita::string path);
