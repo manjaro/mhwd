@@ -37,22 +37,32 @@
 
 
 namespace mhwd {
-    class hwd
+    class HWD
     {
     public:
-        static std::vector<Device*> getUSBDevices();
-        static std::vector<Device*> getPCIDevices();
-        static void printUSBDetails();
-        static void printPCIDetails();
-        static void update();
+        HWD();
+
+        std::vector<mhwd::Device>* getUSBDevices() { return &USBDevices; }
+        std::vector<mhwd::Device>* getPCIDevices() { return &PCIDevices; }
+
+        void printUSBDetails();
+        void printPCIDetails();
+        void update();
+
+        bool installConfig(mhwd::Config& config);
 
     private:
-        static std::vector<Device*> USBDevices, PCIDevices;
+        std::vector<mhwd::Device> USBDevices, PCIDevices;
+        std::vector<mhwd::Config> InstalledUSBConfigs, InstalledPCIConfigs;
 
-        static std::vector<mhwd::Device*> getDevices(Device::TYPE type);
-        static void setMatchingConfigs(std::vector<mhwd::Device*>* devices, const std::string configDir, bool setAsInstalled = false);
-        static void setMatchingConfig(std::vector<mhwd::Device*>* devices, const std::string configPath, bool setAsInstalled = false);
-        static void printDetails(hw_item hw);
+        void setDevices(std::vector<mhwd::Device>* devices, Device::TYPE type);
+        void setInstalledConfigs(std::vector<mhwd::Config>* configs, std::string databaseDir);
+
+        void setMatchingConfigs(std::vector<mhwd::Device>* devices, const std::string configDir, bool setAsInstalled = false);
+        void setMatchingConfigs(std::vector<mhwd::Device>* devices, std::vector<mhwd::Config>* configs, bool setAsInstalled = false);
+        void setMatchingConfig(mhwd::Config& config, std::vector<mhwd::Device>* devices, bool setAsInstalled = false);
+
+        void printDetails(hw_item hw);
 
     };
 }

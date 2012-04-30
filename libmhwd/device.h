@@ -34,7 +34,7 @@ namespace mhwd {
     class Device
     {
     public:
-        friend class hwd;
+        friend class HWD;
 
         enum TYPE { TYPE_PCI, TYPE_USB };
 

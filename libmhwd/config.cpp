@@ -33,7 +33,7 @@ mhwd::Config::Config(std::string basePath) :
 
 
 bool mhwd::Config::operator==(const mhwd::Config& compare) {
-    return (basePath == compare.basePath);
+    return (name == compare.name);
 }
 
 
