@@ -80,27 +80,29 @@ std::vector<mhwd::Device*> mhwd::hwd::getDevices(Device::TYPE type) {
     hd_data_t *hd_data;
     hd_t *hd;
     hw_item hw;
-    std::string configDir;
+    std::string configDir, databaseDir;
 
     if (type == Device::TYPE_USB) {
         hw = hw_usb;
         configDir = MHWD_USB_CONFIG_DIR;
+        databaseDir = MHWD_USB_DATABASE_DIR;
     }
     else {
         hw = hw_pci;
         configDir = MHWD_PCI_CONFIG_DIR;
+        databaseDir = MHWD_PCI_DATABASE_DIR;
     }
 
+
     hd_data = (hd_data_t*)calloc(1, sizeof *hd_data);
-
-
     hd = hd_list(hd_data, hw, 1, NULL);
 
     for(; hd; hd = hd->next) {
         devices.push_back(new Device(hd, type));
     }
 
-    setMatchingConfigs(&devices, configDir);
+    setMatchingConfigs(&devices, configDir, false);
+    setMatchingConfigs(&devices, databaseDir, true);
 
     hd_free_hd_list(hd);
     hd_free_hd_data(hd_data);
@@ -111,7 +113,7 @@ std::vector<mhwd::Device*> mhwd::hwd::getDevices(Device::TYPE type) {
 
 
 
-void mhwd::hwd::setMatchingConfigs(std::vector<mhwd::Device*>* devices, const std::string configDir) {
+void mhwd::hwd::setMatchingConfigs(std::vector<mhwd::Device*>* devices, const std::string configDir, bool setAsInstalled) {
     struct dirent *dir;
     DIR *d = opendir(configDir.c_str());
 
@@ -129,10 +131,10 @@ void mhwd::hwd::setMatchingConfigs(std::vector<mhwd::Device*>* devices, const st
         struct stat filestatus;
         lstat(filepath.c_str(), &filestatus);
 
-        if (S_ISREG(filestatus.st_mode) && filename.explode(".").back() == MHWD_CONFIG_END)
-            setMatchingConfig(devices, filepath);
+        if (S_ISREG(filestatus.st_mode) && filename == MHWD_CONFIG_NAME)
+            setMatchingConfig(devices, configDir, setAsInstalled);
         else if (S_ISDIR(filestatus.st_mode))
-            setMatchingConfigs(devices, filepath);
+            setMatchingConfigs(devices, filepath, setAsInstalled);
     }
 
     closedir(d);
@@ -140,7 +142,7 @@ void mhwd::hwd::setMatchingConfigs(std::vector<mhwd::Device*>* devices, const st
 
 
 
-void mhwd::hwd::setMatchingConfig(std::vector<mhwd::Device*>* devices, const std::string configPath) {
+void mhwd::hwd::setMatchingConfig(std::vector<mhwd::Device*>* devices, const std::string configPath, bool setAsInstalled) {
     mhwd::Config config(configPath);
 
     // Check if config is valid
@@ -206,7 +208,10 @@ void mhwd::hwd::setMatchingConfig(std::vector<mhwd::Device*>* devices, const std
 
     // Set config to all matching devices
     for (std::vector<mhwd::Device*>::iterator iterator = foundDevices.begin(); iterator != foundDevices.end(); iterator++) {
-        (*iterator)->addConfig(config);
+        if (setAsInstalled)
+            (*iterator)->addInstalledConfig(config);
+        else
+            (*iterator)->addConfig(config);
     }
 }
 

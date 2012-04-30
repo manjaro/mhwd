@@ -26,19 +26,17 @@
 #include <vector>
 #include "const.h"
 #include "string.hpp"
-#include "database.h"
-
 
 namespace mhwd {
     class Config
     {
     public:
-        Config(std::string path);
+        Config(std::string basePath);
         bool operator==(const Config& compare);
 
-        bool isInstalled();
         bool isValid() { return configValid; }
         std::string getName() { return name; }
+        std::string getVersion() { return version; }
         std::string getInfo() { return info; }
         bool getIsFreeDriver() { return freedriver; }
         int getPriority() { return priority; }
@@ -50,9 +48,7 @@ namespace mhwd {
         std::vector<IDsGroup> getIDsGroups() { return IDs; }
 
     private:
-        static Database db;
-
-        std::string path, name, info;
+        std::string basePath, name, info, version;
         std::vector<IDsGroup> IDs;
         bool configValid, freedriver;
         int priority;

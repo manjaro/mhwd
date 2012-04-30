@@ -50,8 +50,8 @@ namespace mhwd {
         static std::vector<Device*> USBDevices, PCIDevices;
 
         static std::vector<mhwd::Device*> getDevices(Device::TYPE type);
-        static void setMatchingConfigs(std::vector<mhwd::Device*>* devices, const std::string configDir);
-        static void setMatchingConfig(std::vector<mhwd::Device*>* devices, const std::string configPath);
+        static void setMatchingConfigs(std::vector<mhwd::Device*>* devices, const std::string configDir, bool setAsInstalled = false);
+        static void setMatchingConfig(std::vector<mhwd::Device*>* devices, const std::string configPath, bool setAsInstalled = false);
         static void printDetails(hw_item hw);
 
     };

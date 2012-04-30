@@ -48,13 +48,15 @@ namespace mhwd {
         std::string getDeviceID() { return DeviceID; }
         std::string getVendorID() { return VendorID; }
         std::vector<mhwd::Config> getConfigs() { return configs; }
+        std::vector<mhwd::Config> getInstalledConfigs() { return installedConfigs; }
 
     private:
         std::string ClassName, DeviceName, VendorName, ClassID, DeviceID, VendorID;
         TYPE type;
-        std::vector<mhwd::Config> configs;
+        std::vector<mhwd::Config> configs, installedConfigs;
 
         void addConfig(Config& config);
+        void addInstalledConfig(Config& config);
         Vita::string from_Hex(uint16_t hexnum, int fill = 4);
         Vita::string from_CharArray(char* c);
     };

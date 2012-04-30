@@ -20,18 +20,25 @@ int main (int argc, char *argv[])
 
     for (vector<mhwd::Device*>::const_iterator iterator = devices.begin(); iterator != devices.end(); iterator++) {
         vector<mhwd::Config> configs = (*iterator)->getConfigs();
+        vector<mhwd::Config> installedConfigs = (*iterator)->getInstalledConfigs();
 
         if (!configs.empty())
-            cout << (*iterator)->getClassName() << ": ";
+            cout << endl << endl << (*iterator)->getClassName() << " " << (*iterator)->getVendorName() << ":" << endl << "Available: ";
 
         for (vector<mhwd::Config>::const_iterator iterator = configs.begin(); iterator != configs.end(); iterator++) {
             mhwd::Config config = (*iterator);
 
-            cout << config.getName() << " ";
+            cout << config.getName() << "-" << config.getVersion() << "  ";
         }
 
-        if (!configs.empty())
-            cout << endl;
+        if (!installedConfigs.empty())
+            cout << endl <<"Installed: ";
+
+        for (vector<mhwd::Config>::const_iterator iterator = installedConfigs.begin(); iterator != installedConfigs.end(); iterator++) {
+            mhwd::Config config = (*iterator);
+
+            cout << config.getName() << "-" << config.getVersion() << "  ";
+        }
     }
 
     /*for(unsigned int i = 0; i < devices.size(); i++) {
@@ -47,4 +54,6 @@ int main (int argc, char *argv[])
     cout << endl << endl;
 
     mhwd::printDetails(mhwd::HW_USB);*/
+
+    cout << endl << endl;
 }

@@ -20,39 +20,21 @@
 #include "config.h"
 
 
-// Static variables
 
-mhwd::Database mhwd::Config::db(MHWD_DATABASE_PATH);
-
-
-// Methods
-
-
-mhwd::Config::Config(std::string path) :
-    path(path)
+mhwd::Config::Config(std::string basePath) :
+    basePath(basePath)
 {
     priority = 0;
     freedriver = true;
 
-    configValid = readConfig(path);
+    configValid = readConfig(basePath + "/" + MHWD_CONFIG_NAME);
 }
 
 
 
 bool mhwd::Config::operator==(const mhwd::Config& compare) {
-    return (path == compare.path);
+    return (basePath == compare.basePath);
 }
-
-
-
-bool mhwd::Config::isInstalled() {
-    if (!db.isValid())
-        return false;
-    // TODO: Warning!
-
-    return db.isAvailable(name);
-}
-
 
 
 
@@ -124,6 +106,9 @@ bool mhwd::Config::readConfig(const Vita::string path) {
         }
         else if (key == "name") {
             name = value;
+        }
+        else if (key == "version") {
+            version = value;
         }
         else if (key == "info") {
             info = value;
@@ -205,5 +190,5 @@ Vita::string mhwd::Config::getRightPath(Vita::string str) {
     if (str.size() <= 0 || str.substr(0, 1) == "/")
         return str;
 
-    return path.substr(0, path.find_last_of('/')) + "/" + str;
+    return basePath + "/" + str;
 }

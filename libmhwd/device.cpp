@@ -57,6 +57,24 @@ void mhwd::Device::addConfig(mhwd::Config& config) {
 
 
 
+void mhwd::Device::addInstalledConfig(mhwd::Config& config) {
+    for (std::vector<mhwd::Config>::const_iterator iterator = installedConfigs.begin(); iterator != installedConfigs.end(); iterator++) {
+        if (config == *iterator)
+            return;
+    }
+
+    for (std::vector<mhwd::Config>::iterator iterator = installedConfigs.begin(); iterator != installedConfigs.end(); iterator++) {
+        if (config.getPriority() > (*iterator).getPriority()) {
+            installedConfigs.insert(iterator, config);
+            return;
+        }
+    }
+
+    installedConfigs.push_back(config);
+}
+
+
+
 Vita::string mhwd::Device::from_Hex(uint16_t hexnum, int fill) {
     std::stringstream stream;
     stream << std::hex << std::setfill('0') << std::setw(fill) << hexnum;

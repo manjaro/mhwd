@@ -18,7 +18,8 @@
  */
 
 
-#define MHWD_CONFIG_END "mhwd"
+#define MHWD_CONFIG_NAME "MHWDCONFIG"
 #define MHWD_USB_CONFIG_DIR "/var/lib/mhwd/usb"
-#define MHWD_PCI_CONFIG_DIR "." //"/var/lib/mhwd/pci"
-#define MHWD_DATABASE_PATH "/var/lib/mhwd/local.db"
+#define MHWD_PCI_CONFIG_DIR "./db" //"/var/lib/mhwd/pci"
+#define MHWD_USB_DATABASE_DIR "/var/lib/mhwd/local/usb"
+#define MHWD_PCI_DATABASE_DIR  "./local" //"/var/lib/mhwd/local/pci"
