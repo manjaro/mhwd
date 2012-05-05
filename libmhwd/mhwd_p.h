@@ -25,8 +25,8 @@
 #include <iostream>
 #include <iomanip>
 #include <fstream>
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <unistd.h>
 #include <dirent.h>
 #include <vector>
@@ -63,6 +63,9 @@ namespace mhwd {
     //### Directory and File Operations ###//
     //#####################################//
     std::vector<std::string> getRecursiveDirectoryFileList(const std::string directoryPath, std::string onlyFilename = "");
+    bool copyDirectory(const std::string source, const std::string destination);
+    bool copyFile(const std::string source, const std::string destination);
+    bool removeDirectory(const std::string directory);
 }
 
 

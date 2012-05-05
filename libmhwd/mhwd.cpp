@@ -502,5 +502,135 @@ std::vector<std::string> mhwd::getRecursiveDirectoryFileList(const std::string d
 
 
 
+bool mhwd::copyDirectory(const std::string source, const std::string destination) {
+    struct stat filestatus;
+
+    if (lstat(destination.c_str(), &filestatus) != 0) {
+        // TODO: Show Error Message
+        if (mkdir(destination.c_str(), S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IROTH) != 0)
+            return false;
+    }
+    else if (S_ISREG(filestatus.st_mode)) {
+        // TODO: Show Error Message
+        return false;
+    }
+    else if (S_ISDIR(filestatus.st_mode)) {
+        // TODO: Error Message
+        if (!removeDirectory(destination))
+            return false;
+
+        if (mkdir(destination.c_str(), S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IROTH) != 0)
+            return false;
+    }
+
+
+    bool success = true;
+    struct dirent *dir;
+    DIR *d = opendir(source.c_str());
+
+    if (!d)
+        return false;
+
+    while ((dir = readdir(d)) != NULL)
+    {
+        std::string filename = std::string(dir->d_name);
+        std::string sourcepath = source + "/" + filename;
+        std::string destinationpath = destination + "/" + filename;
+
+        if(filename == "." || filename == ".." || filename == "")
+            continue;
+
+        lstat(sourcepath.c_str(), &filestatus);
+
+        if (S_ISREG(filestatus.st_mode)) {
+            // TODO: Error Message
+            if (!copyFile(sourcepath, destinationpath))
+                success = false;
+        }
+        else if (S_ISDIR(filestatus.st_mode)) {
+            // TODO: Error Message
+            if (!copyDirectory(sourcepath, destinationpath))
+                success = false;
+        }
+    }
+
+    closedir(d);
+    return success;
+}
+
+
+
+bool mhwd::copyFile(const std::string source, const std::string destination) {
+    int c;
+    FILE *in,*out;
+
+    in = fopen(source.c_str(), "r");
+    out = fopen(destination.c_str(), "w");
+
+    if(in==NULL || !in)
+    {
+        // TODO: Error Message: fprintf(stderr,"%s: No such file or directory\n",argv[1]);
+        return false;
+    }
+    else if(out==NULL || !out)
+    {
+        // TODO: Error Message: printf(stderr,"%s: No such file or directory\n",argv[2]);
+        return false;
+    }
+
+    while((c=getc(in))!=EOF)
+        putc(c,out);
+
+    fclose(in);
+    fclose(out);
+
+    return true;
+}
+
+
+
+bool mhwd::removeDirectory(const std::string directory) {
+    bool success = true;
+    struct dirent *dir;
+    DIR *d = opendir(directory.c_str());
+
+    if (!d)
+        return false;
+
+    while ((dir = readdir(d)) != NULL)
+    {
+        std::string filename = std::string(dir->d_name);
+        std::string filepath = directory + "/" + filename;
+
+        if(filename == "." || filename == ".." || filename == "")
+            continue;
+
+        struct stat filestatus;
+        lstat(filepath.c_str(), &filestatus);
+
+        if (S_ISREG(filestatus.st_mode)) {
+            // TODO: Error Message
+            if (remove(filepath.c_str()) != 0)
+                success = false;
+        }
+        else if (S_ISDIR(filestatus.st_mode)) {
+            // TODO: Error Message
+            if (!removeDirectory(filepath)) {
+                std::cout << "bb" << std::endl;
+                success = false;
+            }
+        }
+    }
+
+    closedir(d);
+
+    if (remove(directory.c_str()) != 0)
+        success = false;
+
+    return success;
+}
+
+
+
 
 
