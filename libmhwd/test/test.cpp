@@ -1,56 +1,43 @@
-#include <iostream>
-#include "mhwd.h"
-
-
-using namespace std;
 
 #include <iomanip>
 #include <iostream>
 #include <string>
 #include <vector>
 #include "mhwd.h"
-#include "config.h"
 
 using namespace std;
 
 
 int main (int argc, char *argv[])
 {
-    mhwd::HWD hwd;
-    vector<mhwd::Device>* devices = hwd.getPCIDevices();
+      mhwd::Data data;
+      mhwd::fillData(&data);
 
-    for (vector<mhwd::Device>::iterator iterator = devices->begin(); iterator != devices->end(); iterator++) {
-        vector<mhwd::Config> configs = (*iterator).getConfigs();
-        vector<mhwd::Config> installedConfigs = (*iterator).getInstalledConfigs();
+      for (vector<mhwd::Device>::iterator dev_iter = data.PCIDevices.begin(); dev_iter != data.PCIDevices.end(); dev_iter++) {
+          if (!(*dev_iter).availableConfigs.empty())
+              cout << endl << endl << (*dev_iter).className << " " << (*dev_iter).vendorName << ":" << endl << "Available: ";
 
-        if (!configs.empty())
-            cout << endl << endl << (*iterator).getClassName() << " " << (*iterator).getVendorName() << ":" << endl << "Available: ";
+          for (vector<mhwd::Config>::const_iterator iterator = (*dev_iter).availableConfigs.begin(); iterator != (*dev_iter).availableConfigs.end(); iterator++) {
+              cout << (*iterator).name << "-" << (*iterator).version << "  ";
+          }
 
-        for (vector<mhwd::Config>::const_iterator iterator = configs.begin(); iterator != configs.end(); iterator++) {
-            mhwd::Config config = (*iterator);
+          if (!(*dev_iter).installedConfigs.empty())
+              cout << endl <<"Installed: ";
 
-            cout << config.getName() << "-" << config.getVersion() << "  ";
-        }
+          for (vector<mhwd::Config>::const_iterator iterator = (*dev_iter).installedConfigs.begin(); iterator != (*dev_iter).installedConfigs.end(); iterator++) {
+              cout << (*iterator).name << "-" << (*iterator).version << "  ";
+          }
+      }
 
-        if (!installedConfigs.empty())
-            cout << endl <<"Installed: ";
-
-        for (vector<mhwd::Config>::const_iterator iterator = installedConfigs.begin(); iterator != installedConfigs.end(); iterator++) {
-            mhwd::Config config = (*iterator);
-
-            cout << config.getName() << "-" << config.getVersion() << "  ";
-        }
-    }
-
-    /*for(unsigned int i = 0; i < devices.size(); i++) {
-        cout << setw(30) << devices[i]->getClassName();
-        cout << setw(10)<< devices[i]->getClassID();
-        cout << setw(40)<< devices[i]->getVendorName();
-        cout << setw(10)<< devices[i]->getVendorID();
-        cout << setw(30)<< devices[i]->getDeviceName();
-        cout << setw(10)<< devices[i]->getDeviceID();
-        cout << endl;
-    }
+      /*for(unsigned int i = 0; i < devices.size(); i++) {
+          cout << setw(30) << devices[i]->getClassName();
+          cout << setw(10)<< devices[i]->getClassID();
+          cout << setw(40)<< devices[i]->getVendorName();
+          cout << setw(10)<< devices[i]->getVendorID();
+          cout << setw(30)<< devices[i]->getDeviceName();
+          cout << setw(10)<< devices[i]->getDeviceID();
+          cout << endl;
+      }
 
     cout << endl << endl;
 

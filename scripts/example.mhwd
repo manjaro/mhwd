@@ -11,27 +11,20 @@ FREEDRIVER="false"
 PRIORITY="1"
 
 CLASSIDS="0300"
-VENDORIDS="10de"
-DEVICEIDS="0040 0042 0044"
+VENDORIDS="10de;1020"
+DEVICEIDS=">nvidia.mhwd;>intel.mhwd"
 
 CLASSIDS="0300"
-VENDORIDS="1001"
-DEVICEIDS="0030 0122 0123"
+VENDORIDS="1020"
+DEVICEIDS="*"
 
 ##
 ## This is important for the bash script
 ##
 
 # Dependencies
-DEPENDS="nvidia-utils nvidia"
-DEPENDS-i686="something"
+DEPENDS="nvidia-utils nvidia vesa.mhwd"
 DEPENDS-x86_64="lib32-nvidia-utils"
-
-# Driver config depends
-# This is a mhwd driver config -> nouveau -> should install the mhwd nouveau driver config
-DEPENDSMHWD="nouveau"
-DEPENDSMHWD-i686=""
-DEPENDSMHWD-x86_64=""
 
 
 # Conflicts
@@ -39,11 +32,6 @@ CONFLICTS="catalyst nvidia-173xx"
 CONFLICTS-i686=""
 CONFLICTS-x86_64=""
 
-# Driver config conflicts
-# This is a mhwd driver config -> nouveau -> should remove and uninstall with the nouveau driver config rules instead of just removing the pacman package
-CONFLICTSMHWD="nouveau"
-CONFLICTSMHWD-i686=""
-CONFLICTSMHWD-x86_64=""
 
 
 
@@ -56,6 +44,7 @@ pre_install() {
 post_install()
 {
 	# After package operations -> so configuration
+	if [ checkIDs("82139", "ajqwe", "sewe") ]
 }
 
 

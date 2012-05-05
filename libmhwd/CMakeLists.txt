@@ -2,19 +2,13 @@ include_directories(. vita)
 
 set( HEADERS
     mhwd.h
-    hwd.h
+    mhwd_p.h
     const.h
-    device.h
-    config.h
-    vita/config.hpp
     vita/string.hpp
 )
 
 set( SOURCES
-    hwd.cpp
-    device.cpp
-    config.cpp
-    vita/config.cpp
+    mhwd.cpp
     vita/string.cpp
 )
 
