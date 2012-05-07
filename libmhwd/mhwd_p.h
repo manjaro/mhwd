@@ -51,6 +51,7 @@ namespace mhwd {
     //###############//
     enum SCRIPTOPERATION { SCRIPTOPERATION_INSTALL, SCRIPTOPERATION_REMOVE };
 
+    bool checkDependenciesConflicts(mhwd::Data *data, mhwd::Config *config);
     void updateInstalledConfigData(mhwd::Data *data);
     void setInstalledConfigs(mhwd::Data *data, mhwd::TYPE type);
     void setMatchingConfigs(mhwd::Data *data, std::vector<mhwd::Device>* devices, mhwd::TYPE type, bool setAsInstalled = false);

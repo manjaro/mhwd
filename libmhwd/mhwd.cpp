@@ -92,7 +92,9 @@ bool mhwd::installConfig(mhwd::Data *data, mhwd::Config *config) {
         return false;
     }
 
-    // TODO: Check for mhwd config dependendcies and conflicts
+    // Check for mhwd config dependendcies and conflicts
+    if (!checkDependenciesConflicts(data, config))
+        return false;
 
     // Run script
     if (!runScript(data, config, SCRIPTOPERATION_INSTALL)) {
@@ -115,6 +117,13 @@ bool mhwd::installConfig(mhwd::Data *data, mhwd::Config *config) {
 
 bool mhwd::uninstallConfig(mhwd::Data *data, mhwd::Config *config) {
     mhwd::Config *installedConfig = getInstalledConfig(data, config->name, config->type);
+    std::vector<mhwd::Config>* installedConfigs;
+
+    if (config->type == mhwd::TYPE_USB)
+        installedConfigs = &data->installedUSBConfigs;
+    else
+        installedConfigs = &data->installedPCIConfigs;
+
 
     // Check if installed
     if (installedConfig == NULL) {
@@ -126,7 +135,15 @@ bool mhwd::uninstallConfig(mhwd::Data *data, mhwd::Config *config) {
         return false;
     }
 
-    // TODO: Check for mhwd config dependendcies and conflicts
+    // Check if this config is required by another installed config
+    for (std::vector<mhwd::Config>::const_iterator iterator = installedConfigs->begin(); iterator != installedConfigs->end(); iterator++) {
+        for (std::vector<std::string>::const_iterator depend = (*iterator).dependencies.begin(); depend != (*iterator).dependencies.end(); depend++) {
+            if ((*depend) == config->name) {
+                data->lastError = (*iterator).name + " requires " + config->name;
+                return false;
+            }
+        }
+    }
 
 
     // Run script
@@ -261,6 +278,46 @@ void mhwd::addConfigSorted(std::vector<mhwd::Config>* configs, mhwd::Config* con
 //#########################//
 //### Private - Configs ###//
 //#########################//
+
+
+
+bool mhwd::checkDependenciesConflicts(mhwd::Data *data, mhwd::Config *config) {
+    std::vector<mhwd::Config>* installedConfigs;
+
+    // Get the right configs
+    if (config->type == mhwd::TYPE_USB)
+        installedConfigs = &data->installedUSBConfigs;
+    else
+        installedConfigs = &data->installedPCIConfigs;
+
+
+    for (std::vector<std::string>::const_iterator conflict = config->conflicts.begin(); conflict != config->conflicts.end(); conflict++) {
+        for (std::vector<mhwd::Config>::const_iterator iterator = installedConfigs->begin(); iterator != installedConfigs->end(); iterator++) {
+            if ((*conflict) == (*iterator).name) {
+                data->lastError = config->name + " conflicts with " + (*conflict);
+                return false;
+            }
+        }
+    }
+
+    for (std::vector<std::string>::const_iterator depend = config->dependencies.begin(); depend != config->dependencies.end(); depend++) {
+        bool found = false;
+
+        for (std::vector<mhwd::Config>::const_iterator iterator = installedConfigs->begin(); iterator != installedConfigs->end(); iterator++) {
+            if ((*depend) == (*iterator).name) {
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            data->lastError = config->name + " depends on " + (*depend) + " but " + (*depend) + " is not installed";
+            return false;
+        }
+    }
+
+    return true;
+}
 
 
 

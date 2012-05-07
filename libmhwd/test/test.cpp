@@ -20,13 +20,20 @@ int main (int argc, char *argv[])
 
       data.environment.messageFunc = &message;
 
-      for (vector<mhwd::Device>::iterator dev_iter = data.PCIDevices.begin(); dev_iter != data.PCIDevices.end(); dev_iter++) {
+      /*for (vector<mhwd::Device>::iterator dev_iter = data.PCIDevices.begin(); dev_iter != data.PCIDevices.end(); dev_iter++) {
           for (vector<mhwd::Config>::iterator iterator = (*dev_iter).availableConfigs.begin(); iterator != (*dev_iter).availableConfigs.end(); iterator++) {
               if (mhwd::installConfig(&data, &(*iterator)))
                   std::cout << "installed config!" << std::endl;
               else
-                  std::cout << "failed to installed config!" << std::endl;
+                  std::cout << "failed to installed config!\n" << data.lastError << std::endl;
           }
+      }*/
+
+      for (vector<mhwd::Config>::iterator iterator = data.installedPCIConfigs.begin(); iterator != data.installedPCIConfigs.end(); iterator++) {
+          if (mhwd::uninstallConfig(&data, &(*iterator)))
+              std::cout << "installed config!" << std::endl;
+          else
+              std::cout << "failed to installed config!\n" << data.lastError << std::endl;
       }
 
 
@@ -36,14 +43,6 @@ int main (int argc, char *argv[])
 
           for (vector<mhwd::Config>::iterator iterator = (*dev_iter).availableConfigs.begin(); iterator != (*dev_iter).availableConfigs.end(); iterator++) {
               cout << (*iterator).name << "-" << (*iterator).version << "  ";
-
-              for (vector<std::string>::iterator dep = (*iterator).dependencies.begin(); dep != (*iterator).dependencies.end(); dep++) {
-                  cout << (*dep) << " ";
-              }
-
-              for (vector<std::string>::iterator con = (*iterator).conflicts.begin(); con != (*iterator).conflicts.end(); con++) {
-                  cout << (*con) << " ";
-              }
           }
 
           if (!(*dev_iter).installedConfigs.empty())
