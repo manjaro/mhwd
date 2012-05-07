@@ -83,8 +83,16 @@ namespace mhwd {
 
 #else
 
+namespace mhwd {
+    extern void fillData(mhwd::Data *data);
+    extern void cleanupData(mhwd::Data *data);
 
-//!!!!!!!!!!!!!!!!!!!! TODO
+    extern void printDeviceDetails(mhwd::TYPE type, FILE *f = stdout);
+
+    extern bool installConfig(mhwd::Data *data, mhwd::Config *config);
+    extern bool uninstallConfig(mhwd::Data *data, mhwd::Config *config);
+    extern mhwd::Config* getInstalledConfig(mhwd::Data *data, const std::string configName, const TYPE configType);
+}
 
 
 #endif // MHWD_H
