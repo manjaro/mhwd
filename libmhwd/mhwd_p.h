@@ -58,7 +58,7 @@ namespace mhwd {
     void setMatchingConfig(mhwd::Config* config, std::vector<mhwd::Device>* devices, bool setAsInstalled = false);
     bool fillConfig(mhwd::Config *config, std::string configPath, mhwd::TYPE type);
     bool readConfigFile(mhwd::Config *config, std::string configPath);
-    std::vector<std::string> getConfigHardwareIDs(Vita::string str);
+    std::vector<std::string> splitValue(Vita::string str, Vita::string onlyEnding = "");
     Vita::string getRightConfigPath(Vita::string str, Vita::string baseConfigPath);
 
 

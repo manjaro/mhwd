@@ -128,6 +128,7 @@ bool mhwd::uninstallConfig(mhwd::Data *data, mhwd::Config *config) {
 
     // TODO: Check for mhwd config dependendcies and conflicts
 
+
     // Run script
     if (!runScript(data, installedConfig, SCRIPTOPERATION_REMOVE)) {
         data->lastError = "failed to run script or script failed";
@@ -486,7 +487,7 @@ bool mhwd::readConfigFile(mhwd::Config *config, std::string configPath) {
             readConfigFile(config, getRightConfigPath(value, config->basePath));
         }
         else if (key == "name") {
-            config->name = value;
+            config->name = value.toLower();
         }
         else if (key == "version") {
             config->version = value;
@@ -512,7 +513,7 @@ bool mhwd::readConfigFile(mhwd::Config *config, std::string configPath) {
                 config->hwdIDs.push_back(hwdID);
             }
 
-            config->hwdIDs.back().classIDs = getConfigHardwareIDs(value);
+            config->hwdIDs.back().classIDs = splitValue(value);
         }
         else if (key == "vendorids") {
             // Add new HardwareIDs group to vector if vector is empty
@@ -521,7 +522,7 @@ bool mhwd::readConfigFile(mhwd::Config *config, std::string configPath) {
                 config->hwdIDs.push_back(hwdID);
             }
 
-            config->hwdIDs.back().vendorIDs = getConfigHardwareIDs(value);
+            config->hwdIDs.back().vendorIDs = splitValue(value);
         }
         else if (key == "deviceids") {
             // Add new HardwareIDs group to vector if vector is empty
@@ -530,7 +531,13 @@ bool mhwd::readConfigFile(mhwd::Config *config, std::string configPath) {
                 config->hwdIDs.push_back(hwdID);
             }
 
-            config->hwdIDs.back().deviceIDs = getConfigHardwareIDs(value);
+            config->hwdIDs.back().deviceIDs = splitValue(value);
+        }
+        else if (key == "dependencies" || key == "depends") {
+            config->dependencies = splitValue(value, "mhwd");
+        }
+        else if (key == "conflicts") {
+            config->conflicts = splitValue(value, "mhwd");
         }
     }
 
@@ -556,13 +563,15 @@ bool mhwd::readConfigFile(mhwd::Config *config, std::string configPath) {
 
 
 
-std::vector<std::string> mhwd::getConfigHardwareIDs(Vita::string str) {
+std::vector<std::string> mhwd::splitValue(Vita::string str, Vita::string onlyEnding) {
     std::vector<Vita::string> work = str.toLower().explode(" ");
     std::vector<std::string> final;
 
     for (std::vector<Vita::string>::const_iterator iterator = work.begin(); iterator != work.end(); iterator++) {
-        if (*iterator != "")
+        if (*iterator != "" && onlyEnding.empty())
             final.push_back(*iterator);
+        else if (*iterator != "" && Vita::string(*iterator).explode(".").back() == onlyEnding && (*iterator).size() > 5)
+            final.push_back(Vita::string(*iterator).substr(0, (*iterator).size() - 5));
     }
 
     return final;

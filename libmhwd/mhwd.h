@@ -46,6 +46,7 @@ namespace mhwd {
         bool freedriver;
         int priority;
         std::vector<HardwareIDs> hwdIDs;
+        std::vector<std::string> conflicts, dependencies;
     };
 
     struct Device {

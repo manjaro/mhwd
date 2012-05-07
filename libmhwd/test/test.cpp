@@ -36,6 +36,14 @@ int main (int argc, char *argv[])
 
           for (vector<mhwd::Config>::iterator iterator = (*dev_iter).availableConfigs.begin(); iterator != (*dev_iter).availableConfigs.end(); iterator++) {
               cout << (*iterator).name << "-" << (*iterator).version << "  ";
+
+              for (vector<std::string>::iterator dep = (*iterator).dependencies.begin(); dep != (*iterator).dependencies.end(); dep++) {
+                  cout << (*dep) << " ";
+              }
+
+              for (vector<std::string>::iterator con = (*iterator).conflicts.begin(); con != (*iterator).conflicts.end(); con++) {
+                  cout << (*con) << " ";
+              }
           }
 
           if (!(*dev_iter).installedConfigs.empty())
