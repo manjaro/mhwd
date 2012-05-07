@@ -1,22 +1,23 @@
 include_directories(. vita)
 
-set( HEADERS
+###
+### mhwd library
+###
+
+set( LIB_HEADERS
     mhwd.h
     mhwd_p.h
     const.h
     vita/string.hpp
 )
 
-set( SOURCES
+set( LIB_SOURCES
     mhwd.cpp
     vita/string.cpp
 )
 
-set( LIBS hd)
+set( LIB_LIBS hd)
 
 
-add_library (mhwd SHARED ${SOURCES} ${HEADERS})
-target_link_libraries(mhwd ${LIBS})
-
-
-add_subdirectory(test)
+add_library (mhwd SHARED ${LIB_SOURCES} ${LIB_HEADERS})
+target_link_libraries(mhwd ${LIB_LIBS})

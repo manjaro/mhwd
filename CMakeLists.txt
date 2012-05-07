@@ -4,3 +4,4 @@ project(mhwd)
 add_definitions(-Wall)
 
 add_subdirectory(libmhwd)
+add_subdirectory(mhwd)

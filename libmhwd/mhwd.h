@@ -1,5 +1,6 @@
 /*
  *  mhwd - Manjaro Hardware Detection
+ *  Roland Singer <roland@manjaro.org>
  *
  *  Copyright (C) 2007 Free Software Foundation, Inc.
  *
@@ -71,28 +72,30 @@ namespace mhwd {
     //#################//
     //### Functions ###//
     //#################//
+    void initData(mhwd::Data *data);
     void fillData(mhwd::Data *data);
-    void cleanupData(mhwd::Data *data);
 
     void printDeviceDetails(mhwd::TYPE type, FILE *f = stdout);
 
     bool installConfig(mhwd::Data *data, mhwd::Config *config);
     bool uninstallConfig(mhwd::Data *data, mhwd::Config *config);
     mhwd::Config* getInstalledConfig(mhwd::Data *data, const std::string configName, const TYPE configType);
+    mhwd::Config* getAvailableConfig(mhwd::Data *data, const std::string configName, const TYPE configType);
 }
 
 
 #else
 
 namespace mhwd {
+    extern void initData(mhwd::Data *data);
     extern void fillData(mhwd::Data *data);
-    extern void cleanupData(mhwd::Data *data);
 
     extern void printDeviceDetails(mhwd::TYPE type, FILE *f = stdout);
 
     extern bool installConfig(mhwd::Data *data, mhwd::Config *config);
     extern bool uninstallConfig(mhwd::Data *data, mhwd::Config *config);
     extern mhwd::Config* getInstalledConfig(mhwd::Data *data, const std::string configName, const TYPE configType);
+    extern mhwd::Config* getAvailableConfig(mhwd::Data *data, const std::string configName, const TYPE configType);
 }
 
 

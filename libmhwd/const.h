@@ -1,5 +1,6 @@
 /*
  *  mhwd - Manjaro Hardware Detection
+ *  Roland Singer <roland@manjaro.org>
  *
  *  Copyright (C) 2007 Free Software Foundation, Inc.
  *
@@ -20,8 +21,8 @@
 
 #define MHWD_CONFIG_NAME "MHWDCONFIG"
 #define MHWD_USB_CONFIG_DIR "/var/lib/mhwd/usb"
-#define MHWD_PCI_CONFIG_DIR "./db" //"/var/lib/mhwd/pci"
+#define MHWD_PCI_CONFIG_DIR "/var/lib/mhwd/pci"
 #define MHWD_USB_DATABASE_DIR "/var/lib/mhwd/local/usb"
-#define MHWD_PCI_DATABASE_DIR  "./local" //"/var/lib/mhwd/local/pci"
+#define MHWD_PCI_DATABASE_DIR  "/var/lib/mhwd/local/pci"
 #define MHWD_CACHE_DIR "/var/cache/pacman/pkg"
 #define MHWD_SCRIPT_PATH "/var/lib/mhwd/script/mhwd"

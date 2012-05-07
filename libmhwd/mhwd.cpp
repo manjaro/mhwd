@@ -1,5 +1,6 @@
 /*
  *  mhwd - Manjaro Hardware Detection
+ *  Roland Singer <roland@manjaro.org>
  *
  *  Copyright (C) 2007 Free Software Foundation, Inc.
  *
@@ -27,19 +28,8 @@
 //########################//
 
 
-void mhwd::fillData(mhwd::Data *data) {
-    cleanupData(data);
 
-    setInstalledConfigs(data, mhwd::TYPE_PCI);
-    setInstalledConfigs(data, mhwd::TYPE_USB);
-
-    setDevices(data, mhwd::TYPE_PCI);
-    setDevices(data, mhwd::TYPE_USB);
-}
-
-
-
-void mhwd::cleanupData(mhwd::Data *data) {
+void mhwd::initData(mhwd::Data *data) {
     data->PCIDevices.clear();
     data->USBDevices.clear();
     data->installedPCIConfigs.clear();
@@ -51,6 +41,21 @@ void mhwd::cleanupData(mhwd::Data *data) {
     data->environment.messageFunc = NULL;
 }
 
+
+void mhwd::fillData(mhwd::Data *data) {
+    data->PCIDevices.clear();
+    data->USBDevices.clear();
+    data->installedPCIConfigs.clear();
+    data->installedUSBConfigs.clear();
+    data->invalidConfigs.clear();
+    data->lastError.clear();
+
+    setInstalledConfigs(data, mhwd::TYPE_PCI);
+    setInstalledConfigs(data, mhwd::TYPE_USB);
+
+    setDevices(data, mhwd::TYPE_PCI);
+    setDevices(data, mhwd::TYPE_USB);
+}
 
 
 void mhwd::printDeviceDetails(mhwd::TYPE type, FILE *f) {
@@ -88,7 +93,7 @@ bool mhwd::installConfig(mhwd::Data *data, mhwd::Config *config) {
 
     // Check if already installed
     if (getInstalledConfig(data, config->name, config->type) != NULL) {
-        data->lastError = "a config is already installed";
+        data->lastError = "a version of config " + config->name + " is already installed";
         return false;
     }
 
@@ -174,10 +179,34 @@ mhwd::Config* mhwd::getInstalledConfig(mhwd::Data *data, const std::string confi
     else
         installedConfigs = &data->installedPCIConfigs;
 
-    // Check if already installed
     for (std::vector<mhwd::Config>::iterator iterator = installedConfigs->begin(); iterator != installedConfigs->end(); iterator++) {
         if (configName == (*iterator).name)
             return &(*iterator);
+    }
+
+    return NULL;
+}
+
+
+
+mhwd::Config* mhwd::getAvailableConfig(mhwd::Data *data, const std::string configName, const TYPE configType) {
+    std::vector<mhwd::Device> *devices;
+
+    // Get the right devices
+    if (configType == mhwd::TYPE_USB)
+        devices = &data->USBDevices;
+    else
+        devices = &data->PCIDevices;
+
+
+    for (std::vector<mhwd::Device>::iterator dev_iter = devices->begin(); dev_iter != devices->end(); dev_iter++) {
+        if ((*dev_iter).availableConfigs.empty())
+            continue;
+
+        for (std::vector<mhwd::Config>::iterator iterator = (*dev_iter).availableConfigs.begin(); iterator != (*dev_iter).availableConfigs.end(); iterator++) {
+            if (configName == (*iterator).name)
+                return &(*iterator);
+        }
     }
 
     return NULL;
