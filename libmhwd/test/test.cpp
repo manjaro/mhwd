@@ -8,16 +8,33 @@
 using namespace std;
 
 
+void message(string msg) {
+    cout << msg;
+}
+
+
 int main (int argc, char *argv[])
 {
       mhwd::Data data;
       mhwd::fillData(&data);
 
+      data.environment.messageFunc = &message;
+
+      for (vector<mhwd::Device>::iterator dev_iter = data.PCIDevices.begin(); dev_iter != data.PCIDevices.end(); dev_iter++) {
+          for (vector<mhwd::Config>::iterator iterator = (*dev_iter).availableConfigs.begin(); iterator != (*dev_iter).availableConfigs.end(); iterator++) {
+              if (mhwd::installConfig(&data, &(*iterator)))
+                  std::cout << "installed config!" << std::endl;
+              else
+                  std::cout << "failed to installed config!" << std::endl;
+          }
+      }
+
+
       for (vector<mhwd::Device>::iterator dev_iter = data.PCIDevices.begin(); dev_iter != data.PCIDevices.end(); dev_iter++) {
           if (!(*dev_iter).availableConfigs.empty())
               cout << endl << endl << (*dev_iter).className << " " << (*dev_iter).vendorName << ":" << endl << "Available: ";
 
-          for (vector<mhwd::Config>::const_iterator iterator = (*dev_iter).availableConfigs.begin(); iterator != (*dev_iter).availableConfigs.end(); iterator++) {
+          for (vector<mhwd::Config>::iterator iterator = (*dev_iter).availableConfigs.begin(); iterator != (*dev_iter).availableConfigs.end(); iterator++) {
               cout << (*iterator).name << "-" << (*iterator).version << "  ";
           }
 
@@ -28,6 +45,7 @@ int main (int argc, char *argv[])
               cout << (*iterator).name << "-" << (*iterator).version << "  ";
           }
       }
+
 
       /*for(unsigned int i = 0; i < devices.size(); i++) {
           cout << setw(30) << devices[i]->getClassName();

@@ -49,8 +49,11 @@ namespace mhwd {
     //###############//
     //### Configs ###//
     //###############//
+    enum SCRIPTOPERATION { SCRIPTOPERATION_INSTALL, SCRIPTOPERATION_REMOVE };
+
+    void updateInstalledConfigData(mhwd::Data *data);
     void setInstalledConfigs(mhwd::Data *data, mhwd::TYPE type);
-    void setMatchingConfigs(std::vector<mhwd::Device>* devices, mhwd::TYPE type, bool setAsInstalled = false);
+    void setMatchingConfigs(mhwd::Data *data, std::vector<mhwd::Device>* devices, mhwd::TYPE type, bool setAsInstalled = false);
     void setMatchingConfigs(std::vector<mhwd::Device>* devices, std::vector<mhwd::Config>* configs, bool setAsInstalled = false);
     void setMatchingConfig(mhwd::Config* config, std::vector<mhwd::Device>* devices, bool setAsInstalled = false);
     bool fillConfig(mhwd::Config *config, std::string configPath, mhwd::TYPE type);
@@ -66,6 +69,12 @@ namespace mhwd {
     bool copyDirectory(const std::string source, const std::string destination);
     bool copyFile(const std::string source, const std::string destination);
     bool removeDirectory(const std::string directory);
+
+
+    //##############//
+    //### Script ###//
+    //##############//
+    bool runScript(mhwd::Data *data, mhwd::Config *config, SCRIPTOPERATION scriptOperation);
 }
 
 

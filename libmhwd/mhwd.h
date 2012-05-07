@@ -36,11 +36,11 @@ namespace mhwd {
     //####################//
     //### Data Structs ###//
     //####################//
-    struct HardwareIDs {
-        std::vector<std::string> classIDs, vendorIDs, deviceIDs;
-    };
-
     struct Config {
+        struct HardwareIDs {
+            std::vector<std::string> classIDs, vendorIDs, deviceIDs;
+        };
+
         TYPE type;
         std::string basePath, configPath, name, info, version;
         bool freedriver;
@@ -55,8 +55,15 @@ namespace mhwd {
     };
 
     struct Data {
+        struct Environment {
+            std::string cachePath;
+            void (*messageFunc)(std::string);
+        };
+
+        std::string lastError;
         std::vector<mhwd::Device> USBDevices, PCIDevices;
-        std::vector<mhwd::Config> installedUSBConfigs, installedPCIConfigs;
+        std::vector<mhwd::Config> installedUSBConfigs, installedPCIConfigs, invalidConfigs;
+        Environment environment;
     };
 
 
@@ -68,7 +75,9 @@ namespace mhwd {
 
     void printDeviceDetails(mhwd::TYPE type, FILE *f = stdout);
 
-    /*bool installConfig(mhwd::Config *config);*/
+    bool installConfig(mhwd::Data *data, mhwd::Config *config);
+    bool uninstallConfig(mhwd::Data *data, mhwd::Config *config);
+    mhwd::Config* getInstalledConfig(mhwd::Data *data, const std::string configName, const TYPE configType);
 }
 
 

@@ -44,6 +44,11 @@ void mhwd::cleanupData(mhwd::Data *data) {
     data->USBDevices.clear();
     data->installedPCIConfigs.clear();
     data->installedUSBConfigs.clear();
+    data->invalidConfigs.clear();
+    data->lastError.clear();
+
+    data->environment.cachePath = MHWD_CACHE_DIR;
+    data->environment.messageFunc = NULL;
 }
 
 
@@ -68,6 +73,96 @@ void mhwd::printDeviceDetails(mhwd::TYPE type, FILE *f) {
     hd_free_hd_list(hd);
     hd_free_hd_data(hd_data);
     free(hd_data);
+}
+
+
+
+bool mhwd::installConfig(mhwd::Data *data, mhwd::Config *config) {
+    std::string databaseDir;
+
+    // Get the right configs
+    if (config->type == mhwd::TYPE_USB)
+        databaseDir = MHWD_USB_DATABASE_DIR;
+    else
+        databaseDir = MHWD_PCI_DATABASE_DIR;
+
+    // Check if already installed
+    if (getInstalledConfig(data, config->name, config->type) != NULL) {
+        data->lastError = "a config is already installed";
+        return false;
+    }
+
+    // TODO: Check for mhwd config dependendcies and conflicts
+
+    // Run script
+    if (!runScript(data, config, SCRIPTOPERATION_INSTALL)) {
+        data->lastError = "failed to run script or script failed";
+        return false;
+    }
+
+    if (!copyDirectory(config->basePath, databaseDir + "/" + config->name)) {
+        data->lastError = "failed to set local database:\nfailed to copy '" + config->basePath + "' to '" + databaseDir + "/" + config->name + "'";
+        return false;
+    }
+
+    // Update installed config vectors
+    updateInstalledConfigData(data);
+
+    return true;
+}
+
+
+
+bool mhwd::uninstallConfig(mhwd::Data *data, mhwd::Config *config) {
+    mhwd::Config *installedConfig = getInstalledConfig(data, config->name, config->type);
+
+    // Check if installed
+    if (installedConfig == NULL) {
+        data->lastError = "config is not installed";
+        return false;
+    }
+    else if (installedConfig->basePath != config->basePath) {
+        data->lastError = "passed config does not match with local config";
+        return false;
+    }
+
+    // TODO: Check for mhwd config dependendcies and conflicts
+
+    // Run script
+    if (!runScript(data, installedConfig, SCRIPTOPERATION_REMOVE)) {
+        data->lastError = "failed to run script or script failed";
+        return false;
+    }
+
+    if (!removeDirectory(installedConfig->basePath)) {
+        data->lastError = "failed to set local database:\nfailed to remove '" + installedConfig->basePath + "'";
+        return false;
+    }
+
+    // Update installed config vectors
+    updateInstalledConfigData(data);
+
+    return true;
+}
+
+
+
+mhwd::Config* mhwd::getInstalledConfig(mhwd::Data *data, const std::string configName, const TYPE configType) {
+    std::vector<mhwd::Config>* installedConfigs;
+
+    // Get the right configs
+    if (configType == mhwd::TYPE_USB)
+        installedConfigs = &data->installedUSBConfigs;
+    else
+        installedConfigs = &data->installedPCIConfigs;
+
+    // Check if already installed
+    for (std::vector<mhwd::Config>::iterator iterator = installedConfigs->begin(); iterator != installedConfigs->end(); iterator++) {
+        if (configName == (*iterator).name)
+            return &(*iterator);
+    }
+
+    return NULL;
 }
 
 
@@ -120,7 +215,7 @@ void mhwd::setDevices(mhwd::Data *data, mhwd::TYPE type) {
     free(hd_data);
 
     // Fill the config vectors
-    setMatchingConfigs(devices, type, false);
+    setMatchingConfigs(data, devices, type, false);
     setMatchingConfigs(devices, installedConfigs, true);
 }
 
@@ -145,7 +240,7 @@ Vita::string mhwd::from_CharArray(char* c) {
 
 void mhwd::addConfigSorted(std::vector<mhwd::Config>* configs, mhwd::Config* config) {
     for (std::vector<mhwd::Config>::const_iterator iterator = configs->begin(); iterator != configs->end(); iterator++) {
-        if (config->name == (*iterator).name && !config->version.empty() && !(*iterator).version.empty() && config->version == (*iterator).version)
+        if (config->name == (*iterator).name)
             return;
     }
 
@@ -168,6 +263,29 @@ void mhwd::addConfigSorted(std::vector<mhwd::Config>* configs, mhwd::Config* con
 
 
 
+void mhwd::updateInstalledConfigData(mhwd::Data *data) {
+    // Clear and refill the installed config vectors
+    data->installedPCIConfigs.clear();
+    data->installedUSBConfigs.clear();
+    setInstalledConfigs(data, mhwd::TYPE_PCI);
+    setInstalledConfigs(data, mhwd::TYPE_USB);
+
+    // Clear installed config vector in each device element
+    for (std::vector<mhwd::Device>::iterator iterator = data->PCIDevices.begin(); iterator != data->PCIDevices.end(); iterator++) {
+        (*iterator).installedConfigs.clear();
+    }
+
+    for (std::vector<mhwd::Device>::iterator iterator = data->USBDevices.begin(); iterator != data->USBDevices.end(); iterator++) {
+        (*iterator).installedConfigs.clear();
+    }
+
+    // Refill it again
+    setMatchingConfigs(&data->PCIDevices, &data->installedPCIConfigs, true);
+    setMatchingConfigs(&data->USBDevices, &data->installedUSBConfigs, true);
+}
+
+
+
 void mhwd::setInstalledConfigs(mhwd::Data *data, mhwd::TYPE type) {
     std::vector<std::string> configPaths;
     std::vector<mhwd::Config>* configs;
@@ -187,13 +305,14 @@ void mhwd::setInstalledConfigs(mhwd::Data *data, mhwd::TYPE type) {
 
         if (fillConfig(&config, (*iterator), type))
             configs->push_back(config);
-        // TODO: Show error message!
+        else
+            data->invalidConfigs.push_back(config);
     }
 }
 
 
 
-void mhwd::setMatchingConfigs(std::vector<mhwd::Device>* devices, mhwd::TYPE type, bool setAsInstalled) {
+void mhwd::setMatchingConfigs(mhwd::Data *data, std::vector<mhwd::Device>* devices, mhwd::TYPE type, bool setAsInstalled) {
     std::vector<std::string> configPaths;
 
     if (type == mhwd::TYPE_USB)
@@ -207,7 +326,8 @@ void mhwd::setMatchingConfigs(std::vector<mhwd::Device>* devices, mhwd::TYPE typ
 
         if (fillConfig(&config, (*iterator), type))
             setMatchingConfig(&config, devices, setAsInstalled);
-        // TODO: Show error message!
+        else
+            data->invalidConfigs.push_back(config);
     }
 }
 
@@ -224,7 +344,7 @@ void mhwd::setMatchingConfigs(std::vector<mhwd::Device>* devices, std::vector<mh
 void mhwd::setMatchingConfig(mhwd::Config* config, std::vector<mhwd::Device>* devices, bool setAsInstalled) {
     std::vector<mhwd::Device*> foundDevices;
 
-    for (std::vector<mhwd::HardwareIDs>::const_iterator i_hwdIDs = config->hwdIDs.begin(); i_hwdIDs != config->hwdIDs.end(); i_hwdIDs++) {
+    for (std::vector<mhwd::Config::HardwareIDs>::const_iterator i_hwdIDs = config->hwdIDs.begin(); i_hwdIDs != config->hwdIDs.end(); i_hwdIDs++) {
         bool foundDevice = false;
 
         // Check all devices
@@ -296,7 +416,7 @@ bool mhwd::fillConfig(mhwd::Config *config, std::string configPath, mhwd::TYPE t
 
     // Add new HardwareIDs group to vector if vector is empty
     if (config->hwdIDs.empty()) {
-        HardwareIDs hwdID;
+        mhwd::Config::HardwareIDs hwdID;
         config->hwdIDs.push_back(hwdID);
     }
 
@@ -388,7 +508,7 @@ bool mhwd::readConfigFile(mhwd::Config *config, std::string configPath) {
         else if (key == "classids") {
             // Add new HardwareIDs group to vector if vector is empty
             if (!config->hwdIDs.back().classIDs.empty()) {
-                mhwd::HardwareIDs hwdID;
+                mhwd::Config::HardwareIDs hwdID;
                 config->hwdIDs.push_back(hwdID);
             }
 
@@ -397,7 +517,7 @@ bool mhwd::readConfigFile(mhwd::Config *config, std::string configPath) {
         else if (key == "vendorids") {
             // Add new HardwareIDs group to vector if vector is empty
             if (!config->hwdIDs.back().vendorIDs.empty()) {
-                mhwd::HardwareIDs hwdID;
+                mhwd::Config::HardwareIDs hwdID;
                 config->hwdIDs.push_back(hwdID);
             }
 
@@ -406,7 +526,7 @@ bool mhwd::readConfigFile(mhwd::Config *config, std::string configPath) {
         else if (key == "deviceids") {
             // Add new HardwareIDs group to vector if vector is empty
             if (!config->hwdIDs.back().deviceIDs.empty()) {
-                mhwd::HardwareIDs hwdID;
+                mhwd::Config::HardwareIDs hwdID;
                 config->hwdIDs.push_back(hwdID);
             }
 
@@ -417,7 +537,7 @@ bool mhwd::readConfigFile(mhwd::Config *config, std::string configPath) {
     file.close();
 
     // Append * to all empty vectors
-    for (std::vector<mhwd::HardwareIDs>::iterator iterator = config->hwdIDs.begin(); iterator != config->hwdIDs.end(); iterator++) {
+    for (std::vector<mhwd::Config::HardwareIDs>::iterator iterator = config->hwdIDs.begin(); iterator != config->hwdIDs.end(); iterator++) {
         if ((*iterator).classIDs.empty())
             (*iterator).classIDs.push_back("*");
 
@@ -427,6 +547,9 @@ bool mhwd::readConfigFile(mhwd::Config *config, std::string configPath) {
         if ((*iterator).deviceIDs.empty())
             (*iterator).deviceIDs.push_back("*");
     }
+
+    if (config->name.empty())
+        return false;
 
     return true;
 }
@@ -506,16 +629,13 @@ bool mhwd::copyDirectory(const std::string source, const std::string destination
     struct stat filestatus;
 
     if (lstat(destination.c_str(), &filestatus) != 0) {
-        // TODO: Show Error Message
         if (mkdir(destination.c_str(), S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IROTH) != 0)
             return false;
     }
     else if (S_ISREG(filestatus.st_mode)) {
-        // TODO: Show Error Message
         return false;
     }
     else if (S_ISDIR(filestatus.st_mode)) {
-        // TODO: Error Message
         if (!removeDirectory(destination))
             return false;
 
@@ -543,12 +663,10 @@ bool mhwd::copyDirectory(const std::string source, const std::string destination
         lstat(sourcepath.c_str(), &filestatus);
 
         if (S_ISREG(filestatus.st_mode)) {
-            // TODO: Error Message
             if (!copyFile(sourcepath, destinationpath))
                 success = false;
         }
         else if (S_ISDIR(filestatus.st_mode)) {
-            // TODO: Error Message
             if (!copyDirectory(sourcepath, destinationpath))
                 success = false;
         }
@@ -568,15 +686,9 @@ bool mhwd::copyFile(const std::string source, const std::string destination) {
     out = fopen(destination.c_str(), "w");
 
     if(in==NULL || !in)
-    {
-        // TODO: Error Message: fprintf(stderr,"%s: No such file or directory\n",argv[1]);
         return false;
-    }
     else if(out==NULL || !out)
-    {
-        // TODO: Error Message: printf(stderr,"%s: No such file or directory\n",argv[2]);
         return false;
-    }
 
     while((c=getc(in))!=EOF)
         putc(c,out);
@@ -609,12 +721,10 @@ bool mhwd::removeDirectory(const std::string directory) {
         lstat(filepath.c_str(), &filestatus);
 
         if (S_ISREG(filestatus.st_mode)) {
-            // TODO: Error Message
             if (remove(filepath.c_str()) != 0)
                 success = false;
         }
         else if (S_ISDIR(filestatus.st_mode)) {
-            // TODO: Error Message
             if (!removeDirectory(filepath)) {
                 std::cout << "bb" << std::endl;
                 success = false;
@@ -632,5 +742,41 @@ bool mhwd::removeDirectory(const std::string directory) {
 
 
 
+//########################//
+//### Private - Script ###//
+//########################//
 
+
+
+bool mhwd::runScript(mhwd::Data *data, mhwd::Config *config, SCRIPTOPERATION scriptOperation) {
+    std::string cmd = "exec " + std::string(MHWD_SCRIPT_PATH);
+
+    if (scriptOperation == SCRIPTOPERATION_REMOVE)
+        cmd += " --remove";
+    else
+        cmd += " --install";
+
+    cmd += " --cachedir \"" + data->environment.cachePath + "\"";
+    cmd += " --config \"" + config->configPath + "\"";
+    cmd += " 2>&1";
+
+
+    FILE *in;
+    char buff[512];
+
+    if(!(in = popen(cmd.c_str(), "r")))
+        return false;
+
+    while(fgets(buff, sizeof(buff), in) != NULL){
+        if (data->environment.messageFunc != NULL)
+            data->environment.messageFunc(std::string(buff));
+    }
+
+    int stat = pclose(in);
+
+    if(WEXITSTATUS(stat) != 0)
+        return false;
+
+    return true;
+}
 
