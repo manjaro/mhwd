@@ -19,6 +19,7 @@
  */
 
 #include <stdio.h>
+#include <unistd.h>
 #include <string.h>
 #include <iomanip>
 #include <iostream>
@@ -28,6 +29,10 @@
 #include "vita/string.hpp"
 
 using namespace std;
+
+
+#define CONSOLE_COLOR_RESET "\e[m"
+#define CONSOLE_COLOR "\e[1m\e[31m"
 
 
 enum ARGUMENTS {
@@ -48,13 +53,16 @@ mhwd::Data data;
 vector<string> configList;
 mhwd::TYPE operationType;
 
+bool checkRoot();
 void messageFunc(string str);
+void printArrow();
 void printHelp();
 void printAvailableConfigs(mhwd::TYPE type);
 void printInstalledConfigs(mhwd::TYPE type);
-void checkInvalidConfigs();
 bool installConfigs();
 bool removeConfigs();
+
+
 
 
 
@@ -124,17 +132,38 @@ int main (int argc, char *argv[])
 
             arguments = (ARGUMENTS)(arguments | ARG_REMOVE);
         }
-        else if (strcmp(argv[nArg], "--cachedir") == 0) {
+        else if (strcmp(argv[nArg], "--pmcachedir") == 0) {
             if (nArg + 1 >= argc) {
-                cout << "invalid use of option: --cachedir" << endl << endl;
+                cout << "invalid use of option: --pmcachedir" << endl << endl;
                 printHelp();
                 return 1;
             }
 
-            data.environment.cachePath = Vita::string(argv[++nArg]).trim("\"").trim();
+            data.environment.PMCachePath = Vita::string(argv[++nArg]).trim("\"").trim();
+        }
+        else if (strcmp(argv[nArg], "--pmconfig") == 0) {
+            if (nArg + 1 >= argc) {
+                cout << "invalid use of option: --pmconfig" << endl << endl;
+                printHelp();
+                return 1;
+            }
+
+            data.environment.PMConfigPath = Vita::string(argv[++nArg]).trim("\"").trim();
         }
         else if ((arguments & ARG_INSTALL) || (arguments & ARG_REMOVE)) {
-            configList.push_back(Vita::string(argv[nArg]).toLower());
+            bool found = false;
+            std::string name = Vita::string(argv[nArg]).toLower();
+
+            // Check if already in list
+            for (vector<string>::iterator iter = configList.begin(); iter != configList.end(); iter++) {
+                if ((*iter) == name) {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found)
+                configList.push_back(name);
         }
         else {
             cout << "invalid option: " << argv[nArg] << endl << endl;
@@ -144,8 +173,9 @@ int main (int argc, char *argv[])
     }
 
 
+    // Check if arguments are right
     if ((arguments & ARG_INSTALL) && (arguments & ARG_REMOVE)) {
-        cout << "Error: install and remove option can be used only seperate!" << endl << endl;
+        cout << "install and remove option can be used only seperate!" << endl << endl;
         printHelp();
         return 1;
     }
@@ -159,11 +189,15 @@ int main (int argc, char *argv[])
         arguments = (ARGUMENTS)(arguments | ARG_SHOWUSB | ARG_SHOWPCI);
 
 
+
     // Fill data with hardware informations
     mhwd::fillData(&data);
 
     // Check for invalid configs
-    checkInvalidConfigs();
+    for (vector<mhwd::Config*>::iterator iterator = data.invalidConfigs.begin(); iterator != data.invalidConfigs.end(); iterator++) {
+        cout << "Warning: Config '" << (*iterator)->configPath << "' is invalid!" << endl;
+    }
+
 
     // Check set arguments
     if (arguments & ARG_SHOWDETAILED && arguments & ARG_SHOWPCI)
@@ -184,22 +218,42 @@ int main (int argc, char *argv[])
 
 
     if (arguments & ARG_INSTALL) {
-        if (!installConfigs())
+        if (!checkRoot() || !installConfigs())
             return 1;
     }
     else if (arguments & ARG_REMOVE) {
-        if (!removeConfigs())
+        if (!checkRoot() || !removeConfigs())
             return 1;
     }
 
+
+    // Cleanup
+    mhwd::freeData(&data);
 
     return 0;
 }
 
 
 
+bool checkRoot() {
+    if (getuid()) {
+        cout << "you cannot perform this operation unless you are root!" << endl;
+        return false;
+    }
+
+    return true;
+}
+
+
+
 void messageFunc(string str) {
     cout << str;
+}
+
+
+
+void printArrow() {
+    cout << CONSOLE_COLOR << "> " << CONSOLE_COLOR_RESET;
 }
 
 
@@ -215,7 +269,8 @@ void printHelp() {
     cout << "  -sh/--showhardware\t\t\tshow detailed hardware info" << endl;
     cout << "  -i/--install <usb/pci> <config(s)>\tinstall driver config(s)" << endl;
     cout << "  -r/--remove <usb/pci> <config(s)>\tremove driver config(s)" << endl;
-    cout << "  --cachedir <path>\t\t\tset package manager cache path" << endl;
+    cout << "  --pmcachedir <path>\t\t\tset package manager cache path" << endl;
+    cout << "  --pmconfig <path>\t\t\tset package manager config" << endl;
     cout << endl;
 }
 
@@ -223,7 +278,7 @@ void printHelp() {
 
 void printAvailableConfigs(mhwd::TYPE type) {
     string beg;
-    vector<mhwd::Device> *devices;
+    vector<mhwd::Device*> *devices;
 
     if (type == mhwd::TYPE_USB) {
         beg = "USB";
@@ -234,42 +289,46 @@ void printAvailableConfigs(mhwd::TYPE type) {
         devices = &data.PCIDevices;
     }
 
+    bool found = false;
 
-    for (vector<mhwd::Device>::iterator dev_iter = devices->begin(); dev_iter != devices->end(); dev_iter++) {
-        if ((*dev_iter).availableConfigs.empty() && (*dev_iter).installedConfigs.empty())
+
+    for (vector<mhwd::Device*>::iterator dev_iter = devices->begin(); dev_iter != devices->end(); dev_iter++) {
+        if ((*dev_iter)->availableConfigs.empty() && (*dev_iter)->installedConfigs.empty())
             continue;
 
+        found = true;
+
         cout << endl << setfill('-') << setw(80) << "-" << setfill(' ') << endl;
-        cout << "> " << beg << " Device: " << (*dev_iter).className << " (" << (*dev_iter).classID << ") ";
-        cout << (*dev_iter).vendorName << " (" << (*dev_iter).vendorID << ") ";
-        cout << (*dev_iter).deviceName << " (" << (*dev_iter).deviceID << ") " << endl;
+        cout << "> " << beg << " Device: " << (*dev_iter)->className << " (" << (*dev_iter)->classID << ") ";
+        cout << (*dev_iter)->vendorName << " (" << (*dev_iter)->vendorID << ") ";
+        cout << (*dev_iter)->deviceName << " (" << (*dev_iter)->deviceID << ") " << endl;
         cout << setfill('-') << setw(80) << "-" << setfill(' ') << endl;
 
-        if (!(*dev_iter).installedConfigs.empty())
+        if (!(*dev_iter)->installedConfigs.empty())
             cout << "  > INSTALLED:" << endl;
 
-        for (vector<mhwd::Config>::iterator iterator = (*dev_iter).installedConfigs.begin(); iterator != (*dev_iter).installedConfigs.end(); iterator++) {
-            cout << endl << "    NAME:\t" << (*iterator).name << endl;
-            cout << "    VERSION:\t" << (*iterator).version << endl;
-            cout << "    INFO:\t" << (*iterator).info << endl;
-            cout << "    PRIORITY:\t" << (*iterator).priority << endl;
-            if ((*iterator).freedriver)
+        for (vector<mhwd::Config*>::iterator iterator = (*dev_iter)->installedConfigs.begin(); iterator != (*dev_iter)->installedConfigs.end(); iterator++) {
+            cout << endl << "    NAME:\t" << (*iterator)->name << endl;
+            cout << "    VERSION:\t" << (*iterator)->version << endl;
+            cout << "    INFO:\t" << (*iterator)->info << endl;
+            cout << "    PRIORITY:\t" << (*iterator)->priority << endl;
+            if ((*iterator)->freedriver)
                 cout << "    FREEDRIVER:\ttrue" << endl;
             else
                 cout << "    FREEDRIVER:\tfalse" << endl;
         }
 
-        if (!(*dev_iter).installedConfigs.empty())
+        if (!(*dev_iter)->installedConfigs.empty())
             cout << endl << endl;
-        if (!(*dev_iter).availableConfigs.empty())
+        if (!(*dev_iter)->availableConfigs.empty())
             cout << "  > AVAILABLE:" << endl;
 
-        for (vector<mhwd::Config>::iterator iterator = (*dev_iter).availableConfigs.begin(); iterator != (*dev_iter).availableConfigs.end(); iterator++) {
-            cout << endl << "    NAME:\t" << (*iterator).name << endl;
-            cout << "    VERSION:\t" << (*iterator).version << endl;
-            cout << "    INFO:\t" << (*iterator).info << endl;
-            cout << "    PRIORITY:\t" << (*iterator).priority << endl;
-            if ((*iterator).freedriver)
+        for (vector<mhwd::Config*>::iterator iterator = (*dev_iter)->availableConfigs.begin(); iterator != (*dev_iter)->availableConfigs.end(); iterator++) {
+            cout << endl << "    NAME:\t" << (*iterator)->name << endl;
+            cout << "    VERSION:\t" << (*iterator)->version << endl;
+            cout << "    INFO:\t" << (*iterator)->info << endl;
+            cout << "    PRIORITY:\t" << (*iterator)->priority << endl;
+            if ((*iterator)->freedriver)
                 cout << "    FREEDRIVER:\ttrue" << endl;
             else
                 cout << "    FREEDRIVER:\tfalse" << endl;
@@ -277,13 +336,18 @@ void printAvailableConfigs(mhwd::TYPE type) {
 
         cout << endl;
     }
+
+    if (!found) {
+        cout << "> No configs for " << beg << " devices found!" << endl;
+        return;
+    }
 }
 
 
 
 void printInstalledConfigs(mhwd::TYPE type) {
     string beg;
-    vector<mhwd::Config> *configs;
+    vector<mhwd::Config*> *configs;
 
     if (type == mhwd::TYPE_USB) {
         beg = "USB";
@@ -294,16 +358,17 @@ void printInstalledConfigs(mhwd::TYPE type) {
         configs = &data.installedPCIConfigs;
     }
 
-    if (configs->empty())
+    if (configs->empty()) {
+        cout << "> No installed configs for " << beg << " devices found!" << endl;
         return;
-
-    for (vector<mhwd::Config>::iterator iterator = configs->begin(); iterator != configs->end(); iterator++) {
-        cout << endl << "   NAME:\t" << (*iterator).name << endl;
+    }
+    for (vector<mhwd::Config*>::iterator iterator = configs->begin(); iterator != configs->end(); iterator++) {
+        cout << endl << "   NAME:\t" << (*iterator)->name << endl;
         cout << "   ATTACHED:\t" << beg << endl;
-        cout << "   VERSION:\t" << (*iterator).version << endl;
-        cout << "   INFO:\t" << (*iterator).info << endl;
-        cout << "   PRIORITY:\t" << (*iterator).priority << endl;
-        if ((*iterator).freedriver)
+        cout << "   VERSION:\t" << (*iterator)->version << endl;
+        cout << "   INFO:\t" << (*iterator)->info << endl;
+        cout << "   PRIORITY:\t" << (*iterator)->priority << endl;
+        if ((*iterator)->freedriver)
             cout << "   FREEDRIVER:\ttrue" << endl;
         else
             cout << "   FREEDRIVER:\tfalse" << endl;
@@ -314,57 +379,7 @@ void printInstalledConfigs(mhwd::TYPE type) {
 
 
 
-void checkInvalidConfigs() {
-    for (vector<mhwd::Config>::iterator iterator = data.invalidConfigs.begin(); iterator != data.invalidConfigs.end(); iterator++) {
-        cout << "Warning: Config '" << (*iterator).configPath << "' is invalid!" << endl;
-    }
-}
-
-
-/* TODO: Implement config dependency installing and conflict checking
-
-bool installConfigs(vector<string> &configList, vector<string> &skipList) {
-    for (vector<string>::iterator iter = configList.begin(); iter != configList.end(); iter++) {
-        bool skip = false;
-
-        for (vector<string>::iterator skip_iter = skipList.begin(); skip_iter != skipList.end(); skip_iter++) {
-            if ((*iter) == (*skip_iter)) {
-                skip = true;
-                break;
-            }
-        }
-
-        if (skip)
-            continue;
-
-        skipList.push_back((*iter));
-
-
-        mhwd::Config *config = mhwd::getAvailableConfig(&data, (*iter), operationType);
-
-        if (config == NULL) {
-            cout << "Config " << (*iter) << " does not exist!" << endl;
-            return false;
-        }
-        else if (!config->dependencies.empty()) {
-            cout << "> Installing dependencies of " << config->name << "..." << endl;
-
-            if (!installConfigs(config->dependencies, skipList))
-                return false;
-        }
-
-        cout << "> Installing Config " << config->name << "..." << endl;
-
-        if (!mhwd::installConfig(&data, config)) {
-            cout << "Installation failed: " << data.lastError << endl;
-            return false;
-        }
-    }
-
-    return true;
-}*/
-
-
+// TODO: Implement config dependency installing and conflict checking
 
 bool installConfigs() {
     for (vector<string>::iterator iter = configList.begin(); iter != configList.end(); iter++) {
@@ -380,20 +395,34 @@ bool installConfigs() {
             return false;
         }
         else if (installedConfig != NULL && arguments & ARG_FORCE) {
-            cout << "> Removing Config " << installedConfig->name << "..." << endl;
+            printArrow();
+            cout << "Removing Config " << installedConfig->name << "..." << endl;
 
             if (!mhwd::uninstallConfig(&data, installedConfig)) {
                 cout << "Remove failed: " << data.lastError << endl;
                 return false;
             }
+
+            printArrow();
+            cout << "Removed Config " << installedConfig->name << endl;
+
+            // Update mhwd data object
+            mhwd::updateInstalledConfigData(&data);
         }
 
-        cout << "> Installing Config " << config->name << "..." << endl;
+        printArrow();
+        cout << "Installing Config " << config->name << "..." << endl;
 
         if (!mhwd::installConfig(&data, config)) {
             cout << "Installation failed: " << data.lastError << endl;
             return false;
         }
+
+        printArrow();
+        cout << "Installed Config " << config->name << endl;
+
+        // Update mhwd data object
+        mhwd::updateInstalledConfigData(&data);
     }
 
     return true;
@@ -401,7 +430,7 @@ bool installConfigs() {
 
 
 
-bool removeConfigs() {
+bool removeConfigs() {    
     for (vector<string>::iterator iter = configList.begin(); iter != configList.end(); iter++) {
         mhwd::Config *config = mhwd::getInstalledConfig(&data, (*iter), operationType);
 
@@ -410,12 +439,19 @@ bool removeConfigs() {
             return false;
         }
 
-        cout << "> Removing Config " << config->name << "..." << endl;
+        printArrow();
+        cout << "Removing Config " << config->name << "..." << endl;
 
         if (!mhwd::uninstallConfig(&data, config)) {
             cout << "Remove failed: " << data.lastError << endl;
             return false;
         }
+
+        printArrow();
+        cout << "Removed Config " << config->name << endl;
+
+        // Update mhwd data object
+        mhwd::updateInstalledConfigData(&data);
     }
 
     return true;

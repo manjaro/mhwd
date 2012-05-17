@@ -23,39 +23,133 @@
 
 
 
+
+//#########################################//
+//### Private - List & Vector Functions ###//
+//#########################################//
+
+
+template< typename T >
+struct delete_ptr : public std::unary_function<bool,T> {
+    bool operator()(T *ptr) const {
+        if (ptr != NULL)
+            delete ptr;
+
+        ptr = NULL;
+        return true;
+    }
+};
+
+
+
+
+
 //########################//
 //### Public Functions ###//
 //########################//
 
 
-
 void mhwd::initData(mhwd::Data *data) {
-    data->PCIDevices.clear();
-    data->USBDevices.clear();
-    data->installedPCIConfigs.clear();
-    data->installedUSBConfigs.clear();
-    data->invalidConfigs.clear();
-    data->lastError.clear();
-
-    data->environment.cachePath = MHWD_CACHE_DIR;
+    data->environment.PMCachePath = MHWD_PM_CACHE_DIR;
+    data->environment.PMConfigPath = MHWD_PM_CONFIG;
+    data->environment.syncPackageManagerDatabase = true;
     data->environment.messageFunc = NULL;
 }
 
 
+
 void mhwd::fillData(mhwd::Data *data) {
+    freeData(data);
+
+    fillDevices(data, mhwd::TYPE_PCI);
+    fillDevices(data, mhwd::TYPE_USB);
+
+    updateConfigData(data);
+}
+
+
+
+void mhwd::freeData(mhwd::Data *data) {
+    data->lastError.clear();
+
+    std::for_each(data->PCIDevices.begin(), data->PCIDevices.end(), delete_ptr<mhwd::Device>());
+    std::for_each(data->USBDevices.begin(), data->USBDevices.end(), delete_ptr<mhwd::Device>());
+    std::for_each(data->installedPCIConfigs.begin(), data->installedPCIConfigs.end(), delete_ptr<mhwd::Config>());
+    std::for_each(data->installedUSBConfigs.begin(), data->installedUSBConfigs.end(), delete_ptr<mhwd::Config>());
+    std::for_each(data->allPCIConfigs.begin(), data->allPCIConfigs.end(), delete_ptr<mhwd::Config>());
+    std::for_each(data->allUSBConfigs.begin(), data->allUSBConfigs.end(), delete_ptr<mhwd::Config>());
+    std::for_each(data->invalidConfigs.begin(), data->invalidConfigs.end(), delete_ptr<mhwd::Config>());
+
     data->PCIDevices.clear();
     data->USBDevices.clear();
     data->installedPCIConfigs.clear();
     data->installedUSBConfigs.clear();
+    data->allUSBConfigs.clear();
+    data->allPCIConfigs.clear();
     data->invalidConfigs.clear();
-    data->lastError.clear();
-
-    setInstalledConfigs(data, mhwd::TYPE_PCI);
-    setInstalledConfigs(data, mhwd::TYPE_USB);
-
-    setDevices(data, mhwd::TYPE_PCI);
-    setDevices(data, mhwd::TYPE_USB);
 }
+
+
+
+void mhwd::updateConfigData(mhwd::Data *data) {
+    // Clear config vectors in each device element
+    for (std::vector<mhwd::Device*>::iterator iterator = data->PCIDevices.begin(); iterator != data->PCIDevices.end(); iterator++) {
+        (*iterator)->availableConfigs.clear();
+    }
+
+    for (std::vector<mhwd::Device*>::iterator iterator = data->USBDevices.begin(); iterator != data->USBDevices.end(); iterator++) {
+        (*iterator)->availableConfigs.clear();
+    }
+
+
+    // Clear installed config vectors
+    std::for_each(data->allPCIConfigs.begin(), data->allPCIConfigs.end(), delete_ptr<mhwd::Config>());
+    std::for_each(data->allUSBConfigs.begin(), data->allUSBConfigs.end(), delete_ptr<mhwd::Config>());
+
+    data->allPCIConfigs.clear();
+    data->allUSBConfigs.clear();
+
+
+    // Refill data
+    fillAllConfigs(data, mhwd::TYPE_PCI);
+    fillAllConfigs(data, mhwd::TYPE_USB);
+
+    setMatchingConfigs(&data->PCIDevices, &data->allPCIConfigs, false);
+    setMatchingConfigs(&data->USBDevices, &data->allUSBConfigs, false);
+
+    // Update also installed config data
+    updateInstalledConfigData(data);
+}
+
+
+
+void mhwd::updateInstalledConfigData(mhwd::Data *data) {
+    // Clear config vectors in each device element
+    for (std::vector<mhwd::Device*>::iterator iterator = data->PCIDevices.begin(); iterator != data->PCIDevices.end(); iterator++) {
+        (*iterator)->installedConfigs.clear();
+    }
+
+    for (std::vector<mhwd::Device*>::iterator iterator = data->USBDevices.begin(); iterator != data->USBDevices.end(); iterator++) {
+        (*iterator)->installedConfigs.clear();
+    }
+
+
+    // Clear installed config vectors
+    std::for_each(data->installedPCIConfigs.begin(), data->installedPCIConfigs.end(), delete_ptr<mhwd::Config>());
+    std::for_each(data->installedUSBConfigs.begin(), data->installedUSBConfigs.end(), delete_ptr<mhwd::Config>());
+
+    data->installedPCIConfigs.clear();
+    data->installedUSBConfigs.clear();
+
+
+    // Refill data
+    fillInstalledConfigs(data, mhwd::TYPE_PCI);
+    fillInstalledConfigs(data, mhwd::TYPE_USB);
+
+    setMatchingConfigs(&data->PCIDevices, &data->installedPCIConfigs, true);
+    setMatchingConfigs(&data->USBDevices, &data->installedUSBConfigs, true);
+}
+
 
 
 void mhwd::printDeviceDetails(mhwd::TYPE type, FILE *f) {
@@ -78,6 +172,69 @@ void mhwd::printDeviceDetails(mhwd::TYPE type, FILE *f) {
     hd_free_hd_list(hd);
     hd_free_hd_data(hd_data);
     free(hd_data);
+}
+
+
+
+mhwd::Config* mhwd::getInstalledConfig(mhwd::Data *data, const std::string configName, const TYPE configType) {
+    std::vector<mhwd::Config*>* installedConfigs;
+
+    // Get the right configs
+    if (configType == mhwd::TYPE_USB)
+        installedConfigs = &data->installedUSBConfigs;
+    else
+        installedConfigs = &data->installedPCIConfigs;
+
+    for (std::vector<mhwd::Config*>::iterator iterator = installedConfigs->begin(); iterator != installedConfigs->end(); iterator++) {
+        if (configName == (*iterator)->name)
+            return (*iterator);
+    }
+
+    return NULL;
+}
+
+
+
+mhwd::Config* mhwd::getDatabaseConfig(mhwd::Data *data, const std::string configName, const TYPE configType) {
+    std::vector<mhwd::Config*>* allConfigs;
+
+    // Get the right configs
+    if (configType == mhwd::TYPE_USB)
+        allConfigs = &data->allUSBConfigs;
+    else
+        allConfigs = &data->allPCIConfigs;
+
+    for (std::vector<mhwd::Config*>::iterator iterator = allConfigs->begin(); iterator != allConfigs->end(); iterator++) {
+        if (configName == (*iterator)->name)
+            return (*iterator);
+    }
+
+    return NULL;
+}
+
+
+
+mhwd::Config* mhwd::getAvailableConfig(mhwd::Data *data, const std::string configName, const TYPE configType) {
+    std::vector<mhwd::Device*> *devices;
+
+    // Get the right devices
+    if (configType == mhwd::TYPE_USB)
+        devices = &data->USBDevices;
+    else
+        devices = &data->PCIDevices;
+
+
+    for (std::vector<mhwd::Device*>::iterator dev_iter = devices->begin(); dev_iter != devices->end(); dev_iter++) {
+        if ((*dev_iter)->availableConfigs.empty())
+            continue;
+
+        for (std::vector<mhwd::Config*>::iterator iterator = (*dev_iter)->availableConfigs.begin(); iterator != (*dev_iter)->availableConfigs.end(); iterator++) {
+            if (configName == (*iterator)->name)
+                return (*iterator);
+        }
+    }
+
+    return NULL;
 }
 
 
@@ -112,8 +269,7 @@ bool mhwd::installConfig(mhwd::Data *data, mhwd::Config *config) {
         return false;
     }
 
-    // Update installed config vectors
-    updateInstalledConfigData(data);
+    // Installed config vectors have to be updated manual with updateInstalledConfigData(mhwd::Data*)
 
     return true;
 }
@@ -122,7 +278,7 @@ bool mhwd::installConfig(mhwd::Data *data, mhwd::Config *config) {
 
 bool mhwd::uninstallConfig(mhwd::Data *data, mhwd::Config *config) {
     mhwd::Config *installedConfig = getInstalledConfig(data, config->name, config->type);
-    std::vector<mhwd::Config>* installedConfigs;
+    std::vector<mhwd::Config*>* installedConfigs;
 
     if (config->type == mhwd::TYPE_USB)
         installedConfigs = &data->installedUSBConfigs;
@@ -141,10 +297,10 @@ bool mhwd::uninstallConfig(mhwd::Data *data, mhwd::Config *config) {
     }
 
     // Check if this config is required by another installed config
-    for (std::vector<mhwd::Config>::const_iterator iterator = installedConfigs->begin(); iterator != installedConfigs->end(); iterator++) {
-        for (std::vector<std::string>::const_iterator depend = (*iterator).dependencies.begin(); depend != (*iterator).dependencies.end(); depend++) {
+    for (std::vector<mhwd::Config*>::const_iterator iterator = installedConfigs->begin(); iterator != installedConfigs->end(); iterator++) {
+        for (std::vector<std::string>::const_iterator depend = (*iterator)->dependencies.begin(); depend != (*iterator)->dependencies.end(); depend++) {
             if ((*depend) == config->name) {
-                data->lastError = (*iterator).name + " requires " + config->name;
+                data->lastError = (*iterator)->name + " requires " + config->name;
                 return false;
             }
         }
@@ -162,55 +318,12 @@ bool mhwd::uninstallConfig(mhwd::Data *data, mhwd::Config *config) {
         return false;
     }
 
-    // Update installed config vectors
-    updateInstalledConfigData(data);
+    // Installed config vectors have to be updated manual with updateInstalledConfigData(mhwd::Data*)
 
     return true;
 }
 
 
-
-mhwd::Config* mhwd::getInstalledConfig(mhwd::Data *data, const std::string configName, const TYPE configType) {
-    std::vector<mhwd::Config>* installedConfigs;
-
-    // Get the right configs
-    if (configType == mhwd::TYPE_USB)
-        installedConfigs = &data->installedUSBConfigs;
-    else
-        installedConfigs = &data->installedPCIConfigs;
-
-    for (std::vector<mhwd::Config>::iterator iterator = installedConfigs->begin(); iterator != installedConfigs->end(); iterator++) {
-        if (configName == (*iterator).name)
-            return &(*iterator);
-    }
-
-    return NULL;
-}
-
-
-
-mhwd::Config* mhwd::getAvailableConfig(mhwd::Data *data, const std::string configName, const TYPE configType) {
-    std::vector<mhwd::Device> *devices;
-
-    // Get the right devices
-    if (configType == mhwd::TYPE_USB)
-        devices = &data->USBDevices;
-    else
-        devices = &data->PCIDevices;
-
-
-    for (std::vector<mhwd::Device>::iterator dev_iter = devices->begin(); dev_iter != devices->end(); dev_iter++) {
-        if ((*dev_iter).availableConfigs.empty())
-            continue;
-
-        for (std::vector<mhwd::Config>::iterator iterator = (*dev_iter).availableConfigs.begin(); iterator != (*dev_iter).availableConfigs.end(); iterator++) {
-            if (configName == (*iterator).name)
-                return &(*iterator);
-        }
-    }
-
-    return NULL;
-}
 
 
 
@@ -222,37 +335,35 @@ mhwd::Config* mhwd::getAvailableConfig(mhwd::Data *data, const std::string confi
 
 
 
-void mhwd::setDevices(mhwd::Data *data, mhwd::TYPE type) {
+void mhwd::fillDevices(mhwd::Data *data, mhwd::TYPE type) {
     hd_data_t *hd_data;
     hd_t *hd;
     hw_item hw;
-    std::vector<mhwd::Config>* installedConfigs;
-    std::vector<mhwd::Device>* devices;
+    std::vector<mhwd::Device*>* devices;
 
     if (type == mhwd::TYPE_USB) {
         hw = hw_usb;
-        installedConfigs = &data->installedUSBConfigs;
         devices = &data->USBDevices;
     }
     else {
         hw = hw_pci;
-        installedConfigs = &data->installedPCIConfigs;
         devices = &data->PCIDevices;
     }
 
 
+    // Get the hardware devices
     hd_data = (hd_data_t*)calloc(1, sizeof *hd_data);
     hd = hd_list(hd_data, hw, 1, NULL);
 
     for(; hd; hd = hd->next) {
-        struct mhwd::Device device;
-        device.type = type;
-        device.classID = from_Hex(hd->base_class.id, 2) + from_Hex(hd->sub_class.id, 2).toLower();
-        device.vendorID = from_Hex(hd->vendor.id, 4).toLower();
-        device.deviceID = from_Hex(hd->device.id, 4).toLower();
-        device.className = from_CharArray(hd->base_class.name);
-        device.vendorName = from_CharArray(hd->vendor.name);
-        device.deviceName = from_CharArray(hd->device.name);
+        struct mhwd::Device *device = new mhwd::Device();
+        device->type = type;
+        device->classID = from_Hex(hd->base_class.id, 2) + from_Hex(hd->sub_class.id, 2).toLower();
+        device->vendorID = from_Hex(hd->vendor.id, 4).toLower();
+        device->deviceID = from_Hex(hd->device.id, 4).toLower();
+        device->className = from_CharArray(hd->base_class.name);
+        device->vendorName = from_CharArray(hd->vendor.name);
+        device->deviceName = from_CharArray(hd->device.name);
 
         devices->push_back(device);
     }
@@ -260,10 +371,6 @@ void mhwd::setDevices(mhwd::Data *data, mhwd::TYPE type) {
     hd_free_hd_list(hd);
     hd_free_hd_data(hd_data);
     free(hd_data);
-
-    // Fill the config vectors
-    setMatchingConfigs(data, devices, type, false);
-    setMatchingConfigs(devices, installedConfigs, true);
 }
 
 
@@ -285,23 +392,6 @@ Vita::string mhwd::from_CharArray(char* c) {
 
 
 
-void mhwd::addConfigSorted(std::vector<mhwd::Config>* configs, mhwd::Config* config) {
-    for (std::vector<mhwd::Config>::const_iterator iterator = configs->begin(); iterator != configs->end(); iterator++) {
-        if (config->name == (*iterator).name)
-            return;
-    }
-
-    for (std::vector<mhwd::Config>::iterator iterator = configs->begin(); iterator != configs->end(); iterator++) {
-        if (config->priority > (*iterator).priority) {
-            configs->insert(iterator, *config);
-            return;
-        }
-    }
-
-    configs->push_back(*config);
-}
-
-
 
 
 //#########################//
@@ -309,73 +399,9 @@ void mhwd::addConfigSorted(std::vector<mhwd::Config>* configs, mhwd::Config* con
 //#########################//
 
 
-
-bool mhwd::checkDependenciesConflicts(mhwd::Data *data, mhwd::Config *config) {
-    std::vector<mhwd::Config>* installedConfigs;
-
-    // Get the right configs
-    if (config->type == mhwd::TYPE_USB)
-        installedConfigs = &data->installedUSBConfigs;
-    else
-        installedConfigs = &data->installedPCIConfigs;
-
-
-    for (std::vector<std::string>::const_iterator conflict = config->conflicts.begin(); conflict != config->conflicts.end(); conflict++) {
-        for (std::vector<mhwd::Config>::const_iterator iterator = installedConfigs->begin(); iterator != installedConfigs->end(); iterator++) {
-            if ((*conflict) == (*iterator).name) {
-                data->lastError = config->name + " conflicts with " + (*conflict);
-                return false;
-            }
-        }
-    }
-
-    for (std::vector<std::string>::const_iterator depend = config->dependencies.begin(); depend != config->dependencies.end(); depend++) {
-        bool found = false;
-
-        for (std::vector<mhwd::Config>::const_iterator iterator = installedConfigs->begin(); iterator != installedConfigs->end(); iterator++) {
-            if ((*depend) == (*iterator).name) {
-                found = true;
-                break;
-            }
-        }
-
-        if (!found) {
-            data->lastError = config->name + " depends on " + (*depend) + " but " + (*depend) + " is not installed";
-            return false;
-        }
-    }
-
-    return true;
-}
-
-
-
-void mhwd::updateInstalledConfigData(mhwd::Data *data) {
-    // Clear and refill the installed config vectors
-    data->installedPCIConfigs.clear();
-    data->installedUSBConfigs.clear();
-    setInstalledConfigs(data, mhwd::TYPE_PCI);
-    setInstalledConfigs(data, mhwd::TYPE_USB);
-
-    // Clear installed config vector in each device element
-    for (std::vector<mhwd::Device>::iterator iterator = data->PCIDevices.begin(); iterator != data->PCIDevices.end(); iterator++) {
-        (*iterator).installedConfigs.clear();
-    }
-
-    for (std::vector<mhwd::Device>::iterator iterator = data->USBDevices.begin(); iterator != data->USBDevices.end(); iterator++) {
-        (*iterator).installedConfigs.clear();
-    }
-
-    // Refill it again
-    setMatchingConfigs(&data->PCIDevices, &data->installedPCIConfigs, true);
-    setMatchingConfigs(&data->USBDevices, &data->installedUSBConfigs, true);
-}
-
-
-
-void mhwd::setInstalledConfigs(mhwd::Data *data, mhwd::TYPE type) {
+void mhwd::fillInstalledConfigs(mhwd::Data *data, mhwd::TYPE type) {
     std::vector<std::string> configPaths;
-    std::vector<mhwd::Config>* configs;
+    std::vector<mhwd::Config*>* configs;
 
     if (type == mhwd::TYPE_USB) {
         configs = &data->installedUSBConfigs;
@@ -388,9 +414,9 @@ void mhwd::setInstalledConfigs(mhwd::Data *data, mhwd::TYPE type) {
 
 
     for (std::vector<std::string>::const_iterator iterator = configPaths.begin(); iterator != configPaths.end(); iterator++) {
-        struct mhwd::Config config;
+        struct mhwd::Config *config = new mhwd::Config();
 
-        if (fillConfig(&config, (*iterator), type))
+        if (fillConfig(config, (*iterator), type))
             configs->push_back(config);
         else
             data->invalidConfigs.push_back(config);
@@ -399,20 +425,25 @@ void mhwd::setInstalledConfigs(mhwd::Data *data, mhwd::TYPE type) {
 
 
 
-void mhwd::setMatchingConfigs(mhwd::Data *data, std::vector<mhwd::Device>* devices, mhwd::TYPE type, bool setAsInstalled) {
+void mhwd::fillAllConfigs(mhwd::Data *data, mhwd::TYPE type) {
     std::vector<std::string> configPaths;
+    std::vector<mhwd::Config*>* configs;
 
-    if (type == mhwd::TYPE_USB)
+    if (type == mhwd::TYPE_USB) {
+        configs = &data->allUSBConfigs;
         configPaths = getRecursiveDirectoryFileList(MHWD_USB_CONFIG_DIR, MHWD_CONFIG_NAME);
-    else
+    }
+    else {
+        configs = &data->allPCIConfigs;
         configPaths = getRecursiveDirectoryFileList(MHWD_PCI_CONFIG_DIR, MHWD_CONFIG_NAME);
+    }
 
 
     for (std::vector<std::string>::const_iterator iterator = configPaths.begin(); iterator != configPaths.end(); iterator++) {
-        mhwd::Config config;
+        struct mhwd::Config *config = new mhwd::Config();
 
-        if (fillConfig(&config, (*iterator), type))
-            setMatchingConfig(&config, devices, setAsInstalled);
+        if (fillConfig(config, (*iterator), type))
+            configs->push_back(config);
         else
             data->invalidConfigs.push_back(config);
     }
@@ -420,27 +451,27 @@ void mhwd::setMatchingConfigs(mhwd::Data *data, std::vector<mhwd::Device>* devic
 
 
 
-void mhwd::setMatchingConfigs(std::vector<mhwd::Device>* devices, std::vector<mhwd::Config>* configs, bool setAsInstalled) {
-    for (std::vector<mhwd::Config>::iterator iterator = configs->begin(); iterator != configs->end(); iterator++) {
-        setMatchingConfig(&(*iterator), devices, setAsInstalled);
+void mhwd::setMatchingConfigs(std::vector<mhwd::Device*>* devices, std::vector<mhwd::Config*>* configs, bool setAsInstalled) {
+    for (std::vector<mhwd::Config*>::iterator iterator = configs->begin(); iterator != configs->end(); iterator++) {
+        setMatchingConfig((*iterator), devices, setAsInstalled);
     }
 }
 
 
 
-void mhwd::setMatchingConfig(mhwd::Config* config, std::vector<mhwd::Device>* devices, bool setAsInstalled) {
+void mhwd::setMatchingConfig(mhwd::Config* config, std::vector<mhwd::Device*>* devices, bool setAsInstalled) {
     std::vector<mhwd::Device*> foundDevices;
 
     for (std::vector<mhwd::Config::HardwareIDs>::const_iterator i_hwdIDs = config->hwdIDs.begin(); i_hwdIDs != config->hwdIDs.end(); i_hwdIDs++) {
         bool foundDevice = false;
 
         // Check all devices
-        for (std::vector<mhwd::Device>::iterator i_device = devices->begin(); i_device != devices->end(); i_device++) {
+        for (std::vector<mhwd::Device*>::iterator i_device = devices->begin(); i_device != devices->end(); i_device++) {
             bool found = false;
 
             // Check class ids
             for (std::vector<std::string>::const_iterator iterator = (*i_hwdIDs).classIDs.begin(); iterator != (*i_hwdIDs).classIDs.end(); iterator++) {
-                if (*iterator == "*" || *iterator == (*i_device).classID) {
+                if (*iterator == "*" || *iterator == (*i_device)->classID) {
                     found = true;
                     break;
                 }
@@ -453,7 +484,7 @@ void mhwd::setMatchingConfig(mhwd::Config* config, std::vector<mhwd::Device>* de
             found = false;
 
             for (std::vector<std::string>::const_iterator iterator = (*i_hwdIDs).vendorIDs.begin(); iterator != (*i_hwdIDs).vendorIDs.end(); iterator++) {
-                if (*iterator == "*" || *iterator == (*i_device).vendorID) {
+                if (*iterator == "*" || *iterator == (*i_device)->vendorID) {
                     found = true;
                     break;
                 }
@@ -466,7 +497,7 @@ void mhwd::setMatchingConfig(mhwd::Config* config, std::vector<mhwd::Device>* de
             found = false;
 
             for (std::vector<std::string>::const_iterator iterator = (*i_hwdIDs).deviceIDs.begin(); iterator != (*i_hwdIDs).deviceIDs.end(); iterator++) {
-                if (*iterator == "*" || *iterator == (*i_device).deviceID) {
+                if (*iterator == "*" || *iterator == (*i_device)->deviceID) {
                     found = true;
                     break;
                 }
@@ -475,7 +506,7 @@ void mhwd::setMatchingConfig(mhwd::Config* config, std::vector<mhwd::Device>* de
             if (!found)
                 continue;
 
-            foundDevices.push_back(&(*i_device));
+            foundDevices.push_back((*i_device));
             foundDevice = true;
         }
 
@@ -649,6 +680,25 @@ bool mhwd::readConfigFile(mhwd::Config *config, std::string configPath) {
 
 
 
+void mhwd::addConfigSorted(std::vector<mhwd::Config*>* configs, mhwd::Config* config) {
+    for (std::vector<mhwd::Config*>::const_iterator iterator = configs->begin(); iterator != configs->end(); iterator++) {
+        if (config->name == (*iterator)->name)
+            return;
+    }
+
+
+    for (std::vector<mhwd::Config*>::iterator iterator = configs->begin(); iterator != configs->end(); iterator++) {
+        if (config->priority > (*iterator)->priority) {
+            configs->insert(iterator, config);
+            return;
+        }
+    }
+
+    configs->push_back(config);
+}
+
+
+
 std::vector<std::string> mhwd::splitValue(Vita::string str, Vita::string onlyEnding) {
     std::vector<Vita::string> work = str.toLower().explode(" ");
     std::vector<std::string> final;
@@ -673,6 +723,49 @@ Vita::string mhwd::getRightConfigPath(Vita::string str, Vita::string baseConfigP
 
     return baseConfigPath + "/" + str;
 }
+
+
+
+bool mhwd::checkDependenciesConflicts(mhwd::Data *data, mhwd::Config *config) {
+    std::vector<mhwd::Config*>* installedConfigs;
+
+    // Get the right configs
+    if (config->type == mhwd::TYPE_USB)
+        installedConfigs = &data->installedUSBConfigs;
+    else
+        installedConfigs = &data->installedPCIConfigs;
+
+
+    for (std::vector<std::string>::const_iterator conflict = config->conflicts.begin(); conflict != config->conflicts.end(); conflict++) {
+        for (std::vector<mhwd::Config*>::const_iterator iterator = installedConfigs->begin(); iterator != installedConfigs->end(); iterator++) {
+            if ((*conflict) == (*iterator)->name) {
+                data->lastError = config->name + " conflicts with " + (*conflict);
+                return false;
+            }
+        }
+    }
+
+    for (std::vector<std::string>::const_iterator depend = config->dependencies.begin(); depend != config->dependencies.end(); depend++) {
+        bool found = false;
+
+        for (std::vector<mhwd::Config*>::const_iterator iterator = installedConfigs->begin(); iterator != installedConfigs->end(); iterator++) {
+            if ((*depend) == (*iterator)->name) {
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            data->lastError = config->name + " depends on " + (*depend) + " but " + (*depend) + " is not installed";
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
+
 
 
 
@@ -816,20 +909,18 @@ bool mhwd::removeDirectory(const std::string directory) {
         lstat(filepath.c_str(), &filestatus);
 
         if (S_ISREG(filestatus.st_mode)) {
-            if (remove(filepath.c_str()) != 0)
+            if (unlink(filepath.c_str()) != 0)
                 success = false;
         }
         else if (S_ISDIR(filestatus.st_mode)) {
-            if (!removeDirectory(filepath)) {
-                std::cout << "bb" << std::endl;
+            if (!removeDirectory(filepath))
                 success = false;
-            }
         }
     }
 
     closedir(d);
 
-    if (remove(directory.c_str()) != 0)
+    if (rmdir(directory.c_str()) != 0)
         success = false;
 
     return success;
@@ -851,7 +942,11 @@ bool mhwd::runScript(mhwd::Data *data, mhwd::Config *config, SCRIPTOPERATION scr
     else
         cmd += " --install";
 
-    cmd += " --cachedir \"" + data->environment.cachePath + "\"";
+    if (data->environment.syncPackageManagerDatabase)
+        cmd += " --sync";
+
+    cmd += " --cachedir \"" + data->environment.PMCachePath + "\"";
+    cmd += " --pmconfig \"" + data->environment.PMConfigPath + "\"";
     cmd += " --config \"" + config->configPath + "\"";
     cmd += " 2>&1";
 
@@ -871,6 +966,9 @@ bool mhwd::runScript(mhwd::Data *data, mhwd::Config *config, SCRIPTOPERATION scr
 
     if(WEXITSTATUS(stat) != 0)
         return false;
+
+    // Only one database sync is required
+    data->environment.syncPackageManagerDatabase = false;
 
     return true;
 }

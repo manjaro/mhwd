@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include <iomanip>
+#include <algorithm>
 #include <fstream>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -41,10 +42,9 @@ namespace mhwd {
     //###############//
     //### Devices ###//
     //###############//
-    void setDevices(mhwd::Data *data, mhwd::TYPE type);
+    void fillDevices(mhwd::Data *data, mhwd::TYPE type);
     Vita::string from_Hex(uint16_t hexnum, int fill);
     Vita::string from_CharArray(char* c);
-    void addConfigSorted(std::vector<mhwd::Config>* configs, mhwd::Config* config);
 
 
     //###############//
@@ -52,16 +52,16 @@ namespace mhwd {
     //###############//
     enum SCRIPTOPERATION { SCRIPTOPERATION_INSTALL, SCRIPTOPERATION_REMOVE };
 
-    bool checkDependenciesConflicts(mhwd::Data *data, mhwd::Config *config);
-    void updateInstalledConfigData(mhwd::Data *data);
-    void setInstalledConfigs(mhwd::Data *data, mhwd::TYPE type);
-    void setMatchingConfigs(mhwd::Data *data, std::vector<mhwd::Device>* devices, mhwd::TYPE type, bool setAsInstalled = false);
-    void setMatchingConfigs(std::vector<mhwd::Device>* devices, std::vector<mhwd::Config>* configs, bool setAsInstalled = false);
-    void setMatchingConfig(mhwd::Config* config, std::vector<mhwd::Device>* devices, bool setAsInstalled = false);
+    void fillInstalledConfigs(mhwd::Data *data, mhwd::TYPE type);
+    void fillAllConfigs(mhwd::Data *data, mhwd::TYPE type);
+    void setMatchingConfigs(std::vector<mhwd::Device*>* devices, std::vector<mhwd::Config*>* configs, bool setAsInstalled);
+    void setMatchingConfig(mhwd::Config* config, std::vector<mhwd::Device*>* devices, bool setAsInstalled);
+    void addConfigSorted(std::vector<mhwd::Config*>* configs, mhwd::Config* config);
     bool fillConfig(mhwd::Config *config, std::string configPath, mhwd::TYPE type);
     bool readConfigFile(mhwd::Config *config, std::string configPath);
     std::vector<std::string> splitValue(Vita::string str, Vita::string onlyEnding = "");
     Vita::string getRightConfigPath(Vita::string str, Vita::string baseConfigPath);
+    bool checkDependenciesConflicts(mhwd::Data *data, mhwd::Config *config);
 
 
     //#####################################//

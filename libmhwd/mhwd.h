@@ -53,18 +53,19 @@ namespace mhwd {
     struct Device {
         TYPE type;
         std::string className, deviceName, vendorName, classID, deviceID, vendorID;
-        std::vector<mhwd::Config> availableConfigs, installedConfigs;
+        std::vector<mhwd::Config*> availableConfigs, installedConfigs;
     };
 
     struct Data {
         struct Environment {
-            std::string cachePath;
+            std::string PMCachePath, PMConfigPath;
+            bool syncPackageManagerDatabase;
             void (*messageFunc)(std::string);
         };
 
         std::string lastError;
-        std::vector<mhwd::Device> USBDevices, PCIDevices;
-        std::vector<mhwd::Config> installedUSBConfigs, installedPCIConfigs, invalidConfigs;
+        std::vector<mhwd::Device*> USBDevices, PCIDevices;
+        std::vector<mhwd::Config*> installedUSBConfigs, installedPCIConfigs, allUSBConfigs, allPCIConfigs, invalidConfigs;
         Environment environment;
     };
 
@@ -74,28 +75,25 @@ namespace mhwd {
     //#################//
     void initData(mhwd::Data *data);
     void fillData(mhwd::Data *data);
+    void freeData(mhwd::Data *data);
+    void updateConfigData(mhwd::Data *data);
+    void updateInstalledConfigData(mhwd::Data *data);
 
     void printDeviceDetails(mhwd::TYPE type, FILE *f = stdout);
 
+    mhwd::Config* getInstalledConfig(mhwd::Data *data, const std::string configName, const TYPE configType);
+    mhwd::Config* getDatabaseConfig(mhwd::Data *data, const std::string configName, const TYPE configType);
+    mhwd::Config* getAvailableConfig(mhwd::Data *data, const std::string configName, const TYPE configType);
+
     bool installConfig(mhwd::Data *data, mhwd::Config *config);
     bool uninstallConfig(mhwd::Data *data, mhwd::Config *config);
-    mhwd::Config* getInstalledConfig(mhwd::Data *data, const std::string configName, const TYPE configType);
-    mhwd::Config* getAvailableConfig(mhwd::Data *data, const std::string configName, const TYPE configType);
 }
 
 
 #else
 
 namespace mhwd {
-    extern void initData(mhwd::Data *data);
-    extern void fillData(mhwd::Data *data);
-
-    extern void printDeviceDetails(mhwd::TYPE type, FILE *f = stdout);
-
-    extern bool installConfig(mhwd::Data *data, mhwd::Config *config);
-    extern bool uninstallConfig(mhwd::Data *data, mhwd::Config *config);
-    extern mhwd::Config* getInstalledConfig(mhwd::Data *data, const std::string configName, const TYPE configType);
-    extern mhwd::Config* getAvailableConfig(mhwd::Data *data, const std::string configName, const TYPE configType);
+    // TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 }
 
 

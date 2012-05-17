@@ -1,1 +1,3 @@
 Implement config dependency installing and conflict checking
+allow to set the base lib dir
+add architecture support and install dependencies for it...

@@ -21,3 +21,8 @@ set( LIB_LIBS hd)
 
 add_library (mhwd SHARED ${LIB_SOURCES} ${LIB_HEADERS})
 target_link_libraries(mhwd ${LIB_LIBS})
+
+
+INSTALL(TARGETS mhwd
+  LIBRARY DESTINATION lib
+)
