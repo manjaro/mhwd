@@ -1,0 +1,55 @@
+# mhwd Driver Config
+
+
+INCLUDE="anything"
+
+NAME="sample"
+VERSION="2012.07.05"
+FREEDRIVER="true"
+PRIORITY="0"
+
+CLASSIDS="0300"
+VENDORIDS="*"
+DEVICEIDS="*"
+
+
+# Dependencies
+MHWDDEPENDS="..."
+DEPENDS="..."
+DEPENDS_32="..."
+DEPENDS_64="lib32-..."
+
+
+# Conflicts
+MHWDCONFLICTS="..."
+CONFLICTS="..."
+CONFLICTS_32="..."
+CONFLICTS_64="lib32-..."
+
+
+
+
+pre_install() {
+	# Before package operations
+}
+
+
+
+post_install()
+{
+	# After package operations -> configuration
+}
+
+
+
+post_remove()
+{
+	# Before package operations
+}
+
+
+post_remove()
+{
+	# After package operations -> clear all configuration...
+}
+

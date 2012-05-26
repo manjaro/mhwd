@@ -1,3 +1,6 @@
-Implement config dependency installing and conflict checking
 allow to set the base lib dir
-add architecture support and install dependencies for it...
+install mhwd.h
+force to remove db config
+show detailed info for one config
+set architecture from library not from bash
+

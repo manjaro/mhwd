@@ -50,18 +50,17 @@ namespace mhwd {
     //###############//
     //### Configs ###//
     //###############//
-    enum SCRIPTOPERATION { SCRIPTOPERATION_INSTALL, SCRIPTOPERATION_REMOVE };
-
     void fillInstalledConfigs(mhwd::Data *data, mhwd::TYPE type);
     void fillAllConfigs(mhwd::Data *data, mhwd::TYPE type);
     void setMatchingConfigs(std::vector<mhwd::Device*>* devices, std::vector<mhwd::Config*>* configs, bool setAsInstalled);
     void setMatchingConfig(mhwd::Config* config, std::vector<mhwd::Device*>* devices, bool setAsInstalled);
     void addConfigSorted(std::vector<mhwd::Config*>* configs, mhwd::Config* config);
-    bool fillConfig(mhwd::Config *config, std::string configPath, mhwd::TYPE type);
     bool readConfigFile(mhwd::Config *config, std::string configPath);
     std::vector<std::string> splitValue(Vita::string str, Vita::string onlyEnding = "");
     Vita::string getRightConfigPath(Vita::string str, Vita::string baseConfigPath);
-    bool checkDependenciesConflicts(mhwd::Data *data, mhwd::Config *config);
+
+    void _getAllDependenciesToInstall(mhwd::Data *data, mhwd::Config *config, std::vector<mhwd::Config*>* installedConfigs, std::vector<mhwd::Config*> *depends);
+
 
 
     //#####################################//
@@ -73,10 +72,13 @@ namespace mhwd {
     bool removeDirectory(const std::string directory);
 
 
-    //##############//
-    //### Script ###//
-    //##############//
-    bool runScript(mhwd::Data *data, mhwd::Config *config, SCRIPTOPERATION scriptOperation);
+    //###########################//
+    //### Script & Operations ###//
+    //###########################//
+    void emitMessageFunc(mhwd::Data *data, mhwd::MESSAGETYPE type, std::string str);
+    mhwd::STATUS installConfig(mhwd::Data *data, mhwd::Config *config);
+    mhwd::STATUS uninstallConfig(mhwd::Data *data, mhwd::Config *config);
+    bool runScript(mhwd::Data *data, mhwd::Config *config, mhwd::Transaction::TYPE operationType);
 }
 
 

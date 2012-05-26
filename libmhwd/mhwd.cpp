@@ -70,8 +70,6 @@ void mhwd::fillData(mhwd::Data *data) {
 
 
 void mhwd::freeData(mhwd::Data *data) {
-    data->lastError.clear();
-
     std::for_each(data->PCIDevices.begin(), data->PCIDevices.end(), delete_ptr<mhwd::Device>());
     std::for_each(data->USBDevices.begin(), data->USBDevices.end(), delete_ptr<mhwd::Device>());
     std::for_each(data->installedPCIConfigs.begin(), data->installedPCIConfigs.end(), delete_ptr<mhwd::Config>());
@@ -148,6 +146,24 @@ void mhwd::updateInstalledConfigData(mhwd::Data *data) {
 
     setMatchingConfigs(&data->PCIDevices, &data->installedPCIConfigs, true);
     setMatchingConfigs(&data->USBDevices, &data->installedUSBConfigs, true);
+}
+
+
+
+bool mhwd::fillConfig(mhwd::Config *config, std::string configPath, mhwd::TYPE type) {
+    config->type = type;
+    config->priority = 0;
+    config->freedriver = true;
+    config->basePath = configPath.substr(0, configPath.find_last_of('/'));
+    config->configPath = configPath;
+
+    // Add new HardwareIDs group to vector if vector is empty
+    if (config->hwdIDs.empty()) {
+        mhwd::Config::HardwareIDs hwdID;
+        config->hwdIDs.push_back(hwdID);
+    }
+
+    return readConfigFile(config, config->configPath);
 }
 
 
@@ -239,88 +255,165 @@ mhwd::Config* mhwd::getAvailableConfig(mhwd::Data *data, const std::string confi
 
 
 
-bool mhwd::installConfig(mhwd::Data *data, mhwd::Config *config) {
-    std::string databaseDir;
-
-    // Get the right configs
-    if (config->type == mhwd::TYPE_USB)
-        databaseDir = MHWD_USB_DATABASE_DIR;
-    else
-        databaseDir = MHWD_PCI_DATABASE_DIR;
-
-    // Check if already installed
-    if (getInstalledConfig(data, config->name, config->type) != NULL) {
-        data->lastError = "a version of config " + config->name + " is already installed";
-        return false;
-    }
-
-    // Check for mhwd config dependendcies and conflicts
-    if (!checkDependenciesConflicts(data, config))
-        return false;
-
-    // Run script
-    if (!runScript(data, config, SCRIPTOPERATION_INSTALL)) {
-        data->lastError = "failed to run script or script failed";
-        return false;
-    }
-
-    if (!copyDirectory(config->basePath, databaseDir + "/" + config->name)) {
-        data->lastError = "failed to set local database:\nfailed to copy '" + config->basePath + "' to '" + databaseDir + "/" + config->name + "'";
-        return false;
-    }
-
-    // Installed config vectors have to be updated manual with updateInstalledConfigData(mhwd::Data*)
-
-    return true;
-}
-
-
-
-bool mhwd::uninstallConfig(mhwd::Data *data, mhwd::Config *config) {
-    mhwd::Config *installedConfig = getInstalledConfig(data, config->name, config->type);
+std::vector<mhwd::Config*> mhwd::getAllDependenciesToInstall(mhwd::Data *data, mhwd::Config *config) {
+    std::vector<mhwd::Config*> depends;
     std::vector<mhwd::Config*>* installedConfigs;
 
+    // Get the right configs
     if (config->type == mhwd::TYPE_USB)
         installedConfigs = &data->installedUSBConfigs;
     else
         installedConfigs = &data->installedPCIConfigs;
 
 
-    // Check if installed
-    if (installedConfig == NULL) {
-        data->lastError = "config is not installed";
-        return false;
-    }
-    else if (installedConfig->basePath != config->basePath) {
-        data->lastError = "passed config does not match with local config";
-        return false;
-    }
+    // Get all depends
+    _getAllDependenciesToInstall(data, config, installedConfigs, &depends);
 
-    // Check if this config is required by another installed config
-    for (std::vector<mhwd::Config*>::const_iterator iterator = installedConfigs->begin(); iterator != installedConfigs->end(); iterator++) {
-        for (std::vector<std::string>::const_iterator depend = (*iterator)->dependencies.begin(); depend != (*iterator)->dependencies.end(); depend++) {
-            if ((*depend) == config->name) {
-                data->lastError = (*iterator)->name + " requires " + config->name;
-                return false;
+    return depends;
+}
+
+
+
+std::vector<mhwd::Config*> mhwd::getAllLocalConflicts(mhwd::Data *data, mhwd::Config *config) {
+    std::vector<mhwd::Config*> conflicts;
+    std::vector<mhwd::Config*> depends = getAllDependenciesToInstall(data, config);
+    std::vector<mhwd::Config*>* installedConfigs;
+
+    // Get the right configs
+    if (config->type == mhwd::TYPE_USB)
+        installedConfigs = &data->installedUSBConfigs;
+    else
+        installedConfigs = &data->installedPCIConfigs;
+
+
+    depends.push_back(config);
+
+    for (std::vector<mhwd::Config*>::const_iterator depend = depends.begin(); depend != depends.end(); depend++) {
+        for (std::vector<std::string>::const_iterator conflict = (*depend)->conflicts.begin(); conflict != (*depend)->conflicts.end(); conflict++) {
+            for (std::vector<mhwd::Config*>::const_iterator iterator = installedConfigs->begin(); iterator != installedConfigs->end(); iterator++) {
+                if ((*conflict) != (*iterator)->name)
+                    continue;
+
+                // Check if already in vector
+                bool found = false;
+                for (std::vector<mhwd::Config*>::const_iterator it = conflicts.begin(); it != conflicts.end(); it++) {
+                    if ((*it)->name == (*conflict)) {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (found)
+                    continue;
+
+                // Add to vector
+                conflicts.push_back((*iterator));
+                break;
             }
         }
     }
 
+    return conflicts;
+}
 
-    // Run script
-    if (!runScript(data, installedConfig, SCRIPTOPERATION_REMOVE)) {
-        data->lastError = "failed to run script or script failed";
-        return false;
+
+
+std::vector<mhwd::Config*> mhwd::getAllLocalRequirements(mhwd::Data *data, mhwd::Config *config) {
+    std::vector<mhwd::Config*> requirements;
+    std::vector<mhwd::Config*>* installedConfigs;
+
+    // Get the right configs
+    if (config->type == mhwd::TYPE_USB)
+        installedConfigs = &data->installedUSBConfigs;
+    else
+        installedConfigs = &data->installedPCIConfigs;
+
+
+    // Check if this config is required by another installed config
+    for (std::vector<mhwd::Config*>::const_iterator iterator = installedConfigs->begin(); iterator != installedConfigs->end(); iterator++) {
+        for (std::vector<std::string>::const_iterator depend = (*iterator)->dependencies.begin(); depend != (*iterator)->dependencies.end(); depend++) {
+            if ((*depend) != config->name)
+                continue;
+
+            // Check if already in vector
+            bool found = false;
+            for (std::vector<mhwd::Config*>::const_iterator it = requirements.begin(); it != requirements.end(); it++) {
+                if ((*it)->name == (*iterator)->name) {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                requirements.push_back((*iterator));
+                break;
+            }
+        }
     }
 
-    if (!removeDirectory(installedConfig->basePath)) {
-        data->lastError = "failed to set local database:\nfailed to remove '" + installedConfig->basePath + "'";
-        return false;
+    return requirements;
+}
+
+
+
+mhwd::Transaction mhwd::createTransaction(mhwd::Data *data, mhwd::Config* config, mhwd::Transaction::TYPE type, bool allowReinstallation) {
+    struct mhwd::Transaction transaction;
+    transaction.type = type;
+    transaction.allowReinstallation = allowReinstallation;
+    transaction.config = config;
+
+    // Fill transaction vectors
+    transaction.requiredByConfigs = getAllLocalRequirements(data, config);
+    transaction.dependencyConfigs = getAllDependenciesToInstall(data, config);
+    transaction.conflictedConfigs = getAllLocalConflicts(data, config);
+
+    return transaction;
+}
+
+
+
+mhwd::STATUS mhwd::performTransaction(mhwd::Data *data, mhwd::Transaction *transaction) {
+    if (transaction->type == mhwd::Transaction::TYPE_INSTALL && !transaction->conflictedConfigs.empty())
+        return STATUS_ERROR_CONFLICTS;
+    else if (transaction->type == mhwd::Transaction::TYPE_REMOVE && !transaction->requiredByConfigs.empty())
+        return STATUS_ERROR_REQUIREMENTS;
+
+
+    // Check if already installed
+    mhwd::Config *installedConfig = getInstalledConfig(data, transaction->config->name, transaction->config->type);
+    mhwd::STATUS status = STATUS_SUCCESS;
+
+
+    if (transaction->type == mhwd::Transaction::TYPE_REMOVE || (installedConfig != NULL && transaction->allowReinstallation)) {
+        if (installedConfig == NULL)
+                return STATUS_ERROR_NOT_INSTALLED;
+
+        emitMessageFunc(data, mhwd::MESSAGETYPE_REMOVE_START, installedConfig->name);
+        if ((status = uninstallConfig(data, installedConfig)) != STATUS_SUCCESS)
+            return status;
+        emitMessageFunc(data, mhwd::MESSAGETYPE_REMOVE_END, installedConfig->name);
     }
 
-    // Installed config vectors have to be updated manual with updateInstalledConfigData(mhwd::Data*)
+    if (transaction->type == mhwd::Transaction::TYPE_INSTALL) {
+        // Check if already installed but not allowed to reinstall
+        if (installedConfig != NULL && !transaction->allowReinstallation)
+                return STATUS_ERROR_ALREADY_INSTALLED;
 
-    return true;
+        // Install all dependencies first
+        for (std::vector<mhwd::Config*>::const_iterator it = transaction->dependencyConfigs.end() - 1; it != transaction->dependencyConfigs.begin() - 1; --it) {
+            emitMessageFunc(data, mhwd::MESSAGETYPE_INSTALLDEPENDENCY_START, (*it)->name);
+            if ((status = installConfig(data, (*it))) != STATUS_SUCCESS)
+                return status;
+            emitMessageFunc(data, mhwd::MESSAGETYPE_INSTALLDEPENDENCY_END, (*it)->name);
+        }
+
+        emitMessageFunc(data, mhwd::MESSAGETYPE_INSTALL_START, transaction->config->name);
+        if ((status = installConfig(data, transaction->config)) != STATUS_SUCCESS)
+            return status;
+        emitMessageFunc(data, mhwd::MESSAGETYPE_INSTALL_END, transaction->config->name);
+    }
+
+    return status;
 }
 
 
@@ -364,6 +457,8 @@ void mhwd::fillDevices(mhwd::Data *data, mhwd::TYPE type) {
         device->className = from_CharArray(hd->base_class.name);
         device->vendorName = from_CharArray(hd->vendor.name);
         device->deviceName = from_CharArray(hd->device.name);
+        device->sysfsBusID = from_CharArray(hd->sysfs_bus_id);
+        device->sysfsID = from_CharArray(hd->sysfs_id);
 
         devices->push_back(device);
     }
@@ -525,23 +620,6 @@ void mhwd::setMatchingConfig(mhwd::Config* config, std::vector<mhwd::Device*>* d
 }
 
 
-bool mhwd::fillConfig(mhwd::Config *config, std::string configPath, mhwd::TYPE type) {
-    config->type = type;
-    config->priority = 0;
-    config->freedriver = true;
-    config->basePath = configPath.substr(0, configPath.find_last_of('/'));
-    config->configPath = configPath;
-
-    // Add new HardwareIDs group to vector if vector is empty
-    if (config->hwdIDs.empty()) {
-        mhwd::Config::HardwareIDs hwdID;
-        config->hwdIDs.push_back(hwdID);
-    }
-
-    return readConfigFile(config, config->configPath);
-}
-
-
 
 bool mhwd::readConfigFile(mhwd::Config *config, std::string configPath) {
     std::ifstream file(configPath.c_str(), std::ios::in);
@@ -650,11 +728,11 @@ bool mhwd::readConfigFile(mhwd::Config *config, std::string configPath) {
 
             config->hwdIDs.back().deviceIDs = splitValue(value);
         }
-        else if (key == "dependencies" || key == "depends") {
-            config->dependencies = splitValue(value, "mhwd");
+        else if (key == "mhwddepends") {
+            config->dependencies = splitValue(value);
         }
-        else if (key == "conflicts") {
-            config->conflicts = splitValue(value, "mhwd");
+        else if (key == "mhwdconflicts") {
+            config->conflicts = splitValue(value);
         }
     }
 
@@ -726,25 +804,7 @@ Vita::string mhwd::getRightConfigPath(Vita::string str, Vita::string baseConfigP
 
 
 
-bool mhwd::checkDependenciesConflicts(mhwd::Data *data, mhwd::Config *config) {
-    std::vector<mhwd::Config*>* installedConfigs;
-
-    // Get the right configs
-    if (config->type == mhwd::TYPE_USB)
-        installedConfigs = &data->installedUSBConfigs;
-    else
-        installedConfigs = &data->installedPCIConfigs;
-
-
-    for (std::vector<std::string>::const_iterator conflict = config->conflicts.begin(); conflict != config->conflicts.end(); conflict++) {
-        for (std::vector<mhwd::Config*>::const_iterator iterator = installedConfigs->begin(); iterator != installedConfigs->end(); iterator++) {
-            if ((*conflict) == (*iterator)->name) {
-                data->lastError = config->name + " conflicts with " + (*conflict);
-                return false;
-            }
-        }
-    }
-
+void mhwd::_getAllDependenciesToInstall(mhwd::Data *data, mhwd::Config *config, std::vector<mhwd::Config*>* installedConfigs, std::vector<mhwd::Config*> *depends) {
     for (std::vector<std::string>::const_iterator depend = config->dependencies.begin(); depend != config->dependencies.end(); depend++) {
         bool found = false;
 
@@ -755,13 +815,28 @@ bool mhwd::checkDependenciesConflicts(mhwd::Data *data, mhwd::Config *config) {
             }
         }
 
-        if (!found) {
-            data->lastError = config->name + " depends on " + (*depend) + " but " + (*depend) + " is not installed";
-            return false;
-        }
-    }
+        if (found)
+            continue;
 
-    return true;
+        // Check if already in vector
+        for (std::vector<mhwd::Config*>::const_iterator it = depends->begin(); it != depends->end(); it++) {
+            if ((*it)->name == (*depend)) {
+                found = true;
+                break;
+            }
+        }
+
+        if (found)
+            continue;
+
+        // Add to vector and check for further subdepends...
+        mhwd::Config *dependconfig = mhwd::getDatabaseConfig(data, (*depend), config->type);
+        if (dependconfig == NULL)
+            continue;
+
+        depends->push_back(dependconfig);
+        _getAllDependenciesToInstall(data, dependconfig, installedConfigs, depends);
+    }
 }
 
 
@@ -928,16 +1003,73 @@ bool mhwd::removeDirectory(const std::string directory) {
 
 
 
-//########################//
-//### Private - Script ###//
-//########################//
+//#####################################//
+//### Private - Script & Operations ###//
+//#####################################//
+
+
+void mhwd::emitMessageFunc(mhwd::Data *data, mhwd::MESSAGETYPE type, std::string str) {
+    if (data->environment.messageFunc == NULL)
+        return;
+
+    data->environment.messageFunc(type, str);
+}
 
 
 
-bool mhwd::runScript(mhwd::Data *data, mhwd::Config *config, SCRIPTOPERATION scriptOperation) {
+mhwd::STATUS mhwd::installConfig(mhwd::Data *data, mhwd::Config *config) {
+    std::string databaseDir;
+
+    // Get the right configs
+    if (config->type == mhwd::TYPE_USB)
+        databaseDir = MHWD_USB_DATABASE_DIR;
+    else
+        databaseDir = MHWD_PCI_DATABASE_DIR;
+
+    // Run script
+    if (!runScript(data, config, mhwd::Transaction::TYPE_INSTALL))
+        return STATUS_ERROR_SCRIPT_FAILED;
+
+    if (!copyDirectory(config->basePath, databaseDir + "/" + config->name))
+        return STATUS_ERROR_SET_DATABASE;
+
+    // Installed config vectors have to be updated manual with updateInstalledConfigData(mhwd::Data*)
+
+    return STATUS_SUCCESS;
+}
+
+
+
+mhwd::STATUS mhwd::uninstallConfig(mhwd::Data *data, mhwd::Config *config) {
+    mhwd::Config *installedConfig = getInstalledConfig(data, config->name, config->type);
+
+    // Check if installed
+    if (installedConfig == NULL)
+        return STATUS_ERROR_NOT_INSTALLED;
+    else if (installedConfig->basePath != config->basePath)
+        return STATUS_ERROR_NO_MATCH_LOCAL_CONFIG;
+
+
+    // TODO: Should we check for local requirements here?
+
+    // Run script
+    if (!runScript(data, installedConfig, mhwd::Transaction::TYPE_REMOVE))
+        return STATUS_ERROR_SCRIPT_FAILED;
+
+    if (!removeDirectory(installedConfig->basePath))
+        return STATUS_ERROR_SET_DATABASE;
+
+    // Installed config vectors have to be updated manual with updateInstalledConfigData(mhwd::Data*)
+
+    return STATUS_SUCCESS;
+}
+
+
+
+bool mhwd::runScript(mhwd::Data *data, mhwd::Config *config, mhwd::Transaction::TYPE operationType) {
     std::string cmd = "exec " + std::string(MHWD_SCRIPT_PATH);
 
-    if (scriptOperation == SCRIPTOPERATION_REMOVE)
+    if (operationType == mhwd::Transaction::TYPE_REMOVE)
         cmd += " --remove";
     else
         cmd += " --install";
@@ -957,10 +1089,8 @@ bool mhwd::runScript(mhwd::Data *data, mhwd::Config *config, SCRIPTOPERATION scr
     if(!(in = popen(cmd.c_str(), "r")))
         return false;
 
-    while(fgets(buff, sizeof(buff), in) != NULL){
-        if (data->environment.messageFunc != NULL)
-            data->environment.messageFunc(std::string(buff));
-    }
+    while(fgets(buff, sizeof(buff), in) != NULL)
+        emitMessageFunc(data, mhwd::MESSAGETYPE_CONSOLE_OUTPUT, std::string(buff));
 
     int stat = pclose(in);
 
@@ -968,7 +1098,8 @@ bool mhwd::runScript(mhwd::Data *data, mhwd::Config *config, SCRIPTOPERATION scr
         return false;
 
     // Only one database sync is required
-    data->environment.syncPackageManagerDatabase = false;
+    if (operationType == mhwd::Transaction::TYPE_INSTALL)
+        data->environment.syncPackageManagerDatabase = false;
 
     return true;
 }

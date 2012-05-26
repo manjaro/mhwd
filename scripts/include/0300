@@ -1,0 +1,53 @@
+#!/bin/bash
+
+
+MHWD_ADD_DRI()
+{
+	# only for free drivers
+	sed -i /'Section "Device"'/,/'EndSection'/s/'EndSection'/"\tOption      \"DRI\"    \"true\"\nEndSection"/g "$1"
+
+	echo 'Section "DRI"' >> "$1"
+	echo '        Group  "video"' >> "$1"
+	echo '        Mode   0666' >> "$1"
+	echo 'EndSection' >> "$1"
+	echo ' ' >> "$1"
+}
+
+
+
+MHWD_ADD_COMPOSITING()
+{
+	echo ' ' >> "$1"
+	echo 'Section "Extensions"' >> "$1"
+	echo '	Option "Composite" "Enable"' >> "$1"
+	echo '	Option "RENDER"    "Enable"' >> "$1"
+	echo 'EndSection' >> "$1"
+	echo ' ' >> "$1"
+}
+
+
+MHWD_ADD_BACKSPACE()
+{
+	echo ' ' >> "$1"
+	echo 'Section "InputClass"' >> "$1"
+	echo '	Identifier          "Keyboard Defaults"' >> "$1"
+	echo '	MatchIsKeyboard	    "yes"' >> "$1"
+	echo '	Option              "XkbOptions" "terminate:ctrl_alt_bksp"' >> "$1"
+	echo 'EndSection' >> "$1"
+}
+
+
+
+MHWD_VISUAL_CLEANUP()
+{
+	# visual cleanup ;)
+	# at first, remove all empty lines
+	sed -i '/^$/d' "$1"
+	# and add a new empty line after every EndSection
+	sed -i '/EndSection/G' "$1"
+}
+
+
+# Make them readonly
+declare -fr MHWD_ADD_DRI MHWD_ADD_COMPOSITING MHWD_ADD_BACKSPACE MHWD_VISUAL_CLEANUP
+

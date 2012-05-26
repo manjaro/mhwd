@@ -2,11 +2,10 @@
 
 
 
-
 ### Module Functions ###
 
 
-mhwd_load_Module()
+MHWD_LOAD_MODULE()
 {
 	local loadedmodules="$(ls /sys/module)"
 	local moduleisloaded="false"
@@ -29,7 +28,7 @@ mhwd_load_Module()
 }
 
 
-mhwd_unload_Module()
+MHWD_UNLOAD_MODULE()
 {
 	local loadedmodules="$(ls /sys/module)"
 
@@ -49,16 +48,17 @@ mhwd_unload_Module()
 
 
 # Make them readonly
-declare -fr mhwd_load_Module mhwd_unload_Module
+declare -fr MHWD_LOAD_MODULE MHWD_UNLOAD_MODULE
 
 
 
 
 
 ### Main ###
+ARCH="$(uname -m)"
 PARAM=$#
 INCLUDEPATH="/var/lib/mhwd/scripts/include"
-PACMAN="pacman --noconfirm --noprogress --needed"
+PACMAN="pacman --noconfirm --noprogress"
 SYNC=""
 INSTALL=""
 REMOVE=""
@@ -112,6 +112,7 @@ done
 PACMAN="${PACMAN} --cachedir ${CACHEPATH} --config ${PMCONFIG}"
 
 
+
 if [ "${CONFIGPATH}" != "" ] && [ -f "${CONFIGPATH}" ]; then
 	. "${CONFIGPATH}"
 
@@ -129,9 +130,10 @@ fi
 
 if [ "${INSTALL}" == "true" ]; then
 	# Run preinstall function
-   if [ "`grep "pre_install" "${CONFIGPATH}" | cut -d"#" -f1 | cut -d"(" -f1 | grep "pre_install"`" == "pre_install" ]; then
+	if [ "`grep "pre_install" "${CONFIGPATH}" | cut -d"#" -f1 | cut -d"(" -f1 | grep "pre_install"`" == "pre_install" ]; then
 	   pre_install
-   fi
+	fi
+
 
 	# Remove conflicts
 	if [ "${CONFLICTS}" != "" ]; then
@@ -141,28 +143,59 @@ if [ "${INSTALL}" == "true" ]; then
 			exit 1
 		fi
 	fi
-
-	# Install dependencies
-	if [ "${DEPENDS}" != "" ]; then
-		${PACMAN} -S${SYNC} "${DEPENDS}"
+	if [ "${ARCH}" == "i686" ] && [ "${CONFLICTS_32}" != "" ]; then
+		${PACMAN} -Rs "${CONFLICTS_32}"
+		if [ "$?" -ne "0" ]; then
+			echo "Error: pacman failed!"
+			exit 1
+		fi
+	fi
+	if [ "${ARCH}" == "x86_64" ] && [ "${CONFLICTS_64}" != "" ]; then
+		${PACMAN} -Rs "${CONFLICTS_64}"
 		if [ "$?" -ne "0" ]; then
 			echo "Error: pacman failed!"
 			exit 1
 		fi
 	fi
 
+
+	# Install dependencies
+	if [ "${DEPENDS}" != "" ]; then
+		${PACMAN} --needed -S${SYNC} "${DEPENDS}"
+		SYNC=""
+		if [ "$?" -ne "0" ]; then
+			echo "Error: pacman failed!"
+			exit 1
+		fi
+	fi
+	if [ "${ARCH}" == "i686" ] && [ "${DEPENDS_32}" != "" ]; then
+		${PACMAN} --needed -S${SYNC} "${DEPENDS_32}"
+		if [ "$?" -ne "0" ]; then
+			echo "Error: pacman failed!"
+			exit 1
+		fi
+	fi
+	if [ "${ARCH}" == "x86_64" ] && [ "${DEPENDS_64}" != "" ]; then
+		${PACMAN} --needed -S${SYNC} "${DEPENDS_64}"
+		if [ "$?" -ne "0" ]; then
+			echo "Error: pacman failed!"
+			exit 1
+		fi
+	fi
+
+
 	# Run postinstall function
-   if [ "`grep "post_install" "${CONFIGPATH}" | cut -d"#" -f1 | cut -d"(" -f1 | grep "post_install"`" == "post_install" ]; then
+	if [ "`grep "post_install" "${CONFIGPATH}" | cut -d"#" -f1 | cut -d"(" -f1 | grep "post_install"`" == "post_install" ]; then
 	   post_install
-   fi
+	fi
 fi
 
 
 if [ "${REMOVE}" == "true" ]; then
 	# Run preremove function
-   if [ "`grep "pre_remove" "${CONFIGPATH}" | cut -d"#" -f1 | cut -d"(" -f1 | grep "pre_remove"`" == "pre_remove" ]; then
+	if [ "`grep "pre_remove" "${CONFIGPATH}" | cut -d"#" -f1 | cut -d"(" -f1 | grep "pre_remove"`" == "pre_remove" ]; then
 	   pre_remove
-   fi
+	fi
 
 	# Remove dependencies
 	if [ "${DEPENDS}" != "" ]; then
@@ -172,11 +205,26 @@ if [ "${REMOVE}" == "true" ]; then
 			exit 1
 		fi
 	fi
+	if [ "${ARCH}" == "i686" ] && [ "${DEPENDS_32}" != "" ]; then
+		${PACMAN} -Rs "${DEPENDS_32}"
+		if [ "$?" -ne "0" ]; then
+			echo "Error: pacman failed!"
+			exit 1
+		fi
+	fi
+	if [ "${ARCH}" == "x86_64" ] && [ "${DEPENDS_64}" != "" ]; then
+		${PACMAN} -Rs "${DEPENDS_64}"
+		if [ "$?" -ne "0" ]; then
+			echo "Error: pacman failed!"
+			exit 1
+		fi
+	fi
+
 
 	# Run postremove function
-   if [ "`grep "post_remove" "${CONFIGPATH}" | cut -d"#" -f1 | cut -d"(" -f1 | grep "post_remove"`" == "post_remove" ]; then
+	if [ "`grep "post_remove" "${CONFIGPATH}" | cut -d"#" -f1 | cut -d"(" -f1 | grep "post_remove"`" == "post_remove" ]; then
 	   post_remove
-   fi
+	fi
 fi
 
 
