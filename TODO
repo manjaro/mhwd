@@ -1,6 +1,4 @@
 allow to set the base lib dir
-install mhwd.h
 force to remove db config
 show detailed info for one config
 set architecture from library not from bash
-

@@ -4,6 +4,7 @@
 INCLUDE="anything"
 
 NAME="sample"
+INFO=""
 VERSION="2012.07.05"
 FREEDRIVER="true"
 PRIORITY="0"
@@ -42,7 +43,7 @@ post_install()
 
 
 
-post_remove()
+pre_remove()
 {
 	# Before package operations
 }
