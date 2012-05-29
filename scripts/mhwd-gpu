@@ -150,7 +150,7 @@ fi
 # Set libGl and libglx
 if [ "${SETGL}" == "mesa" ] || [ "${SETGL}" == "default" ]; then
 	set_modules
-	set_Gl "/usr/lib/libGL.so.mesa" "/usr/lib/xorg/modules/extensions/libglx.so.mesa"
+	set_Gl "/usr/lib/libGL.so.mesa" "/usr/lib/xorg/modules/extensions/libglx.xorg"
 elif [ "${SETGL}" == "nvidia" ]; then
 	set_modules "" "nouveau"
 	set_Gl "/usr/lib/libGL.so.nvidia" "/usr/lib/xorg/modules/extensions/libglx.so.nvidia"
