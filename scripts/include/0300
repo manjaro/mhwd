@@ -1,6 +1,17 @@
 #!/bin/bash
 
 
+
+MHWD_ADD_DEVICE_SECTION()
+{
+	echo 'Section "Device"' >> "$2"
+	echo '	Identifier  "Device0"' >> "$2"
+	echo "	Driver      \"$1\"" >> "$2"
+	echo 'EndSection' >> "$2"
+	echo ' ' >> "$2"
+}
+
+
 MHWD_ADD_DRI()
 {
 	# only for free drivers
@@ -13,7 +24,6 @@ MHWD_ADD_DRI()
 	echo 'EndSection' >> "$1"
 	echo ' ' >> "$1"
 }
-
 
 
 MHWD_ADD_COMPOSITING()
@@ -40,5 +50,5 @@ MHWD_ADD_BACKSPACE()
 
 
 # Make them readonly
-declare -fr MHWD_ADD_DRI MHWD_ADD_COMPOSITING MHWD_ADD_BACKSPACE
+declare -fr MHWD_ADD_DEVICE_SECTION MHWD_ADD_DRI MHWD_ADD_COMPOSITING MHWD_ADD_BACKSPACE
 

@@ -19,7 +19,11 @@ set_modules() {
 	for module in $2
 	do
 		echo "blacklist ${module}" >> "/etc/modprobe.d/mhwd-gpu.conf"
-		modprobe -r ${module}
+
+		# Unload module if X is not running
+		if [ ! "$(pidof X)" ];	then
+			modprobe -r ${module}
+		fi
 	done
 
 
@@ -31,7 +35,11 @@ set_modules() {
 	for module in $1
 	do
 		echo "${module}" >> "/etc/modules-load.d/mhwd-gpu.conf"
-		modprobe ${module}
+
+		# Load module if X is not running
+		if [ ! "$(pidof X)" ];	then
+			modprobe ${module}
+		fi
 	done
 }
 
@@ -57,6 +65,7 @@ set_xorg()
 
 # param 1: libGl path
 # param 2: libglx path
+# optional param 3: lib32 libGl path
 set_Gl() {
 	if [ -e "$1" ]; then
 		ln -sf "$1" /usr/lib/libGL.so
@@ -66,6 +75,14 @@ set_Gl() {
 		echo "libGl: '$1'"
 	else
 		echo "warning: could not find '$1'!"
+	fi
+
+	if [ -e "$3" ]; then
+		ln -sf "$3" /usr/lib32/libGL.so
+		ln -sf "$3" /usr/lib32/libGL.so.1
+		ln -sf "$3" /usr/lib32/libGL.so.1.2
+
+		echo "lib32-libGl: '$3'"
 	fi
 
 	if [ -e "$2" ]; then
@@ -146,13 +163,13 @@ fi
 # Set libGl and libglx
 if [ "${SETGL}" == "mesa" ] || [ "${SETGL}" == "default" ]; then
 	set_modules
-	set_Gl "/usr/lib/libGL.so.mesa" "/usr/lib/xorg/modules/extensions/libglx.xorg"
+	set_Gl "/usr/lib/libGL.so.mesa" "/usr/lib/xorg/modules/extensions/libglx.xorg" "/usr/lib32/libGL.so.mesa"
 elif [ "${SETGL}" == "nvidia" ]; then
-	set_modules "" "nouveau"
-	set_Gl "/usr/lib/libGL.so.nvidia" "/usr/lib/xorg/modules/extensions/libglx.so.nvidia"
+	set_modules "nvidia" "nouveau"
+	set_Gl "/usr/lib/libGL.so.nvidia" "/usr/lib/xorg/modules/extensions/libglx.so.nvidia" "/usr/lib32/libGL.so.nvidia"
 elif [ "${SETGL}" == "catalyst" ] || [ "${SETGL}" == "ati" ]; then
-	set_modules "" "radeon"
-	set_Gl "/usr/lib/libGL.so.catalyst" "/usr/lib/xorg/modules/extensions/libglx.so.catalyst"
+	set_modules "fglrx" "radeon"
+	set_Gl "/usr/lib/libGL.so.catalyst" "/usr/lib/xorg/modules/extensions/libglx.so.catalyst" "/usr/lib32/libGL.so.catalyst"
 elif [ "${SETGL}" != "" ]; then
 	echo "error: invalid argument '${SETGL}'"
 	exit 1
@@ -171,20 +188,17 @@ fi
 if [ "${CHECKCONFIG}" == "true" ]; then
 	if [ -L "${MHWDXORGCONF}" -a ! -e "${MHWDXORGCONF}" ]; then
 		echo "'${MHWDXORGCONF}' symlink is invalid! Removing it..."
-
-		if [ -e "${MHWDXORGCONF}" ]; then
-			rm "${MHWDXORGCONF}"
-		fi
-	else
+		rm "${MHWDXORGCONF}"
+	elif [ -e "${MHWDXORGCONF}" ]; then
 		echo "xorg configuration symlink valid..."
 	fi
 
-	if [ ! -e "/usr/lib/libGL.so" ] || [ ! -e "/usr/lib/xorg/modules/extensions/libglx.so" ]; then
+	if [ ! -e "/usr/lib/libGL.so" ] || [ ! -e "/usr/lib/xorg/modules/extensions/libglx.so" ] || [ -L "/usr/lib32/libGL.so" -a ! -e "/usr/lib32/libGL.so" ] || [ -e "/usr/lib32/libGL.so.mesa" -a ! -e "/usr/lib32/libGL.so" ]; then
 		echo "libGl and libglx symlinks are invalid!"
 		echo "Falling back to default..."
 
 		set_modules
-		set_Gl "/usr/lib/libGL.so.mesa" "/usr/lib/xorg/modules/extensions/libglx.xorg"
+		set_Gl "/usr/lib/libGL.so.mesa" "/usr/lib/xorg/modules/extensions/libglx.xorg" "/usr/lib32/libGL.so.mesa"
 	else
 		echo "libGl and libglx symlinks valid..."
 	fi

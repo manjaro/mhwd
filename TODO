@@ -5,4 +5,4 @@ set architecture from library not from bash
 lib32-libgl
 change order in mhwd script: first remove 64 packages....
 depends on nvidia ids
-
+pass ids and bus ids to script
