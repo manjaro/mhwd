@@ -83,6 +83,7 @@ REMOVE=""
 CONFIGPATH=""
 CACHEPATH="/var/cache/pacman/pkg"
 PMCONFIG="/etc/pacman.conf"
+PACKAGES=""
 
 
 if [ "${PARAM}" -lt 1 ]; then
@@ -152,49 +153,43 @@ if [ "${INSTALL}" == "true" ]; then
 	   pre_install
 	fi
 
+	PACKAGES=""
 
 	# Remove conflicts
 	if [ "${CONFLICTS}" != "" ]; then
-		${PACMAN} -Rs ${CONFLICTS}
-		if [ "$?" -ne "0" ]; then
-			echo "Error: pacman failed!"
-			exit 1
-		fi
+		PACKAGES="${CONFLICTS}"
 	fi
 	if [ "${ARCH}" == "i686" ] && [ "${CONFLICTS_32}" != "" ]; then
-		${PACMAN} -Rs ${CONFLICTS_32}
-		if [ "$?" -ne "0" ]; then
-			echo "Error: pacman failed!"
-			exit 1
-		fi
+		PACKAGES="${PACKAGES} ${CONFLICTS_32}"
 	fi
 	if [ "${ARCH}" == "x86_64" ] && [ "${CONFLICTS_64}" != "" ]; then
-		${PACMAN} -Rs ${CONFLICTS_64}
+		PACKAGES="${PACKAGES} ${CONFLICTS_64}"
+	fi
+
+	if [ "${PACKAGES}" != "" ]; then
+		${PACMAN} -Rs ${PACKAGES}
 		if [ "$?" -ne "0" ]; then
 			echo "Error: pacman failed!"
 			exit 1
 		fi
 	fi
 
+
+	PACKAGES=""
 
 	# Install dependencies
 	if [ "${DEPENDS}" != "" ]; then
-		${PACMAN} --needed -S${SYNC} ${DEPENDS}
-		SYNC=""
-		if [ "$?" -ne "0" ]; then
-			echo "Error: pacman failed!"
-			exit 1
-		fi
+		PACKAGES="${DEPENDS}"
 	fi
 	if [ "${ARCH}" == "i686" ] && [ "${DEPENDS_32}" != "" ]; then
-		${PACMAN} --needed -S${SYNC} ${DEPENDS_32}
-		if [ "$?" -ne "0" ]; then
-			echo "Error: pacman failed!"
-			exit 1
-		fi
+		PACKAGES="${PACKAGES} ${DEPENDS_32}"
 	fi
 	if [ "${ARCH}" == "x86_64" ] && [ "${DEPENDS_64}" != "" ]; then
-		${PACMAN} --needed -S${SYNC} ${DEPENDS_64}
+		PACKAGES="${PACKAGES} ${DEPENDS_64}"
+	fi
+
+	if [ "${PACKAGES}" != "" ]; then
+		${PACMAN} --needed -S${SYNC} ${PACKAGES}
 		if [ "$?" -ne "0" ]; then
 			echo "Error: pacman failed!"
 			exit 1
@@ -215,23 +210,21 @@ if [ "${REMOVE}" == "true" ]; then
 	   pre_remove
 	fi
 
+	PACKAGES=""
+
 	# Remove dependencies
 	if [ "${DEPENDS}" != "" ]; then
-		${PACMAN} -Rs ${DEPENDS}
-		if [ "$?" -ne "0" ]; then
-			echo "Error: pacman failed!"
-			exit 1
-		fi
+		PACKAGES="${DEPENDS}"
 	fi
 	if [ "${ARCH}" == "i686" ] && [ "${DEPENDS_32}" != "" ]; then
-		${PACMAN} -Rs ${DEPENDS_32}
-		if [ "$?" -ne "0" ]; then
-			echo "Error: pacman failed!"
-			exit 1
-		fi
+		PACKAGES="${PACKAGES} ${DEPENDS_32}"
 	fi
 	if [ "${ARCH}" == "x86_64" ] && [ "${DEPENDS_64}" != "" ]; then
-		${PACMAN} -Rs ${DEPENDS_64}
+		PACKAGES="${PACKAGES} ${DEPENDS_64}"
+	fi
+
+	if [ "${PACKAGES}" != "" ]; then
+		${PACMAN} -Rs ${PACKAGES}
 		if [ "$?" -ne "0" ]; then
 			echo "Error: pacman failed!"
 			exit 1

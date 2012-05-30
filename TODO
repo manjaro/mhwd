@@ -2,7 +2,5 @@ allow to set the base lib dir
 force to remove db config
 show detailed info for one config
 set architecture from library not from bash
-lib32-libgl
-change order in mhwd script: first remove 64 packages....
-depends on nvidia ids
 pass ids and bus ids to script
+don't remove packages on reinstallation...
