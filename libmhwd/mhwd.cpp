@@ -1080,7 +1080,7 @@ bool mhwd::runScript(mhwd::Data *data, mhwd::Config *config, mhwd::Transaction::
 
     cmd += " --cachedir \"" + data->environment.PMCachePath + "\"";
     cmd += " --pmconfig \"" + data->environment.PMConfigPath + "\"";
-    cmd += " --root \"" + data->environment.PMRootPath + "\"";
+    cmd += " --pmroot \"" + data->environment.PMRootPath + "\"";
     cmd += " --config \"" + config->configPath + "\"";
     cmd += " 2>&1";
 

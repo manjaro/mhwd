@@ -83,6 +83,7 @@ REMOVE=""
 CONFIGPATH=""
 CACHEPATH="/var/cache/pacman/pkg"
 PMCONFIG="/etc/pacman.conf"
+PMROOT="/"
 PACKAGES=""
 
 
@@ -116,6 +117,10 @@ do
 			shift
 			PMCONFIG="$1"
 			;;
+		--pmroot)
+			shift
+			PMROOT="$1"
+			;;
 		"")	;;
 		*)
 			echo "Wrong Argument: $1"
@@ -128,7 +133,7 @@ done
 
 
 # Set final variables
-PACMAN="${PACMAN} --cachedir ${CACHEPATH} --config ${PMCONFIG}"
+PACMAN="${PACMAN} --cachedir ${CACHEPATH} --config ${PMCONFIG} --root ${PMROOT}"
 
 
 
