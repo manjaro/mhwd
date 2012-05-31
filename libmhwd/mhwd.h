@@ -60,7 +60,7 @@ namespace mhwd {
 
     struct Data {
         struct Environment {
-            std::string PMCachePath, PMConfigPath;
+            std::string PMCachePath, PMConfigPath, PMRootPath;
             bool syncPackageManagerDatabase;
             void (*messageFunc)(mhwd::MESSAGETYPE, std::string);
         };

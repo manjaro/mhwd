@@ -28,3 +28,4 @@
 
 #define MHWD_PM_CACHE_DIR "/var/cache/pacman/pkg"
 #define MHWD_PM_CONFIG "/etc/pacman.conf"
+#define MHWD_PM_ROOT "/"

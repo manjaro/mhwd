@@ -129,6 +129,7 @@ void printHelp() {
     cout << "  -a/--auto <usb/pci> <free/nonfree> <classid>\tauto install configs for classid" << endl;
     cout << "  --pmcachedir <path>\t\t\tset package manager cache path" << endl;
     cout << "  --pmconfig <path>\t\t\tset package manager config" << endl;
+    cout << "  --pmroot <path>\t\t\tset package manager root" << endl;
     cout << endl;
 }
 
@@ -560,6 +561,15 @@ int main (int argc, char *argv[])
             }
 
             data.environment.PMConfigPath = Vita::string(argv[++nArg]).trim("\"").trim();
+        }
+        else if (strcmp(argv[nArg], "--pmroot") == 0) {
+            if (nArg + 1 >= argc) {
+                printError("invalid use of option: --pmroot\n");
+                printHelp();
+                return 1;
+            }
+
+            data.environment.PMRootPath = Vita::string(argv[++nArg]).trim("\"").trim();
         }
         else if ((arguments & ARG_INSTALL) || (arguments & ARG_REMOVE)) {
             bool found = false;

@@ -52,6 +52,7 @@ struct delete_ptr : public std::unary_function<bool,T> {
 void mhwd::initData(mhwd::Data *data) {
     data->environment.PMCachePath = MHWD_PM_CACHE_DIR;
     data->environment.PMConfigPath = MHWD_PM_CONFIG;
+    data->environment.PMRootPath = MHWD_PM_ROOT;
     data->environment.syncPackageManagerDatabase = true;
     data->environment.messageFunc = NULL;
 }
@@ -1079,6 +1080,7 @@ bool mhwd::runScript(mhwd::Data *data, mhwd::Config *config, mhwd::Transaction::
 
     cmd += " --cachedir \"" + data->environment.PMCachePath + "\"";
     cmd += " --pmconfig \"" + data->environment.PMConfigPath + "\"";
+    cmd += " --root \"" + data->environment.PMRootPath + "\"";
     cmd += " --config \"" + config->configPath + "\"";
     cmd += " 2>&1";
 
