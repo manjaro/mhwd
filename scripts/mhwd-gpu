@@ -165,7 +165,7 @@ if [ "${SETGL}" == "mesa" ] || [ "${SETGL}" == "default" ]; then
 	set_modules
 	set_Gl "/usr/lib/libGL.so.mesa" "/usr/lib/xorg/modules/extensions/libglx.xorg" "/usr/lib32/libGL.so.mesa"
 elif [ "${SETGL}" == "nvidia" ]; then
-	set_modules "nvidia" "nouveau"
+	set_modules "nvidia" "nouveau ttm drm_kms_helper drm"
 	set_Gl "/usr/lib/libGL.so.nvidia" "/usr/lib/xorg/modules/extensions/libglx.so.nvidia" "/usr/lib32/libGL.so.nvidia"
 elif [ "${SETGL}" == "catalyst" ] || [ "${SETGL}" == "ati" ]; then
 	set_modules "fglrx" "radeon"
