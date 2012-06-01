@@ -21,8 +21,8 @@ set_modules() {
 		echo "blacklist ${module}" >> "/etc/modprobe.d/mhwd-gpu.conf"
 
 		# Unload module if X is not running
-		if [ ! "$(pidof X)" ];	then
-			modprobe -r ${module}
+		if [ ! "$(pgrep X)" ];	then
+			rmmod -f ${module}
 		fi
 	done
 
@@ -37,7 +37,7 @@ set_modules() {
 		echo "${module}" >> "/etc/modules-load.d/mhwd-gpu.conf"
 
 		# Load module if X is not running
-		if [ ! "$(pidof X)" ];	then
+		if [ ! "$(pgrep X)" ];	then
 			modprobe ${module}
 		fi
 	done
