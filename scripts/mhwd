@@ -171,6 +171,19 @@ if [ "${INSTALL}" == "true" ]; then
 		PACKAGES="${PACKAGES} ${CONFLICTS_64}"
 	fi
 
+        # Check if packages are installed
+        for PKG in ${PACKAGES} ; do
+            for RMPKG in $(pacman -Qq | grep ${PKG}) ; do
+                echo "found for ${PKG} - ${RMPKG}"
+                if [ "${PKG}" == "${RMPKG}" ] ; then
+                   echo "removing ${RMPKG}"
+                   REMOVE="${REMOVE} ${RMPKG}"
+                fi
+            done
+        done
+
+        PACKAGES="${REMOVE}"
+
 	if [ "${PACKAGES}" != "" ]; then
 		${PACMAN} -Rs ${PACKAGES}
 		if [ "$?" -ne "0" ]; then
@@ -192,6 +205,21 @@ if [ "${INSTALL}" == "true" ]; then
 	if [ "${ARCH}" == "x86_64" ] && [ "${DEPENDS_64}" != "" ]; then
 		PACKAGES="${PACKAGES} ${DEPENDS_64}"
 	fi
+
+        # check if multible kernel module
+        for PKG in ${PACKAGES} ; do
+            for KERNEL in $(pacman -Ss ${PKG} | grep linux | grep -v mhwd | grep / | grep - | cut -d- -f1 | cut -d/ -f2) ; do
+                for KERN in $(pacman -Qq | grep ${KERNEL}) ; do
+                    if [ "${KERN}" == "${KERNEL}" ] ; then
+                       if [ "${KERNEL}-${PKG}" == $(pacman -Ss "${KERNEL}-${PKG}" | grep "${KERNEL}-${PKG}" | grep -v mhwd | cut -d/ -f2 | cut -d' ' -f1) ] ; then
+                           KMODS="${KMODS} ${KERNEL}-${PKG}"
+                       fi
+                    fi
+                done
+            done
+        done
+
+        PACKAGES="${PACKAGES} ${KMODS}"
 
 	if [ "${PACKAGES}" != "" ]; then
 		${PACMAN} --needed -S${SYNC} ${PACKAGES}
