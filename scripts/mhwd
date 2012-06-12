@@ -211,7 +211,8 @@ if [ "${INSTALL}" == "true" ]; then
             for KERNEL in $(pacman -Ss ${PKG} | grep linux | grep -v mhwd | grep / | grep - | cut -d- -f1 | cut -d/ -f2) ; do
                 for KERN in $(pacman -Qq | grep ${KERNEL}) ; do
                     if [ "${KERN}" == "${KERNEL}" ] ; then
-                       if [ "${KERNEL}-${PKG}" == $(pacman -Ss "${KERNEL}-${PKG}" | grep "${KERNEL}-${PKG}" | grep -v mhwd | cut -d/ -f2 | cut -d' ' -f1) ] ; then
+                       PKGCHECK=`pacman -Ss "${KERNEL}-${PKG}" | grep "${KERNEL}-${PKG}" | grep -v mhwd | cut -d/ -f2 | cut -d' ' -f1`
+                       if [ "${KERNEL}-${PKG}" == "$PKGCHECK" ] ; then
                            KMODS="${KMODS} ${KERNEL}-${PKG}"
                        fi
                     fi
