@@ -113,6 +113,7 @@ namespace mhwd {
     extern void initData(mhwd::Data *data);
     extern void fillData(mhwd::Data *data);
     extern void freeData(mhwd::Data *data);
+    extern std::string checkEnvironment();
     extern void updateConfigData(mhwd::Data *data);
     extern void updateInstalledConfigData(mhwd::Data *data);
 

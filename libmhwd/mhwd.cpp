@@ -911,7 +911,7 @@ bool mhwd::copyDirectory(const std::string source, const std::string destination
     struct stat filestatus;
 
     if (lstat(destination.c_str(), &filestatus) != 0) {
-        if (mkdir(destination.c_str(), S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IROTH) != 0)
+        if (!createDir(destination))
             return false;
     }
     else if (S_ISREG(filestatus.st_mode)) {
@@ -921,7 +921,7 @@ bool mhwd::copyDirectory(const std::string source, const std::string destination
         if (!removeDirectory(destination))
             return false;
 
-        if (mkdir(destination.c_str(), S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IROTH) != 0)
+        if (!createDir(destination))
             return false;
     }
 
@@ -960,7 +960,7 @@ bool mhwd::copyDirectory(const std::string source, const std::string destination
 
 
 
-bool mhwd::copyFile(const std::string source, const std::string destination) {
+bool mhwd::copyFile(const std::string source, const std::string destination, const mode_t mode) {
     int c;
     FILE *in,*out;
 
@@ -969,14 +969,21 @@ bool mhwd::copyFile(const std::string source, const std::string destination) {
 
     if(in==NULL || !in)
         return false;
-    else if(out==NULL || !out)
+    else if(out==NULL || !out) {
+        fclose(in);
         return false;
+    }
 
     while((c=getc(in))!=EOF)
         putc(c,out);
 
     fclose(in);
     fclose(out);
+
+    // Set right permission
+    mode_t process_mask = umask(0);
+    chmod(destination.c_str(), mode);
+    umask(process_mask);
 
     return true;
 }
@@ -1028,6 +1035,16 @@ bool mhwd::checkExist(const std::string path) {
         return false;
     else
         return true;
+}
+
+
+
+bool mhwd::createDir(const std::string path, const mode_t mode) {
+    mode_t process_mask = umask(0);
+    int ret = mkdir(path.c_str(), mode);
+    umask(process_mask);
+
+    return (ret == 0);
 }
 
 
