@@ -86,6 +86,7 @@ namespace mhwd {
     void initData(mhwd::Data *data);
     void fillData(mhwd::Data *data);
     void freeData(mhwd::Data *data);
+    std::string checkEnvironment();
     void updateConfigData(mhwd::Data *data);
     void updateInstalledConfigData(mhwd::Data *data);
     bool fillConfig(mhwd::Config *config, std::string configPath, mhwd::TYPE type);

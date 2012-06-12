@@ -70,6 +70,7 @@ namespace mhwd {
     bool copyDirectory(const std::string source, const std::string destination);
     bool copyFile(const std::string source, const std::string destination);
     bool removeDirectory(const std::string directory);
+    bool checkExist(const std::string path);
 
 
     //###########################//

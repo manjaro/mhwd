@@ -90,6 +90,24 @@ void mhwd::freeData(mhwd::Data *data) {
 
 
 
+std::string mhwd::checkEnvironment() {
+    std::string retValue = "";
+
+    // Check if required directories exists. Otherwise return missing directory...
+    if (!checkExist(MHWD_USB_CONFIG_DIR))
+        retValue = MHWD_USB_CONFIG_DIR;
+    if (!checkExist(MHWD_PCI_CONFIG_DIR))
+        retValue = MHWD_PCI_CONFIG_DIR;
+    if (!checkExist(MHWD_USB_DATABASE_DIR))
+        retValue = MHWD_USB_DATABASE_DIR;
+    if (!checkExist(MHWD_PCI_DATABASE_DIR))
+        retValue = MHWD_PCI_DATABASE_DIR;
+
+    return retValue;
+}
+
+
+
 void mhwd::updateConfigData(mhwd::Data *data) {
     // Clear config vectors in each device element
     for (std::vector<mhwd::Device*>::iterator iterator = data->PCIDevices.begin(); iterator != data->PCIDevices.end(); iterator++) {
@@ -1004,6 +1022,16 @@ bool mhwd::removeDirectory(const std::string directory) {
 
 
 
+bool mhwd::checkExist(const std::string path) {
+    struct stat filestatus;
+    if (stat(path.c_str(), &filestatus) != 0)
+        return false;
+    else
+        return true;
+}
+
+
+
 //#####################################//
 //### Private - Script & Operations ###//
 //#####################################//
@@ -1105,4 +1133,3 @@ bool mhwd::runScript(mhwd::Data *data, mhwd::Config *config, mhwd::Transaction::
 
     return true;
 }
-

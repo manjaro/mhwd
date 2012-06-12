@@ -622,6 +622,15 @@ int main (int argc, char *argv[])
 
 
 
+    // Check environment
+    string ret = mhwd::checkEnvironment();
+    if (!ret.empty()) {
+        printError("directory '" + ret + "' does not exist!");
+        cleanup();
+        return 1;
+    }
+
+
     // Fill data with hardware informations
     mhwd::fillData(&data);
 
