@@ -207,6 +207,8 @@ if [ "${INSTALL}" == "true" ]; then
 	fi
 
         # check if multible kernel module
+        KMODS=""
+        NOKMODS=""
         for PKG in ${PACKAGES} ; do
             for KERNEL in $(pacman -Ss ${PKG} | grep linux | grep -v mhwd | grep / | grep - | cut -d- -f1 | cut -d/ -f2) ; do
                 for KERN in $(pacman -Qq | grep ${KERNEL}) ; do
@@ -214,13 +216,15 @@ if [ "${INSTALL}" == "true" ]; then
                        PKGCHECK=`pacman -Ss "${KERNEL}-${PKG}" | grep "${KERNEL}-${PKG}" | grep -v mhwd | cut -d/ -f2 | cut -d' ' -f1`
                        if [ "${KERNEL}-${PKG}" == "$PKGCHECK" ] ; then
                            KMODS="${KMODS} ${KERNEL}-${PKG}"
+                       else
+                           NOKMODS="${NOKMODS} ${PKG}"
                        fi
                     fi
                 done
             done
         done
 
-        PACKAGES="${PACKAGES} ${KMODS}"
+        PACKAGES="${KMODS} ${KMODS}"
 
 	if [ "${PACKAGES}" != "" ]; then
 		${PACMAN} --needed -S${SYNC} ${PACKAGES}
@@ -256,6 +260,26 @@ if [ "${REMOVE}" == "true" ]; then
 	if [ "${ARCH}" == "x86_64" ] && [ "${DEPENDS_64}" != "" ]; then
 		PACKAGES="${PACKAGES} ${DEPENDS_64}"
 	fi
+
+        # check if multible kernel module
+        KMODS=""
+        NOKMODS=""
+        for PKG in ${PACKAGES} ; do
+            for KERNEL in $(pacman -Ss ${PKG} | grep linux | grep -v mhwd | grep / | grep - | cut -d- -f1 | cut -d/ -f2) ; do
+                for KERN in $(pacman -Qq | grep ${KERNEL}) ; do
+                    if [ "${KERN}" == "${KERNEL}" ] ; then
+                       PKGCHECK=`pacman -Ss "${KERNEL}-${PKG}" | grep "${KERNEL}-${PKG}" | grep -v mhwd | cut -d/ -f2 | cut -d' ' -f1`
+                       if [ "${KERNEL}-${PKG}" == "$PKGCHECK" ] ; then
+                           KMODS="${KMODS} ${KERNEL}-${PKG}"
+                       else
+                           NOKMODS="${NOKMODS} ${PKG}"
+                       fi
+                    fi
+                done
+            done
+        done
+
+        PACKAGES="${KMODS} ${KMODS}"
 
 	if [ "${PACKAGES}" != "" ]; then
 		${PACMAN} -Rs ${PACKAGES}
