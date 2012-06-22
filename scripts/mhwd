@@ -64,6 +64,43 @@ MHWD_UNLOAD_MODULE()
 	return 0 #true
 }
 
+MHWD_CHECK_PKGS()
+{
+        for PKG in ${PACKAGES} ; do
+            for RMPKG in $(pacman -Qq | grep ${PKG}) ; do
+                if [ "${PKG}" == "${RMPKG}" ] ; then
+                   REMOVE="${REMOVE} ${RMPKG}"
+                fi
+            done
+        done
+
+        PACKAGES="${REMOVE}"
+}
+
+MHWD_CHECK_KMODS()
+{
+        KMODS=""
+        NOKMODS=""
+        for PKG in ${PACKAGES} ; do
+            for KERNEL in $(pacman -Ss ${PKG} | grep linux | grep -v mhwd | grep / | grep - | cut -d- -f1 | cut -d/ -f2) ; do
+                for KERN in $(pacman -Qq | grep ${KERNEL}) ; do
+                    if [ "${KERN}" == "${KERNEL}" ] ; then
+                       PKGCHECK=`pacman -Ss "${KERNEL}-${PKG}" | grep "${KERNEL}-${PKG}" | grep -v mhwd | cut -d/ -f2 | cut -d' ' -f1`
+                       if [ "${KERNEL}-${PKG}" == "$PKGCHECK" ] ; then
+                           KMODS="${KMODS} ${KERNEL}-${PKG}"
+                           PRVID="${PKG}"
+                       fi
+                    fi
+                done
+            done
+            if [ "${PKG}" != "${PRVID}" ] ; then
+               NOKMODS="${NOKMODS} ${PKG}"
+            fi
+        done
+
+        PACKAGES="${NOKMODS} ${KMODS}"
+}
+
 
 # Make them readonly
 declare -fr MHWD_HEADING MHWD_PCI_BUS_ID MHWD_LOAD_MODULE MHWD_UNLOAD_MODULE
@@ -172,17 +209,7 @@ if [ "${INSTALL}" == "true" ]; then
 	fi
 
         # Check if packages are installed
-        for PKG in ${PACKAGES} ; do
-            for RMPKG in $(pacman -Qq | grep ${PKG}) ; do
-                echo "found for ${PKG} - ${RMPKG}"
-                if [ "${PKG}" == "${RMPKG}" ] ; then
-                   echo "removing ${RMPKG}"
-                   REMOVE="${REMOVE} ${RMPKG}"
-                fi
-            done
-        done
-
-        PACKAGES="${REMOVE}"
+        MHWD_CHECK_PKGS
 
 	if [ "${PACKAGES}" != "" ]; then
 		${PACMAN} -Rs ${PACKAGES}
@@ -207,24 +234,7 @@ if [ "${INSTALL}" == "true" ]; then
 	fi
 
         # check if multible kernel module
-        KMODS=""
-        NOKMODS=""
-        for PKG in ${PACKAGES} ; do
-            for KERNEL in $(pacman -Ss ${PKG} | grep linux | grep -v mhwd | grep / | grep - | cut -d- -f1 | cut -d/ -f2) ; do
-                for KERN in $(pacman -Qq | grep ${KERNEL}) ; do
-                    if [ "${KERN}" == "${KERNEL}" ] ; then
-                       PKGCHECK=`pacman -Ss "${KERNEL}-${PKG}" | grep "${KERNEL}-${PKG}" | grep -v mhwd | cut -d/ -f2 | cut -d' ' -f1`
-                       if [ "${KERNEL}-${PKG}" == "$PKGCHECK" ] ; then
-                           KMODS="${KMODS} ${KERNEL}-${PKG}"
-                       else
-                           NOKMODS="${NOKMODS} ${PKG}"
-                       fi
-                    fi
-                done
-            done
-        done
-
-        PACKAGES="${KMODS} ${KMODS}"
+        MHWD_CHECK_KMODS
 
 	if [ "${PACKAGES}" != "" ]; then
 		${PACMAN} --needed -S${SYNC} ${PACKAGES}
@@ -262,24 +272,10 @@ if [ "${REMOVE}" == "true" ]; then
 	fi
 
         # check if multible kernel module
-        KMODS=""
-        NOKMODS=""
-        for PKG in ${PACKAGES} ; do
-            for KERNEL in $(pacman -Ss ${PKG} | grep linux | grep -v mhwd | grep / | grep - | cut -d- -f1 | cut -d/ -f2) ; do
-                for KERN in $(pacman -Qq | grep ${KERNEL}) ; do
-                    if [ "${KERN}" == "${KERNEL}" ] ; then
-                       PKGCHECK=`pacman -Ss "${KERNEL}-${PKG}" | grep "${KERNEL}-${PKG}" | grep -v mhwd | cut -d/ -f2 | cut -d' ' -f1`
-                       if [ "${KERNEL}-${PKG}" == "$PKGCHECK" ] ; then
-                           KMODS="${KMODS} ${KERNEL}-${PKG}"
-                       else
-                           NOKMODS="${NOKMODS} ${PKG}"
-                       fi
-                    fi
-                done
-            done
-        done
+        MHWD_CHECK_KMODS
 
-        PACKAGES="${KMODS} ${KMODS}"
+        # Check if packages are installed
+        MHWD_CHECK_PKGS
 
 	if [ "${PACKAGES}" != "" ]; then
 		${PACMAN} -Rs ${PACKAGES}
