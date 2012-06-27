@@ -66,40 +66,42 @@ MHWD_UNLOAD_MODULE()
 
 MHWD_CHECK_PKGS()
 {
-        for PKG in ${PACKAGES} ; do
-            for RMPKG in $(pacman -Qq | grep ${PKG}) ; do
-                if [ "${PKG}" == "${RMPKG}" ] ; then
-                   REMOVE="${REMOVE} ${RMPKG}"
-                fi
-            done
-        done
+	local REMOVEPKGS=""
 
-        PACKAGES="${REMOVE}"
-}
-
-MHWD_CHECK_KMODS()
-{
-        KMODS=""
-        NOKMODS=""
-        for PKG in ${PACKAGES} ; do
-            for KERNEL in $(pacman -Ss ${PKG} | grep linux | grep -v mhwd | grep / | grep - | cut -d- -f1 | cut -d/ -f2) ; do
-                for KERN in $(pacman -Qq | grep ${KERNEL}) ; do
-                    if [ "${KERN}" == "${KERNEL}" ] ; then
-                       PKGCHECK=`pacman -Ss "${KERNEL}-${PKG}" | grep "${KERNEL}-${PKG}" | grep -v mhwd | cut -d/ -f2 | cut -d' ' -f1`
-                       if [ "${KERNEL}-${PKG}" == "$PKGCHECK" ] ; then
-                           KMODS="${KMODS} ${KERNEL}-${PKG}"
-                           PRVID="${PKG}"
-                       fi
-                    fi
-                done
-            done
-            if [ "${PKG}" != "${PRVID}" ] ; then
-               NOKMODS="${NOKMODS} ${PKG}"
+    for PKG in ${PACKAGES} ; do
+        for RMPKG in $(pacman -Qq | grep ${PKG}) ; do
+            if [ "${PKG}" == "${RMPKG}" ] ; then
+               REMOVEPKGS="${REMOVEPKGS} ${RMPKG}"
             fi
         done
+    done
 
-        PACKAGES="${NOKMODS} ${KMODS}"
+    PACKAGES="${REMOVEPKGS}"
 }
+
+#MHWD_CHECK_KMODS()
+#{
+#        KMODS=""
+#        NOKMODS=""
+#        for PKG in ${PACKAGES} ; do
+#            for KERNEL in $(pacman -Ss ${PKG} | grep linux | grep -v mhwd | grep / | grep - | cut -d- -f1 | cut -d/ -f2) ; do
+#                for KERN in $(pacman -Qq | grep ${KERNEL}) ; do
+#                    if [ "${KERN}" == "${KERNEL}" ] ; then
+#                       PKGCHECK=`pacman -Ss "${KERNEL}-${PKG}" | grep "${KERNEL}-${PKG}" | grep -v mhwd | cut -d/ -f2 | cut -d' ' -f1`
+#                       if [ "${KERNEL}-${PKG}" == "$PKGCHECK" ] ; then
+#                           KMODS="${KMODS} ${KERNEL}-${PKG}"
+#                           PRVID="${PKG}"
+#                       fi
+#                    fi
+#                done
+#            done
+#            if [ "${PKG}" != "${PRVID}" ] ; then
+#               NOKMODS="${NOKMODS} ${PKG}"
+#            fi
+#        done
+#
+#        PACKAGES="${NOKMODS} ${KMODS}"
+#}
 
 
 # Make them readonly
@@ -208,8 +210,8 @@ if [ "${INSTALL}" == "true" ]; then
 		PACKAGES="${PACKAGES} ${CONFLICTS_64}"
 	fi
 
-        # Check if packages are installed
-        MHWD_CHECK_PKGS
+    # Check if packages are installed
+    MHWD_CHECK_PKGS
 
 	if [ "${PACKAGES}" != "" ]; then
 		${PACMAN} -Rs ${PACKAGES}
@@ -233,8 +235,6 @@ if [ "${INSTALL}" == "true" ]; then
 		PACKAGES="${PACKAGES} ${DEPENDS_64}"
 	fi
 
-        # check if multible kernel module
-        MHWD_CHECK_KMODS
 
 	if [ "${PACKAGES}" != "" ]; then
 		${PACMAN} --needed -S${SYNC} ${PACKAGES}
@@ -271,11 +271,8 @@ if [ "${REMOVE}" == "true" ]; then
 		PACKAGES="${PACKAGES} ${DEPENDS_64}"
 	fi
 
-        # check if multible kernel module
-        MHWD_CHECK_KMODS
-
-        # Check if packages are installed
-        MHWD_CHECK_PKGS
+    # Check if packages are installed
+    MHWD_CHECK_PKGS
 
 	if [ "${PACKAGES}" != "" ]; then
 		${PACMAN} -Rs ${PACKAGES}
