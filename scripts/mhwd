@@ -23,47 +23,6 @@ MHWD_PCI_BUS_ID()
 
 
 
-MHWD_LOAD_MODULE()
-{
-	local loadedmodules="$(ls /sys/module)"
-	local moduleisloaded="false"
-
-	if [ -z "${loadedmodules}" ]; then
-		return 1 	#false
-	fi
-
-	for loadedmodule in ${loadedmodules} ; do
-		if [ "$1" == "$loadedmodule" ]; then
-			moduleisloaded="true"
-		fi
-	done
-
-	if [ "$moduleisloaded" == "false" ]; then
-		modprobe $1
-	fi
-
-	return 0 #true
-}
-
-
-MHWD_UNLOAD_MODULE()
-{
-	local loadedmodules="$(ls /sys/module)"
-
-	if [ -z "${loadedmodules}" ]; then
-		return 1 	#false
-	fi
-
-	for loadedmodule in ${loadedmodules} ; do
-		if [ "$1" == "$loadedmodule" ]; then
-			modprobe -r $1
-			break
-		fi
-	done
-
-	return 0 #true
-}
-
 MHWD_CHECK_PKGS()
 {
 	local REMOVEPKGS=""
@@ -105,7 +64,7 @@ MHWD_CHECK_PKGS()
 
 
 # Make them readonly
-declare -fr MHWD_HEADING MHWD_PCI_BUS_ID MHWD_LOAD_MODULE MHWD_UNLOAD_MODULE
+declare -fr MHWD_HEADING MHWD_PCI_BUS_ID
 
 
 
