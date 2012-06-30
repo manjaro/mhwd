@@ -6,8 +6,6 @@ CHECKCONFIG="false"
 SETGL=""
 SETXORGCONF=""
 
-
-
 # param 1: modules to load
 # param 2: blacklisted modules
 set_modules() {
@@ -43,8 +41,6 @@ set_modules() {
 	done
 }
 
-
-
 # param 1: Xorg configuration file
 set_xorg()
 {
@@ -60,8 +56,6 @@ set_xorg()
 		echo "warning: could not find '$1'!"
 	fi
 }
-
-
 
 # param 1: libGl path
 # param 2: libglx path
@@ -94,8 +88,6 @@ set_Gl() {
 	fi
 }
 
-
-
 print_help()
 {
 	echo "mhwd-gpu [OPTION] [...]"
@@ -107,18 +99,12 @@ print_help()
 	echo ""
 }
 
-
-
-
-
-
 if [ "${PARAM}" -lt 1 ]; then
 	echo "error: no arguments!"
 	echo ""
 	print_help
 	exit 1
 fi
-
 
 for (( I=1; $I <= $PARAM; I++ ))
 do
@@ -150,15 +136,11 @@ do
 	shift
 done
 
-
-
 # Check root
 if [[ $EUID -ne 0 ]]; then
    echo "error: you cannot perform this operation unless you are root." 1>&2
    exit 1
 fi
-
-
 
 # Set libGl and libglx
 if [ "${SETGL}" == "mesa" ] || [ "${SETGL}" == "default" ]; then
@@ -175,14 +157,10 @@ elif [ "${SETGL}" != "" ]; then
 	exit 1
 fi
 
-
-
 # Set xorg configuration file
 if [ "${SETXORGCONF}" != "" ]; then
 	set_xorg "${SETXORGCONF}"
 fi
-
-
 
 # Check config
 if [ "${CHECKCONFIG}" == "true" ]; then
@@ -203,7 +181,5 @@ if [ "${CHECKCONFIG}" == "true" ]; then
 		echo "libGl and libglx symlinks valid..."
 	fi
 fi
-
-
 
 exit 0

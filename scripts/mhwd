@@ -1,9 +1,6 @@
 #!/bin/bash
 
-
-
 ### Module Functions ###
-
 
 MHWD_HEADING()
 {
@@ -14,14 +11,10 @@ MHWD_HEADING()
 	echo ' ' >> "$1"
 }
 
-
-
 MHWD_PCI_BUS_ID()
 {
 	echo "$(lspci -nmm | grep '$1.*$2' | cut -d" " -f1 | sed "s|\.|:|g")"
 }
-
-
 
 MHWD_CHECK_PKGS()
 {
@@ -38,37 +31,8 @@ MHWD_CHECK_PKGS()
     PACKAGES="${REMOVEPKGS}"
 }
 
-MHWD_CHECK_KMODS()
-{
-        KMODS=""
-        NOKMODS=""
-        for PKG in ${PACKAGES} ; do
-            for KERNEL in $(pacman -Ss ${PKG} | grep linux | grep -v mhwd | grep / | grep - | cut -d- -f1 | cut -d/ -f2) ; do
-                for KERN in $(pacman -Qq | grep ${KERNEL}) ; do
-                    if [ "${KERN}" == "${KERNEL}" ] ; then
-                       PKGCHECK=`pacman -Ss "${KERNEL}-${PKG}" | grep "${KERNEL}-${PKG}" | grep -v mhwd | cut -d/ -f2 | cut -d' ' -f1`
-                       if [ "${KERNEL}-${PKG}" == "$PKGCHECK" ] ; then
-                           KMODS="${KMODS} ${KERNEL}-${PKG}"
-                           PRVID="${PKG}"
-                       fi
-                    fi
-                done
-            done
-            if [ "${PKG}" != "${PRVID}" ] ; then
-               NOKMODS="${NOKMODS} ${PKG}"
-            fi
-        done
-
-        PACKAGES="${NOKMODS} ${KMODS}"
-}
-
-
 # Make them readonly
 declare -fr MHWD_HEADING MHWD_PCI_BUS_ID
-
-
-
-
 
 ### Main ###
 ARCH="$(uname -m)"
@@ -89,7 +53,6 @@ if [ "${PARAM}" -lt 1 ]; then
 	echo "No Arguments!"
 	exit 1
 fi
-
 
 for (( I=1; $I <= $PARAM; I++ ))
 do
@@ -129,11 +92,8 @@ do
 	shift
 done
 
-
 # Set final variables
 PACMAN="${PACMAN} --cachedir ${CACHEPATH} --config ${PMCONFIG} --root ${PMROOT}"
-
-
 
 if [ "${CONFIGPATH}" != "" ] && [ -e "${CONFIGPATH}" ]; then
 	. "${CONFIGPATH}"
@@ -148,7 +108,6 @@ if [ "${CONFIGPATH}" != "" ] && [ -e "${CONFIGPATH}" ]; then
 else
 	exit 1
 fi
-
 
 if [ "${INSTALL}" == "true" ]; then
 	# Run preinstall function
@@ -180,7 +139,6 @@ if [ "${INSTALL}" == "true" ]; then
 		fi
 	fi
 
-
 	PACKAGES=""
 
 	# Install dependencies
@@ -194,9 +152,6 @@ if [ "${INSTALL}" == "true" ]; then
 		PACKAGES="${PACKAGES} ${DEPENDS_64}"
 	fi
 
-        # check if multible kernel module
-        MHWD_CHECK_KMODS
-
 	if [ "${PACKAGES}" != "" ]; then
 		${PACMAN} --needed -S${SYNC} ${PACKAGES}
 		if [ "$?" -ne "0" ]; then
@@ -204,7 +159,6 @@ if [ "${INSTALL}" == "true" ]; then
 			exit 1
 		fi
 	fi
-
 
 	# Run postinstall function
 	if [ "`grep "post_install" "${CONFIGPATH}" | cut -d"#" -f1 | cut -d"(" -f1 | grep "post_install"`" == "post_install" ]; then
@@ -232,9 +186,6 @@ if [ "${REMOVE}" == "true" ]; then
 		PACKAGES="${PACKAGES} ${DEPENDS_64}"
 	fi
 
-        # check if multible kernel module
-        MHWD_CHECK_KMODS
-
         # Check if packages are installed
         MHWD_CHECK_PKGS
 
@@ -246,12 +197,10 @@ if [ "${REMOVE}" == "true" ]; then
 		fi
 	fi
 
-
 	# Run postremove function
 	if [ "`grep "post_remove" "${CONFIGPATH}" | cut -d"#" -f1 | cut -d"(" -f1 | grep "post_remove"`" == "post_remove" ]; then
 	   post_remove
 	fi
 fi
-
 
 exit 0

@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# do UID checking here so someone can at least get usage instructions
+if [ "$EUID" != "0" ]; then
+    echo "error: This script must be run as root."
+    exit 1
+fi
+
+# check usage
+if [ "$#" -ne 3 ]; then
+
+  >&2 printf 'USAGE: %s outdated-kernel replacement-kernel (uninstall) yes/no\n' "$0"
+
+  exit 1
+
+fi
+
+# switch to basic language
+export LANG=C
+export LC_MESSAGES=C
+
+for PKG in $(pacman -Qq | grep $1) ; do
+    NEWPKG=$(echo $PKG | sed s/$1/$2/)
+    PKGCHECK=`pacman -Ss "$NEWPKG" | grep "$NEWPKG" | head -1 | cut -d/ -f2 | cut -d' ' -f1`
+    if [ "$NEWPKG" == "$PKGCHECK" ] ; then
+       if [ "$3" == "yes" ] ; then
+          pacman -Rdd $PKG --noconfirm
+       fi
+       pacman -S $NEWPKG --noconfirm
+    fi
+done
+
+
+
