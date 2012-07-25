@@ -9,7 +9,7 @@ fi
 # check usage
 if [ "$#" -ne 3 ]; then
 
-  >&2 printf 'USAGE: %s outdated-kernel replacement-kernel (uninstall) yes/no\n' "$0"
+  >&2 printf 'USAGE: %s current-kernel new-kernel (uninstall current) yes/no\n' "$0"
 
   exit 1
 
@@ -18,6 +18,9 @@ fi
 # switch to basic language
 export LANG=C
 export LC_MESSAGES=C
+
+# sync databases
+pacman -Syy
 
 for PKG in $(pacman -Qq | grep $1) ; do
     NEWPKG=$(echo $PKG | sed s/$1/$2/)
