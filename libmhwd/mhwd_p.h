@@ -52,6 +52,8 @@ namespace mhwd {
     //###############//
     void fillInstalledConfigs(mhwd::Data *data, mhwd::TYPE type);
     void fillAllConfigs(mhwd::Data *data, mhwd::TYPE type);
+    void getAllDevicesOfConfig(mhwd::Data *data, mhwd::Config *config, std::vector<mhwd::Device*>* foundDevices);
+    void getAllDevicesOfConfig(std::vector<mhwd::Device*>* devices, mhwd::Config *config, std::vector<mhwd::Device*>* foundDevices);
     void setMatchingConfigs(std::vector<mhwd::Device*>* devices, std::vector<mhwd::Config*>* configs, bool setAsInstalled);
     void setMatchingConfig(mhwd::Config* config, std::vector<mhwd::Device*>* devices, bool setAsInstalled);
     void addConfigSorted(std::vector<mhwd::Config*>* configs, mhwd::Config* config);

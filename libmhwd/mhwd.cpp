@@ -565,16 +565,21 @@ void mhwd::fillAllConfigs(mhwd::Data *data, mhwd::TYPE type) {
 
 
 
-void mhwd::setMatchingConfigs(std::vector<mhwd::Device*>* devices, std::vector<mhwd::Config*>* configs, bool setAsInstalled) {
-    for (std::vector<mhwd::Config*>::iterator iterator = configs->begin(); iterator != configs->end(); iterator++) {
-        setMatchingConfig((*iterator), devices, setAsInstalled);
-    }
+void mhwd::getAllDevicesOfConfig(mhwd::Data *data, mhwd::Config *config, std::vector<mhwd::Device*>* foundDevices) {
+    std::vector<mhwd::Device*>* devices;
+
+    if (config->type == mhwd::TYPE_USB)
+        devices = &data->USBDevices;
+    else
+        devices = &data->PCIDevices;
+
+    getAllDevicesOfConfig(devices, config, foundDevices);
 }
 
 
 
-void mhwd::setMatchingConfig(mhwd::Config* config, std::vector<mhwd::Device*>* devices, bool setAsInstalled) {
-    std::vector<mhwd::Device*> foundDevices;
+void mhwd::getAllDevicesOfConfig(std::vector<mhwd::Device*>* devices, mhwd::Config *config, std::vector<mhwd::Device*>* foundDevices) {
+    foundDevices->clear();
 
     for (std::vector<mhwd::Config::HardwareIDs>::const_iterator i_hwdIDs = config->hwdIDs.begin(); i_hwdIDs != config->hwdIDs.end(); i_hwdIDs++) {
         bool foundDevice = false;
@@ -620,13 +625,32 @@ void mhwd::setMatchingConfig(mhwd::Config* config, std::vector<mhwd::Device*>* d
             if (!found)
                 continue;
 
-            foundDevices.push_back((*i_device));
+
             foundDevice = true;
+            foundDevices->push_back((*i_device));
         }
 
-        if (!foundDevice)
+        if (!foundDevice) {
+            foundDevices->clear();
             return;
+        }
     }
+}
+
+
+
+void mhwd::setMatchingConfigs(std::vector<mhwd::Device*>* devices, std::vector<mhwd::Config*>* configs, bool setAsInstalled) {
+    for (std::vector<mhwd::Config*>::iterator iterator = configs->begin(); iterator != configs->end(); iterator++) {
+        setMatchingConfig((*iterator), devices, setAsInstalled);
+    }
+}
+
+
+
+void mhwd::setMatchingConfig(mhwd::Config* config, std::vector<mhwd::Device*>* devices, bool setAsInstalled) {
+    std::vector<mhwd::Device*> foundDevices;
+
+    getAllDevicesOfConfig(devices, config, &foundDevices);
 
 
     // Set config to all matching devices
@@ -1127,6 +1151,45 @@ bool mhwd::runScript(mhwd::Data *data, mhwd::Config *config, mhwd::Transaction::
     cmd += " --pmconfig \"" + data->environment.PMConfigPath + "\"";
     cmd += " --pmroot \"" + data->environment.PMRootPath + "\"";
     cmd += " --config \"" + config->configPath + "\"";
+
+
+    // Set all config devices as argument
+    std::vector<mhwd::Device*> foundDevices, devices;
+    getAllDevicesOfConfig(data, config, &foundDevices);
+
+    for (std::vector<mhwd::Device*>::iterator iterator = foundDevices.begin(); iterator != foundDevices.end(); iterator++) {
+        bool found = false;
+
+        // Check if already in list
+        for (std::vector<mhwd::Device*>::iterator dev = devices.begin(); dev != devices.end(); dev++) {
+            if ((*iterator)->sysfsBusID == (*dev)->sysfsBusID && (*iterator)->sysfsID == (*dev)->sysfsID) {
+                found = true;
+                break;
+            }
+        }
+
+        if (!found)
+            devices.push_back((*iterator));
+    }
+
+    for (std::vector<mhwd::Device*>::iterator dev = devices.begin(); dev != devices.end(); dev++) {
+        Vita::string busID = (*dev)->sysfsBusID;
+
+        if (config->type == mhwd::TYPE_PCI) {
+            std::vector<Vita::string> split = Vita::string(busID).replace(".", ":").explode(":");
+            const int size = split.size();
+
+            if (size >= 3) {
+                // Convert to int to remove leading 0
+                busID = Vita::string::toStr<int>(split[size-3].convert<int>());
+                busID += ":" + Vita::string::toStr<int>(split[size-2].convert<int>());
+                busID += ":" + Vita::string::toStr<int>(split[size-1].convert<int>());
+            }
+        }
+
+        cmd += " --device \"" + (*dev)->classID + "|" + (*dev)->vendorID + "|" + (*dev)->deviceID + "|" + busID + "\"";
+    }
+
     cmd += " 2>&1";
 
 
