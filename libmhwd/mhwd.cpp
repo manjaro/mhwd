@@ -497,6 +497,17 @@ Vita::string mhwd::from_Hex(uint16_t hexnum, int fill) {
 
 
 
+int mhwd::hexToInt(std::string hex) {
+    int i;
+    std::stringstream ss;
+    ss << std::hex << hex;
+    ss >> i;
+
+    return i;
+}
+
+
+
 Vita::string mhwd::from_CharArray(char* c) {
     if (c == NULL)
         return "";
@@ -1181,9 +1192,9 @@ bool mhwd::runScript(mhwd::Data *data, mhwd::Config *config, mhwd::Transaction::
 
             if (size >= 3) {
                 // Convert to int to remove leading 0
-                busID = Vita::string::toStr<int>(split[size-3].convert<int>());
-                busID += ":" + Vita::string::toStr<int>(split[size-2].convert<int>());
-                busID += ":" + Vita::string::toStr<int>(split[size-1].convert<int>());
+                busID = Vita::string::toStr<int>(hexToInt(split[size-3]));
+                busID += ":" + Vita::string::toStr<int>(hexToInt(split[size-2]));
+                busID += ":" + Vita::string::toStr<int>(hexToInt(split[size-1]));
             }
         }
 

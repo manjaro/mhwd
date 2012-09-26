@@ -44,6 +44,7 @@ namespace mhwd {
     //###############//
     void fillDevices(mhwd::Data *data, mhwd::TYPE type);
     Vita::string from_Hex(uint16_t hexnum, int fill);
+    int hexToInt(std::string hex);
     Vita::string from_CharArray(char* c);
 
 
