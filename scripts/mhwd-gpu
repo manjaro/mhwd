@@ -5,6 +5,66 @@ MHWDXORGCONF="/etc/X11/xorg.conf.d/90-mhwd.conf"
 CHECKCONFIG="false"
 SETGL=""
 SETXORGCONF=""
+GRUBDEFAULT="/etc/default/grub"
+UPDATEGRUBCMD="/usr/sbin/update-grub"
+
+
+# param 1: "kms" or "uvesafb"
+set_framebuffer() {
+	if [ ! -e "${GRUBDEFAULT}" ]; then
+		echo "warning: '${GRUBDEFAULT}' does not exists! Skipping framebuffer setup..."
+		return
+	elif [ ! -e "${UPDATEGRUBCMD}" ]; then
+		echo "warning: '${UPDATEGRUBCMD}' does not exists! Skipping framebuffer setup..."
+		return
+	fi
+
+	. "${GRUBDEFAULT}"
+	local NEW_GRUB_CMDLINE_LINUX=""
+
+	for arg in ${GRUB_CMDLINE_LINUX}
+	do
+		if [[ "${arg}" != "mhwdfb="* ]]; then
+			NEW_GRUB_CMDLINE_LINUX="${NEW_GRUB_CMDLINE_LINUX}${arg} "
+		fi
+	done
+
+	if [ "$1" == "kms" ]; then
+		NEW_GRUB_CMDLINE_LINUX="${NEW_GRUB_CMDLINE_LINUX}mhwdfb=kms"
+		echo "using kms framebuffer"
+
+		# Enable GRUB_GFXPAYLOAD_LINUX
+		sed -i '/#[]*GRUB_GFXPAYLOAD_LINUX[ ]*=.*/ s/^.//' "${GRUBDEFAULT}"
+	elif [ "$1" == "uvesafb" ]; then
+		# Find fitting resolution
+		local resolution="$(LANG=C xrandr | grep \* | cut -d' ' -f4)-32"
+		[ "${resolution}" == "" ] && resolution="$(LANG=C hwinfo --framebuffer | grep -w 'Mode' | cut -d: -f2 | sed 's/^ *//g' | sed 's/ .*//g' | sort -nr | head -n 1)-32"
+
+		if [ "${resolution}" == "" ]; then
+			NEW_GRUB_CMDLINE_LINUX="${NEW_GRUB_CMDLINE_LINUX}mhwdfb=uvesafb"
+			echo "using uvesafb framebuffer"
+		else
+			NEW_GRUB_CMDLINE_LINUX="${NEW_GRUB_CMDLINE_LINUX}mhwdfb=uvesafb:${resolution}"
+			echo "using uvesafb framebuffer with resolution: ${resolution}"
+		fi
+
+		# Disable GRUB_GFXPAYLOAD_LINUX
+		sed -i "/#/!s|GRUB_GFXPAYLOAD_LINUX[ ]*=.*|#&|g" "${GRUBDEFAULT}"
+	else
+		echo "error: invalid function argument!"
+		return
+	fi
+	
+	# Adjust grub default file
+	sed -i "/#/!s|GRUB_CMDLINE_LINUX[ ]*=.*|GRUB_CMDLINE_LINUX=\"${NEW_GRUB_CMDLINE_LINUX}\"|g" "${GRUBDEFAULT}"
+
+	# Update grub configuration file
+	echo ""
+	echo ":: update-grub output:"
+	${UPDATEGRUBCMD}
+	[ $? != 0 ] && echo "error: grub-update failed!"
+}
+
 
 # param 1: modules to load
 # param 2: blacklisted modules
@@ -124,7 +184,11 @@ do
 			shift
 			SETXORGCONF="$1"
 			;;
-		"")	;;
+		--setfb)
+			shift
+			FBDRIVER="$1"
+			;;
+		"") ;;
 		*)
 			echo "error: invalid argument: $1"
 			echo ""
@@ -146,12 +210,15 @@ fi
 if [ "${SETGL}" == "mesa" ] || [ "${SETGL}" == "default" ]; then
 	set_modules
 	set_Gl "/usr/lib/libGL.so.mesa" "/usr/lib/xorg/modules/extensions/libglx.xorg" "/usr/lib32/libGL.so.mesa"
+	set_framebuffer kms
 elif [ "${SETGL}" == "nvidia" ]; then
 	set_modules "nvidia" "nouveau ttm drm_kms_helper drm"
 	set_Gl "/usr/lib/libGL.so.nvidia" "/usr/lib/xorg/modules/extensions/libglx.so.nvidia" "/usr/lib32/libGL.so.nvidia"
+	set_framebuffer uvesafb
 elif [ "${SETGL}" == "catalyst" ] || [ "${SETGL}" == "ati" ]; then
 	set_modules "fglrx" "radeon"
 	set_Gl "/usr/lib/libGL.so.catalyst" "/usr/lib/xorg/modules/extensions/libglx.so.catalyst" "/usr/lib32/libGL.so.catalyst"
+	set_framebuffer uvesafb
 elif [ "${SETGL}" != "" ]; then
 	echo "error: invalid argument '${SETGL}'"
 	exit 1
@@ -181,5 +248,3 @@ if [ "${CHECKCONFIG}" == "true" ]; then
 		echo "libGl and libglx symlinks valid..."
 	fi
 fi
-
-exit 0

@@ -1,0 +1,23 @@
+#!/bin/bash
+
+build() {
+    # Add KMS modules
+    add_module 'intel_agp'
+    add_module 'i915'
+    add_module 'radeon'
+    add_module 'nouveau'
+
+    # Add uvesafb
+    add_module 'uvesafb'
+    add_binary "v86d"
+    add_file "/usr/lib/modprobe.d/uvesafb.conf"
+    add_dir "/etc/modprobe.d"
+
+    add_runscript
+}
+
+help() {
+    echo "This hook sets up the right framebuffer on boot."
+}
+
+# vim: set ft=sh ts=4 sw=4 expandtab:
