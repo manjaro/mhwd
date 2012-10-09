@@ -5,7 +5,10 @@ INSTALL(PROGRAMS mhwd-gpu
   DESTINATION /usr/bin)
 
 INSTALL(PROGRAMS mhwd-kernel
-  DESTINATION /usr/sbin)
+  DESTINATION /usr/bin)
+
+INSTALL(PROGRAMS mhwd-fb
+  DESTINATION /usr/bin)
 
 FILE(GLOB INCLUDEFILES "include/*")
 

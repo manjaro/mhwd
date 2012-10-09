@@ -24,7 +24,7 @@ kernel_cmdline()
 
 
 init_args() {
-	local ARGS="$(kernel_cmdline mhwdfb)"
+	local ARGS="$(kernel_cmdline mhwdfb):" # additional ':' if f2 isn't set -> empty string
 
 	ARG_FB_DRIVER="$(echo "${ARGS}" | cut -d: -f1)"
 	ARG_RESOLUTION="$(echo "${ARGS}" | cut -d: -f2)"
@@ -37,7 +37,7 @@ run_earlyhook()
 
     if [ "${ARG_FB_DRIVER}" != "kms" ]; then
 		# Disable KMS modules
-		for module in intel_agp i915 radeon nouveau
+		for module in radeon nouveau i915 via-agp sis-agp intel-agp amd64-agp ati-agp sworks-agp ali-agp amd-k7-agp nvidia-agp efficeon-agp
 		do
 			echo "blacklist ${module}" >> "/etc/modprobe.d/mhwd-kms.conf"
 		done
