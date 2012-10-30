@@ -10,9 +10,9 @@ if [ "$EUID" != "0" ]; then
 fi
 
 # check usage
-if [ "$#" -ne 3 ]; then
+if [ "$#" -ne 2 ]; then
 
-  >&2 printf 'USAGE: %s current-kernel new-kernel (uninstall current) yes/no\n' "$0"
+  >&2 printf 'USAGE: %s new-kernel (uninstall current) yes/no\n' "$0"
 
   exit 1
 
@@ -26,11 +26,19 @@ export LC_MESSAGES=C
 ADDPKGS=""
 REMOVEPKGS=""
 
+# current kernel
+CURRENT="linux$(uname -r | cut -d\. -f1,2 | sed s'/.//2')"
+
+if [ "$CURRENT" = "$1" ]; then
+    echo "error: You cant (un)install your current kernel!"
+    exit 1
+fi
+
 # sync databases
 pacman -Syy
 
-for PKG in $(pacman -Qq | grep $1) ; do
-    NEWPKG=$(echo $PKG | sed s/$1/$2/)
+for PKG in $(pacman -Qq | grep $CURRENT) ; do
+    NEWPKG=$(echo $PKG | sed s/$CURRENT/$1/)
     PKGCHECK=`pacman -Ss "$NEWPKG" | grep "$NEWPKG" | head -1 | cut -d/ -f2 | cut -d' ' -f1`
     if [ "$NEWPKG" == "$PKGCHECK" ] ; then
        REMOVEPKGS="${REMOVEPKGS} $PKG"
@@ -50,7 +58,7 @@ else
 fi
 
 # Remove all packages
-if [ "${REMOVEPKGS}" != "" ] && [ "$3" == "yes" ]; then
+if [ "${REMOVEPKGS}" != "" ] && [ "$2" == "yes" ]; then
     echo ""
     echo "> Removing packages"
     pacman -Rdd ${REMOVEPKGS} --noconfirm
