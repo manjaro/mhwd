@@ -12,7 +12,7 @@ fi
 # check usage
 if [ ! "$#" -le 2 ]; then
 
-  >&2 printf 'USAGE: %s new-kernel (optional: add "yes" to remove current kernel)\n' "$0"
+  >&2 printf 'USAGE: %s new-kernel (optional: add "rmc" to remove current kernel)\n' "$0"
 
   exit 1
 
@@ -63,7 +63,7 @@ else
 fi
 
 # Remove all packages
-if [ "${REMOVEPKGS}" != "" ] && [ "$2" == "yes" ]; then
+if [ "${REMOVEPKGS}" != "" ] && [ "$2" == "rmc" ]; then
     echo ""
     echo "> Removing packages"
     pacman -Rdd ${REMOVEPKGS} --noconfirm
