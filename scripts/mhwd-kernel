@@ -10,9 +10,9 @@ if [ "$EUID" != "0" ]; then
 fi
 
 # check usage
-if [ "$#" -ne 2 ]; then
+if [ ! "$#" -le 2 ]; then
 
-  >&2 printf 'USAGE: %s new-kernel (uninstall current) yes/no\n' "$0"
+  >&2 printf 'USAGE: %s new-kernel (optional: add "yes" to remove current kernel)\n' "$0"
 
   exit 1
 
@@ -28,6 +28,11 @@ REMOVEPKGS=""
 
 # current kernel
 CURRENT="linux$(uname -r | cut -d\. -f1,2 | sed s'/.//2')"
+
+if [ "$(echo "$1" | grep linux)" = "" ]; then
+    echo "error: Did you enter a valid kernel?"
+    exit 1
+fi
 
 if [ "$CURRENT" = "$1" ]; then
     echo "error: You cant (un)install your current kernel!"
@@ -54,7 +59,7 @@ if [ "${ADDPKGS}" != "" ]; then
     pacman -S ${ADDPKGS} --noconfirm
 else
     echo "warning: no packages have been installed! Did you enter a valid kernel?"
-	exit 1
+    exit 1
 fi
 
 # Remove all packages
