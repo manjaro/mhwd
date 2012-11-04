@@ -12,7 +12,7 @@ fi
 # check usage
 if [ ! "$#" -le 2 ]; then
 
-  >&2 printf 'USAGE: %s new-kernel (optional: add "rmc" to remove current kernel)\n' "$0"
+  >&2 printf 'USAGE: %s [new kernel: linux(version)] [optional - remove the current kernel: rmc]\n' "$0"
 
   exit 1
 
@@ -30,7 +30,7 @@ REMOVEPKGS=""
 CURRENT="linux$(uname -r | cut -d\. -f1,2 | sed s'/.//2')"
 
 if [ "$(echo "$1" | grep linux)" = "" ]; then
-    echo "error: Did you enter a valid kernel?"
+    echo "error: Did you enter a valid kernel?\n >> USAGE: %s [new kernel: linux(version)] [optional - remove the current kernel: rmc]\n"
     exit 1
 fi
 
