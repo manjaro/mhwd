@@ -30,12 +30,12 @@ REMOVEPKGS=""
 CURRENT="linux$(uname -r | cut -d\. -f1,2 | sed s'/.//2')"
 
 if [ "$(echo "$1" | grep linux)" = "" ]; then
-    echo "error: Did you enter a valid kernel?\n >> USAGE: %s [new kernel: linux(version)] [optional - remove the current kernel: rmc]\n"
+    printf "ERROR: Did you enter a valid kernel?\n >> USAGE: %s [new kernel: linux(version)] [optional - remove the current kernel: rmc]\n"
     exit 1
 fi
 
 if [ "$CURRENT" = "$1" ]; then
-    echo "error: You cant (un)install your current kernel!"
+    printf "ERROR: You cant (un)install your current kernel!\n"
     exit 1
 fi
 
