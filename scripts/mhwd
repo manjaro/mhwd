@@ -96,6 +96,9 @@ MHWD_CHECK_KMODS()
                done
            done
            KMODS="${KMODS} linux${KERNEL}-${META}"
+           if [ "${KMODS}" == "  linux${KERNEL}-" ]; then
+              KMODS=""
+           fi
         fi
     done
 }
