@@ -84,7 +84,7 @@ MHWD_DEVICE_BUS_ID()
 MHWD_CHECK_KMODS()
 {
 	local META=""
-	local KMODS=""
+	KMODS=""
 
     for KERNEL in {30..40} ; do
         if [ "$(pacman -Qq | grep linux${KERNEL})" != "" ]; then
