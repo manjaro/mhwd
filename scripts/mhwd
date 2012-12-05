@@ -81,30 +81,24 @@ MHWD_DEVICE_BUS_ID()
 }
 
 
-#MHWD_CHECK_KMODS()
-#{
-#        META=""
-#        KMODS=""
-#        NOKMODS=""
-#        for PKG in ${PACKAGES} ; do
-#            for KERNEL in $(pacman -Ss ${PKG} | grep linux | grep -v mhwd | grep / | grep - | cut -d- -f1 | cut -d/ -f2) ; do
-#                for KERN in $(pacman -Qq | grep ${KERNEL}) ; do
-#                    if [ "${KERN}" == "${KERNEL}" ] ; then
-#                       PKGCHECK=`pacman -Ss "${KERNEL}-${PKG}" | grep "${KERNEL}-${PKG}" | grep -v mhwd | cut -d/ -f2 | cut -d' ' -f1`
-#                       if [ "${KERNEL}-${PKG}" == "$PKGCHECK" ] ; then
-#                           KMODS="${KMODS} ${KERNEL}-${PKG}"
-#                           META="${PKG}"
-#                       fi
-#                    fi
-#                done
-#            done
-#            if [ "${PKG}" != "${META}" ] ; then
-#               NOKMODS="${NOKMODS} ${PKG}"
-#            fi
-#        done
-#
-#        PACKAGES="${META} ${KMODS} ${NOKMODS}"
-#}
+MHWD_CHECK_KMODS()
+{
+	local META=""
+	local KMODS=""
+
+    for KERNEL in {30..40} ; do
+        if [ "$(pacman -Qq | grep linux${KERNEL})" != "" ]; then
+           for PKG in ${PACKAGES} ; do
+               for KMOD in $(pacman -Qq | grep linux${KERNEL}-${PKG}) ; do
+                   if [ "linux${KERNEL}-${PKG}" == "${KMOD}" ] ; then
+                      META="${PKG}"
+                   fi
+               done
+           done
+           KMODS="${KMODS} linux${KERNEL}-${META}"
+        fi
+    done
+}
 
 
 MHWD_CHECK_PKGS()
@@ -258,6 +252,17 @@ if [ "${INSTALL}" == "true" ]; then
 		fi
 	fi
 
+	# Install additional kmods
+	MHWD_CHECK_KMODS
+
+	if [ "${KMODS}" != "" ]; then
+		${PACMAN} --needed -S${SYNC} ${KMODS}
+		if [ "$?" -ne "0" ]; then
+			echo "Error: pacman failed!"
+			exit 1
+		fi
+	fi
+
 	# Run postinstall function
 	if [ "`grep "post_install" "${CONFIGPATH}" | cut -d"#" -f1 | cut -d"(" -f1 | grep "post_install"`" == "post_install" ]; then
 	   post_install
@@ -282,6 +287,13 @@ if [ "${REMOVE}" == "true" ]; then
 	fi
 	if [ "${ARCH}" == "x86_64" ] && [ "${DEPENDS_64}" != "" ]; then
 		PACKAGES="${PACKAGES} ${DEPENDS_64}"
+	fi
+
+	# Check for additional kmods
+	MHWD_CHECK_KMODS
+
+	if [ "${KMODS}" != "" ]; then
+		PACKAGES="${PACKAGES} ${KMODS}"
 	fi
 
 
