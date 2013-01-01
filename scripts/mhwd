@@ -83,25 +83,24 @@ MHWD_DEVICE_BUS_ID()
 
 MHWD_CHECK_KMODS()
 {
-	local META=""
-	KMODS=""
+	CONKMODS=""
+	DEPKMODS=""
 
-    for KERNEL in {30..40} ; do
-        if [ "$(pacman -Qq | grep linux${KERNEL})" != "" ]; then
-           for PKG in ${PACKAGES} ; do
-               for KMOD in $(pacman -Qq | grep linux${KERNEL}-${PKG}) ; do
-                   if [ "linux${KERNEL}-${PKG}" == "${KMOD}" ] ; then
-                      META="${PKG}"
-                   fi
-               done
-           done
-           if [ "${META}" != "" ]; then
-              KMODS="${KMODS} linux${KERNEL}-${META}"
-           fi           
-        fi
-    done
+	if [ "${CONKMOD}" != "" ]; then
+		for KERNEL in {30..40} ; do
+			if [ "$(pacman -Qq | grep linux${KERNEL})" != "" ]; then
+				CONKMODS="${CONKMODS} linux${KERNEL}-${CONKMOD}"        
+			fi
+		done
+	fi
+	if [ "${DEPKMOD}" != "" ]; then
+		for KERNEL in {30..40} ; do
+			if [ "$(pacman -Qq | grep linux${KERNEL})" != "" ]; then
+				DEPKMODS="${DEPKMODS} linux${KERNEL}-${DEPKMOD}"        
+			fi
+		done
+	fi
 }
-
 
 MHWD_CHECK_PKGS()
 {
@@ -210,6 +209,9 @@ if [ "${INSTALL}" == "true" ]; then
 
 	PACKAGES=""
 
+	# Check for extramodules
+	MHWD_CHECK_KMODS
+
 	# Remove conflicts
 	if [ "${CONFLICTS}" != "" ]; then
 		PACKAGES="${CONFLICTS}"
@@ -219,6 +221,9 @@ if [ "${INSTALL}" == "true" ]; then
 	fi
 	if [ "${ARCH}" == "x86_64" ] && [ "${CONFLICTS_64}" != "" ]; then
 		PACKAGES="${PACKAGES} ${CONFLICTS_64}"
+	fi
+	if [ "${CONKMODS}" != "" ]; then
+		PACKAGES="${PACKAGES} ${CONKMODS}"
 	fi
 
         # Check if packages are installed
@@ -244,21 +249,12 @@ if [ "${INSTALL}" == "true" ]; then
 	if [ "${ARCH}" == "x86_64" ] && [ "${DEPENDS_64}" != "" ]; then
 		PACKAGES="${PACKAGES} ${DEPENDS_64}"
 	fi
-
+	if [ "${DEPKMODS}" != "" ]; then
+		PACKAGES="${PACKAGES} ${DEPKMODS}"
+	fi
 
 	if [ "${PACKAGES}" != "" ]; then
 		${PACMAN} --needed -S${SYNC} ${PACKAGES}
-		if [ "$?" -ne "0" ]; then
-			echo "Error: pacman failed!"
-			exit 1
-		fi
-	fi
-
-	# Install additional kmods
-	MHWD_CHECK_KMODS
-
-	if [ "${KMODS}" != "" ]; then
-		${PACMAN} --needed -S${SYNC} ${KMODS}
 		if [ "$?" -ne "0" ]; then
 			echo "Error: pacman failed!"
 			exit 1
@@ -280,6 +276,9 @@ if [ "${REMOVE}" == "true" ]; then
 
 	PACKAGES=""
 
+	# Check for extramodules
+	MHWD_CHECK_KMODS
+
 	# Remove dependencies
 	if [ "${DEPENDS}" != "" ]; then
 		PACKAGES="${DEPENDS}"
@@ -290,17 +289,12 @@ if [ "${REMOVE}" == "true" ]; then
 	if [ "${ARCH}" == "x86_64" ] && [ "${DEPENDS_64}" != "" ]; then
 		PACKAGES="${PACKAGES} ${DEPENDS_64}"
 	fi
-
-	# Check for additional kmods
-	MHWD_CHECK_KMODS
-
-	if [ "${KMODS}" != "" ]; then
-		PACKAGES="${PACKAGES} ${KMODS}"
+	if [ "${DEPKMODS}" != "" ]; then
+		PACKAGES="${PACKAGES} ${DEPKMODS}"
 	fi
 
-
-    # Check if packages are installed
-    MHWD_CHECK_PKGS
+        # Check if packages are installed
+        MHWD_CHECK_PKGS
 
 	if [ "${PACKAGES}" != "" ]; then
 		${PACMAN} -Rs ${PACKAGES}

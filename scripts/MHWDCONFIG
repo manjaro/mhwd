@@ -5,7 +5,7 @@ INCLUDE="anything"
 
 NAME="sample"
 INFO=""
-VERSION="2012.07.05"
+VERSION="2013.01.01"
 FREEDRIVER="true"
 PRIORITY="0"
 
@@ -19,6 +19,7 @@ MHWDDEPENDS="..."
 DEPENDS="..."
 DEPENDS_32="..."
 DEPENDS_64="lib32-..."
+DEPKMOD="..."
 
 
 # Conflicts
@@ -26,6 +27,7 @@ MHWDCONFLICTS="..."
 CONFLICTS="..."
 CONFLICTS_32="..."
 CONFLICTS_64="lib32-..."
+CONKMOD="..."
 
 
 
