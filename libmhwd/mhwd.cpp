@@ -610,6 +610,21 @@ void mhwd::getAllDevicesOfConfig(std::vector<mhwd::Device*>* devices, mhwd::Conf
             if (!found)
                 continue;
 
+
+            // Check blacklisted class ids
+            found = false;
+
+            for (std::vector<std::string>::const_iterator iterator = (*i_hwdIDs).blacklistedClassIDs.begin(); iterator != (*i_hwdIDs).blacklistedClassIDs.end(); iterator++) {
+                if (*iterator == (*i_device)->classID) {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (found)
+                continue;
+
+
             // Check vendor ids
             found = false;
 
@@ -623,6 +638,21 @@ void mhwd::getAllDevicesOfConfig(std::vector<mhwd::Device*>* devices, mhwd::Conf
             if (!found)
                 continue;
 
+
+            // Check blacklisted vendor ids
+            found = false;
+
+            for (std::vector<std::string>::const_iterator iterator = (*i_hwdIDs).blacklistedVendorIDs.begin(); iterator != (*i_hwdIDs).blacklistedVendorIDs.end(); iterator++) {
+                if (*iterator == (*i_device)->vendorID) {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (found)
+                continue;
+
+
             // Check device ids
             found = false;
 
@@ -634,6 +664,20 @@ void mhwd::getAllDevicesOfConfig(std::vector<mhwd::Device*>* devices, mhwd::Conf
             }
 
             if (!found)
+                continue;
+
+
+            // Check blacklisted device ids
+            found = false;
+
+            for (std::vector<std::string>::const_iterator iterator = (*i_hwdIDs).blacklistedDeviceIDs.begin(); iterator != (*i_hwdIDs).blacklistedDeviceIDs.end(); iterator++) {
+                if (*iterator == (*i_device)->deviceID) {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (found)
                 continue;
 
 
@@ -756,7 +800,7 @@ bool mhwd::readConfigFile(mhwd::Config *config, std::string configPath) {
                 config->freedriver = true;
         }
         else if (key == "classids") {
-            // Add new HardwareIDs group to vector if vector is empty
+            // Add new HardwareIDs group to vector if vector is not empty
             if (!config->hwdIDs.back().classIDs.empty()) {
                 mhwd::Config::HardwareIDs hwdID;
                 config->hwdIDs.push_back(hwdID);
@@ -765,7 +809,7 @@ bool mhwd::readConfigFile(mhwd::Config *config, std::string configPath) {
             config->hwdIDs.back().classIDs = splitValue(value);
         }
         else if (key == "vendorids") {
-            // Add new HardwareIDs group to vector if vector is empty
+            // Add new HardwareIDs group to vector if vector is not empty
             if (!config->hwdIDs.back().vendorIDs.empty()) {
                 mhwd::Config::HardwareIDs hwdID;
                 config->hwdIDs.push_back(hwdID);
@@ -774,13 +818,22 @@ bool mhwd::readConfigFile(mhwd::Config *config, std::string configPath) {
             config->hwdIDs.back().vendorIDs = splitValue(value);
         }
         else if (key == "deviceids") {
-            // Add new HardwareIDs group to vector if vector is empty
+            // Add new HardwareIDs group to vector if vector is not empty
             if (!config->hwdIDs.back().deviceIDs.empty()) {
                 mhwd::Config::HardwareIDs hwdID;
                 config->hwdIDs.push_back(hwdID);
             }
 
             config->hwdIDs.back().deviceIDs = splitValue(value);
+        }
+        else if (key == "blacklistedclassids") {
+            config->hwdIDs.back().blacklistedClassIDs = splitValue(value);
+        }
+        else if (key == "blacklistedvendorids") {
+            config->hwdIDs.back().blacklistedVendorIDs = splitValue(value);
+        }
+        else if (key == "blacklisteddeviceids") {
+            config->hwdIDs.back().blacklistedDeviceIDs = splitValue(value);
         }
         else if (key == "mhwddepends") {
             config->dependencies = splitValue(value);

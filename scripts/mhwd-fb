@@ -45,8 +45,8 @@ check_system() {
 
 get_framebuffer_resolution() {
 	# Find fitting resolution if not set
-	[ "${FBRESOLUTION}" == "" ] && FBRESOLUTION="$(LANG=C xrandr | grep \* | cut -d' ' -f4)-32"
-	[ "${FBRESOLUTION}" == "" ] && FBRESOLUTION="$(LANG=C hwinfo --framebuffer | grep -w 'Mode' | cut -d: -f2 | sed 's/^ *//g' | sed 's/ .*//g' | sort -nr | head -n 1)-32"
+	[ "${FBRESOLUTION}" == "" ] && FBRESOLUTION="$(LANG=C LC_MESSAGES=C xrandr | grep \* | cut -d' ' -f4 | head -n 1)-32"
+	[ "${FBRESOLUTION}" == "" ] && FBRESOLUTION="$(LANG=C LC_MESSAGES=C hwinfo --framebuffer | grep -w 'Mode' | cut -d: -f2 | sed 's/^ *//g' | sed 's/ .*//g' | sort -nr | head -n 1)-32"
 
 	# Check if resolution is valid
 	if ! [[ "$(echo "${FBRESOLUTION}" | sed 's/-//' | sed 's/x//')" =~ ^[0-9]+$ ]] || [[ "${FBRESOLUTION}" != *[0-9]"x"[0-9]* ]]; then

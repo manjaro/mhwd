@@ -68,7 +68,7 @@ set_Gl() {
 	if [ -e "$1" ]; then
 		ln -sf "$1" /usr/lib/libGL.so
 		ln -sf "$1" /usr/lib/libGL.so.1
-		ln -sf "$1" /usr/lib/libGL.so.1.2
+		ln -sf "$1" /usr/lib/libGL.so.1.2.0
 
 		echo "libGl: '$1'"
 	else
@@ -78,7 +78,7 @@ set_Gl() {
 	if [ -e "$3" ]; then
 		ln -sf "$3" /usr/lib32/libGL.so
 		ln -sf "$3" /usr/lib32/libGL.so.1
-		ln -sf "$3" /usr/lib32/libGL.so.1.2
+		ln -sf "$3" /usr/lib32/libGL.so.1.2.0
 
 		echo "lib32-libGl: '$3'"
 	fi

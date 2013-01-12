@@ -42,6 +42,7 @@ namespace mhwd {
     struct Config {
         struct HardwareIDs {
             std::vector<std::string> classIDs, vendorIDs, deviceIDs;
+            std::vector<std::string> blacklistedClassIDs, blacklistedVendorIDs, blacklistedDeviceIDs;
         };
 
         TYPE type;

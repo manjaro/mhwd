@@ -226,8 +226,8 @@ if [ "${INSTALL}" == "true" ]; then
 		PACKAGES="${PACKAGES} ${CONKMODS}"
 	fi
 
-        # Check if packages are installed
-        MHWD_CHECK_PKGS
+    # Check if packages are installed
+    MHWD_CHECK_PKGS
 
 	if [ "${PACKAGES}" != "" ]; then
 		${PACMAN} -Rs ${PACKAGES}
@@ -293,8 +293,8 @@ if [ "${REMOVE}" == "true" ]; then
 		PACKAGES="${PACKAGES} ${DEPKMODS}"
 	fi
 
-        # Check if packages are installed
-        MHWD_CHECK_PKGS
+    # Check if packages are installed
+    MHWD_CHECK_PKGS
 
 	if [ "${PACKAGES}" != "" ]; then
 		${PACMAN} -Rs ${PACKAGES}
