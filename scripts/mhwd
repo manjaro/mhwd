@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# source manjaro-kernel.conf
+. /var/lib/manjaro-system/manjaro-kernel.conf
+
 
 MHWDDEVICES=()
 
@@ -87,14 +90,14 @@ MHWD_CHECK_KMODS()
 	DEPKMODS=""
 
 	if [ "${CONKMOD}" != "" ]; then
-		for KERNEL in {30..40} ; do
+		for KERNEL in ${manjaro_kernels} ; do
 			if [ "$(pacman -Qq | grep -o linux${KERNEL} -m1)" != "" ]; then
 				CONKMODS="${CONKMODS} linux${KERNEL}-${CONKMOD}"        
 			fi
 		done
 	fi
 	if [ "${DEPKMOD}" != "" ]; then
-		for KERNEL in {30..40} ; do
+		for KERNEL in ${manjaro_kernels} ; do
 			if [ "$(pacman -Qq | grep -o linux${KERNEL} -m1)" != "" ]; then
 				DEPKMODS="${DEPKMODS} linux${KERNEL}-${DEPKMOD}"        
 			fi
