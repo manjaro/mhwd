@@ -88,14 +88,14 @@ MHWD_CHECK_KMODS()
 
 	if [ "${CONKMOD}" != "" ]; then
 		for KERNEL in {30..40} ; do
-			if [ "$(pacman -Qq | grep linux${KERNEL})" != "" ]; then
+			if [ "$(pacman -Qq | grep -o linux${KERNEL} -m1)" != "" ]; then
 				CONKMODS="${CONKMODS} linux${KERNEL}-${CONKMOD}"        
 			fi
 		done
 	fi
 	if [ "${DEPKMOD}" != "" ]; then
 		for KERNEL in {30..40} ; do
-			if [ "$(pacman -Qq | grep linux${KERNEL})" != "" ]; then
+			if [ "$(pacman -Qq | grep -o linux${KERNEL} -m1)" != "" ]; then
 				DEPKMODS="${DEPKMODS} linux${KERNEL}-${DEPKMOD}"        
 			fi
 		done
