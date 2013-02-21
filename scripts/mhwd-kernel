@@ -40,7 +40,7 @@ if [ "$CURRENT" = "$1" ]; then
 fi
 
 # sync databases
-pacman -Syy
+pacman -Syyu --noconfirm
 
 for PKG in $(pacman -Qq | grep $CURRENT) ; do
     NEWPKG=$(echo $PKG | sed s/$CURRENT/$1/)
