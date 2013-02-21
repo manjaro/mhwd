@@ -39,7 +39,7 @@ if [ "$CURRENT" = "$1" ]; then
     exit 1
 fi
 
-if [ ! -z $(pacman -Qu) ]; then
+if [ ! -z "$(pacman -Qu)" ]; then
     printf "ERROR: Your system is outdated. You have to Update it first!\n"
     exit 1
 fi
