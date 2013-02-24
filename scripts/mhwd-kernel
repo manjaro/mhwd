@@ -58,7 +58,7 @@ done
 
 
 # Install new packages
-if [ ! -z "${ADDPKGS}"]; then
+if [ ! -z "${ADDPKGS}" ]; then
     echo ""
     echo "> Installing new packages"
     pacman -S ${ADDPKGS} --noconfirm
@@ -68,7 +68,7 @@ else
 fi
 
 # Remove all packages
-if [ ! -z  "${REMOVEPKGS}"] && [ "$2" == "rmc" ]; then
+if [ ! -z  "${REMOVEPKGS}" ] && [ "$2" == "rmc" ]; then
     echo ""
     echo "> Removing packages"
     pacman -Rdd ${REMOVEPKGS} --noconfirm
