@@ -32,7 +32,7 @@ CONFLICTS="..."
 CONFLICTS_32="..."
 CONFLICTS_64="lib32-..."
 CONKMOD="..."
-
+CONFLDD="..."
 
 
 

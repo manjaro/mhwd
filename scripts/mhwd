@@ -212,6 +212,24 @@ if [ "${INSTALL}" == "true" ]; then
 
 	PACKAGES=""
 
+	# Remove conflicts
+	if [ "${CONFLDD}" != "" ]; then
+		PACKAGES="${CONFLDD}"
+	fi
+
+    # Check if packages are installed
+    MHWD_CHECK_PKGS
+
+	if [ "${PACKAGES}" != "" ]; then
+		${PACMAN} -Rdd ${PACKAGES}
+		if [ "$?" -ne "0" ]; then
+			echo "Error: pacman failed!"
+			exit 1
+		fi
+	fi
+
+	PACKAGES=""
+
 	# Check for extramodules
 	MHWD_CHECK_KMODS
 
