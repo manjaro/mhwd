@@ -1,7 +1,7 @@
 INSTALL(PROGRAMS mhwd
   DESTINATION /var/lib/mhwd/scripts)
 
-INSTALL(PROGRAMS mhwd-gpu
+INSTALL(PROGRAMS mhwd-xorg
   DESTINATION /usr/bin)
 
 INSTALL(PROGRAMS mhwd-kernel
