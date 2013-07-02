@@ -1,78 +1,103 @@
 #!/bin/bash
 
-# This script should exit on error
-set -e
+root_check() {
+    [[ $EUID != 0 ]] && err "Please run as root."
+}
 
-# do UID checking here so someone can at least get usage instructions
-if [ "$EUID" != "0" ]; then
-    echo "error: This script must be run as root."
-    exit 1
-fi
+args_check() {
+    [[ $1 -lt $2 || $1 -gt $3 ]] && err "Please use the right amount of arguments (use -h for help)."
+}
 
-# check usage
-if [ ! "$#" -le 2 ]; then
+err() {
+    echo "Error: $1" 1>&2; exit 1
+}
 
-  >&2 printf ' >> USAGE: %s [new kernel: linux(version)] [optional - remove the current kernel: rmc]\n' "$0"
+kernel_usage() {
+    echo "Usage: mhwd-kernel [option]
+    -h  --help              Show this help message
+    -i  --install           Install a new kernel        [kernel(s)] [optional: rmc = remove current kernel]
+    -l  --list              List all available kernels
+    -li --listinstalled     List installed kernels
+    -r  --remove            Remove a kernel             [kernel(s)]"
+}
 
-  exit 1
+kernel_install() {
+    pkginstall=()
+    rmc=0
 
-fi
+    for kernel in "$@"; do
+        [[ $kernel = "rmc" ]] && rmc=1 && continue
+        [[ $kernel != linux[0-9][0-9]?([0-9]) && $kernel != "rmc" ]] && err "Invalid argument (use -h for help)."
+        [[ $kernel != linux[0-9][0-9]?([0-9]) ]] && err "Please enter a valid kernel name."
+        [[ $current = $kernel ]] && err "You can't reinstall your current kernel. Please use 'pacman -Syu' instead to update."
+        [[ -z $(pacman -Ssq "^$kernel$") ]] && err "Please make sure if the given kernel(s) exist(s)."
+        
+        for pkg in $(pacman -Qqs "$current"); do
+            pkg=${pkg//$current/$kernel}
+            [[ -n $(pacman -Ssq "^$pkg$") ]] && pkginstall+=("$pkg")
+        done
+    done
 
-# switch to basic language
-export LANG=C
-export LC_MESSAGES=C
+    pacman -Syy
 
-# variables to hold packages
-ADDPKGS=""
-REMOVEPKGS=""
+    pacman -S "${pkginstall[@]}"
 
-# current kernel
-CURRENT="linux$(uname -r | cut -d\. -f1,2 | sed s'/.//2')"
+    [[ $rmc = 1 && $? = 0 ]] && pacman -R $(pacman -Qqs $current)
+    [[ $rmc = 1 && $? != 0 ]] && { echo ""; err "'rmc' aborted because the kernel failed to install or canceled on removal."; }
+}
 
-if [ "$(echo "$1" | grep linux)" = "" ]; then
-    printf " >> ERROR: Did you enter a valid kernel?\n >> USAGE: mhwd-kernel [new kernel: linux(version)] [optional - remove the current kernel: rmc]\n"
-    exit 1
-fi
+kernel_repo() {
+    echo "Available kernels:"
+    pacman -Ssq "^linux[0-9][0-9]?([0-9])$" | while read -r; do echo "   * $REPLY"; done
+}
 
-if [ "$CURRENT" = "$1" ]; then
-    printf "ERROR: You cant (un)install your current kernel!\n"
-    exit 1
-fi
+kernel_list() {
+    echo "Currently running: $(uname -r) (${current})"
+    echo "The following kernels are installed in your system:"
+    pacman -Qqs "^linux[0-9][0-9]?([0-9])$" | while read -r; do echo "   * $REPLY"; done
+}
 
-if [ ! -z "$(pacman -Qu)" ]; then
-    printf "ERROR: Your system is outdated. You have to Update it first!\n"
-    exit 1
-fi
+kernel_remove() {
+    pkgremove=()
 
-# sync databases
-pacman -Syy
+    for kernel in "$@"; do
+        [[  -z "$kernel" ]] && err "Invalid argument (use -h for help)."
+        [[ $kernel != linux[0-9][0-9]?([0-9]) ]] && err "Please enter a valid kernel name."
+        [[ $current = $kernel ]] && err "You can't remove your current kernel."
+        [[ -z $(pacman -Qqs "^$1$") ]] && err "Kernel not installed."
 
-for PKG in $(pacman -Qq | grep $CURRENT) ; do
-    NEWPKG=$(echo $PKG | sed s/$CURRENT/$1/)
-    PKGCHECK=`pacman -Ss "$NEWPKG" | grep "$NEWPKG" | head -1 | cut -d/ -f2 | cut -d' ' -f1`
-    if [ "$NEWPKG" == "$PKGCHECK" ] ; then
-       REMOVEPKGS="${REMOVEPKGS} $PKG"
-       ADDPKGS="${ADDPKGS} $NEWPKG"
-    fi
-done
+        for pkg in $(pacman -Qqs "$kernel"); do
+            pkgremove+=("$pkg")
+        done
+    done
 
+    pacman -R "${pkgremove[@]}"
+}
 
-# Install new packages
-if [ ! -z "${ADDPKGS}" ]; then
-    echo ""
-    echo "> Installing new packages"
-    pacman -S ${ADDPKGS} --noconfirm
-else
-    echo "warning: no packages have been installed! Did you enter a valid kernel?"
-    exit 1
-fi
+IFS=. read -r major minor _ <<< "$(uname -r)"
+current="linux$major$minor"
 
-# Remove all packages
-if [ ! -z  "${REMOVEPKGS}" ] && [ "$2" == "rmc" ]; then
-    echo ""
-    echo "> Removing packages"
-    pacman -Rdd ${REMOVEPKGS} --noconfirm
-fi
+case "$1" in
+    -h | --help)            args_check $# 1 1
+                            kernel_usage
+                            exit 0;;
+    -i | --install)         shift
+                            root_check
+                            kernel_install $@
+                            exit 0 ;;
+    -l | --list)            args_check $# 1 1
+                            kernel_repo
+                            exit 0 ;;
+    -li| --listinstalled)   args_check $# 1 1
+                            kernel_list
+                            exit 0 ;;
+    -r | --remove)          shift
+                            root_check
+                            kernel_remove $@
+                            exit 0 ;;
+    -*)                     err "Invalid argument (use -h for help)." ;;
+    *)                      err "No arguments given (use -h for help)." ;;
+esac
 
 
 
