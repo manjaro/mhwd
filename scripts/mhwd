@@ -216,6 +216,9 @@ if [ "${INSTALL}" == "true" ]; then
 	if [ "${CONFLDD}" != "" ]; then
 		PACKAGES="${CONFLDD}"
 	fi
+	if [ "${ARCH}" == "x86_64" ] && [ "${CONFLDD_64}" != "" ]; then
+		PACKAGES="${PACKAGES} ${CONFLDD_64}"
+	fi
 
     # Check if packages are installed
     MHWD_CHECK_PKGS
