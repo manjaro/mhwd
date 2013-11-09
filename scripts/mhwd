@@ -92,14 +92,18 @@ MHWD_CHECK_KMODS()
 	if [ "${CONKMOD}" != "" ]; then
 		for KERNEL in ${manjaro_kernels} ; do
 			if [ "$(pacman -Qq | grep -o linux${KERNEL} -m1)" != "" ]; then
-				CONKMODS="${CONKMODS} linux${KERNEL}-${CONKMOD}"        
+				for KMOD in ${CONKMOD} ; do
+					CONKMODS="${CONKMODS} linux${KERNEL}-${KMOD}"
+				done
 			fi
 		done
 	fi
 	if [ "${DEPKMOD}" != "" ]; then
 		for KERNEL in ${manjaro_kernels} ; do
 			if [ "$(pacman -Qq | grep -o linux${KERNEL} -m1)" != "" ]; then
-				DEPKMODS="${DEPKMODS} linux${KERNEL}-${DEPKMOD}"        
+				for KMOD in ${DEPKMOD} ; do
+					DEPKMODS="${DEPKMODS} linux${KERNEL}-${KMOD}"
+				done				        
 			fi
 		done
 	fi
@@ -127,7 +131,7 @@ declare -fr MHWD_HEADING MHWD_PCI_BUS_ID
 ARCH="$(uname -m)"
 PARAM=$#
 INCLUDEPATH="/var/lib/mhwd/scripts/include"
-PACMAN="pacman --noconfirm --noprogress"
+PACMAN="pacman --noconfirm"
 SYNC=""
 INSTALL=""
 REMOVE=""
