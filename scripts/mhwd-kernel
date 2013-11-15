@@ -39,7 +39,7 @@ kernel_install() {
     done
 
     pacman -Syy
-    ! pacman -Qu &>/dev/null && err "Please update your system first."
+    [[ "`pacman -Qu`" != "" ]] && err "Please update your system first."
 
     pacman -S "${pkginstall[@]}"
 
