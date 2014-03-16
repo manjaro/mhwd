@@ -169,7 +169,7 @@ fi
 # Set libGl and libglx
 if [ "${SETGL}" == "mesa" ] || [ "${SETGL}" == "default" ]; then
 	set_modules
-	set_Gl "/usr/lib/mesa-libGL.so.1.2.0" "/usr/lib/xorg/modules/extensions/libglx.xorg" "/usr/lib32/mesa-libGL.so.1.2.0"
+	set_Gl "/usr/lib/mesa/libGL.so.1.2.0" "/usr/lib/xorg/modules/extensions/libglx.xorg" "/usr/lib32/mesa/libGL.so.1.2.0"
 elif [ "${SETGL}" == "nvidia" ]; then
 	set_modules "nvidia" "nouveau ttm drm_kms_helper drm"
 	set_Gl "/usr/lib/nvidia/libGL.so" "/usr/lib/nvidia/xorg/modules/extensions/libglx.so" "/usr/lib32/nvidia/libGL.so"
