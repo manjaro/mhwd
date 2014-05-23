@@ -42,7 +42,7 @@ kernel_install() {
 
     outofdate="$(pacman -Qqu | tr '\n' ' ')"
     if [[ -n $outofdate ]]; then
-        echo "The following packackages are out of date, please update your system first: $outofdate" >&2
+        echo "The following packages are out of date, please update your system first: $outofdate" >&2
         read -p "Do you want to continue anyway? [y/N] " yesno
         [[ $yesno = [Yy]?([Ee][Ss]) ]] || exit 1
     fi
