@@ -1,12 +1,6 @@
 #!/bin/bash
 
-# source manjaro-kernel.conf
-. /var/lib/manjaro-system/manjaro-kernel.conf
-
-
 MHWDDEVICES=()
-
-
 
 ### Module Functions ###
 
@@ -90,19 +84,19 @@ MHWD_CHECK_KMODS()
 	DEPKMODS=""
 
 	if [ "${CONKMOD}" != "" ]; then
-		for KERNEL in ${manjaro_kernels} ; do
-			if [ "$(pacman -Qq | grep -o linux${KERNEL} -m1)" != "" ]; then
+		for KERNEL in ${KERNELS} ; do
+			if [ "$(pacman -Qq | grep -o ${KERNEL} -m1)" != "" ]; then
 				for KMOD in ${CONKMOD} ; do
-					CONKMODS="${CONKMODS} linux${KERNEL}-${KMOD}"
+					CONKMODS="${CONKMODS} ${KERNEL}-${KMOD}"
 				done
 			fi
 		done
 	fi
 	if [ "${DEPKMOD}" != "" ]; then
-		for KERNEL in ${manjaro_kernels} ; do
-			if [ "$(pacman -Qq | grep -o linux${KERNEL} -m1)" != "" ]; then
+		for KERNEL in ${KERNELS} ; do
+			if [ "$(pacman -Qq | grep -o ${KERNEL} -m1)" != "" ]; then
 				for KMOD in ${DEPKMOD} ; do
-					DEPKMODS="${DEPKMODS} linux${KERNEL}-${KMOD}"
+					DEPKMODS="${DEPKMODS} ${KERNEL}-${KMOD}"
 				done				        
 			fi
 		done
@@ -140,7 +134,7 @@ CACHEPATH="/var/cache/pacman/pkg"
 PMCONFIG="/etc/pacman.conf"
 PMROOT="/"
 PACKAGES=""
-
+KERNELS=$(pacman -Qqs "^linux[0-9][0-9]?([0-9])$")
 
 if [ "${PARAM}" -lt 1 ]; then
 	echo "No Arguments!"
