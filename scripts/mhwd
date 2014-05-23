@@ -195,12 +195,13 @@ done
 PACMAN="${PACMAN} --cachedir ${CACHEPATH} --config ${PMCONFIG} --root ${PMROOT}"
 
 if [ "${CONFIGPATH}" != "" ] && [ -e "${CONFIGPATH}" ]; then
+	echo "Sourcing ${CONFIGPATH}"
 	. "${CONFIGPATH}"
 
-	# Now include additional functions for this group
-	for classid in "${CLASSIDS}"
-	do
+	for classid in ${CLASSIDS} ; do
+		echo "Processing classid: ${classid}"
 		if [ -e "${INCLUDEPATH}/${classid}" ]; then
+			echo "Sourcing ${INCLUDEPATH}/${classid}"
 			. "${INCLUDEPATH}/${classid}"
 		fi
 	done
