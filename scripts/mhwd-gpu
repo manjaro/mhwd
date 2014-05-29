@@ -60,8 +60,14 @@ set_xorg()
 }
 
 # param 1: libGl path
-# param 2: libglx path
-# optional param 3: lib32 libGl path
+# param 2: libGLESv1 path
+# param 3: libGLESv2 path
+# param 4: libEGL path
+# param 5: libglx path
+# optional param 6: lib32 libGl path
+# optional param 7: lib32 libGLESv1 path
+# optional param 8: lib32 libGLESv2 path
+# optional param 9: lib32 libEGL path
 set_Gl() {
 	if [ -e "$1" ]; then
 		ln -sf "$1" /usr/lib/libGL.so
@@ -73,20 +79,80 @@ set_Gl() {
 		echo "warning: could not find '$1'!"
 	fi
 
-	if [ -e "$3" ]; then
-		ln -sf "$3" /usr/lib32/libGL.so
-		ln -sf "$3" /usr/lib32/libGL.so.1
-		ln -sf "$3" /usr/lib32/libGL.so.1.2.0
-
-		echo "lib32-libGl: '$3'"
-	fi
-
 	if [ -e "$2" ]; then
-		ln -sf "$2" /usr/lib/xorg/modules/extensions/libglx.so
+		ln -sf "$2" /usr/lib/libGLESv1_CM.so
+		ln -sf "$2" /usr/lib/libGLESv1_CM.so.1
+		ln -sf "$2" /usr/lib/libGLESv1_CM.so.1.1.0
 
-		echo "libglx: '$2'"
+		echo "libGLESv1: '$2'"
 	else
 		echo "warning: could not find '$2'!"
+	fi
+
+	if [ -e "$3" ]; then
+		ln -sf "$3" /usr/lib/libGLESv2.so
+		ln -sf "$3" /usr/lib/libGLESv2.so.2
+		ln -sf "$3" /usr/lib/libGLESv2.so.2.0.0
+
+		echo "libGLESv2: '$3'"
+	else
+		echo "warning: could not find '$3'!"
+	fi
+
+	if [ -e "$4" ]; then
+		ln -sf "$4" /usr/lib/libEGL.so
+		ln -sf "$4" /usr/lib/libEGL.so.1
+		ln -sf "$4" /usr/lib/libEGL.so.1.0.0
+
+		echo "libEGL: '$4'"
+	else
+		echo "warning: could not find '$4'!"
+	fi
+
+	if [ -e "$6" ]; then
+		ln -sf "$6" /usr/lib32/libGL.so
+		ln -sf "$6" /usr/lib32/libGL.so.1
+		ln -sf "$6" /usr/lib32/libGL.so.1.2.0
+
+		echo "lib32-libGl: '$6'"
+	fi
+
+	if [ -e "$7" ]; then
+		ln -sf "$7" /usr/lib32/libGLESv1_CM.so
+		ln -sf "$7" /usr/lib32/libGLESv1_CM.so.1
+		ln -sf "$7" /usr/lib32/libGLESv1_CM.so.1.1.0
+
+		echo "lib32-libGLESv1: '$7'"
+	else
+		echo "warning: could not find '$7'!"
+	fi
+
+	if [ -e "$8" ]; then
+		ln -sf "$8" /usr/lib32/libGLESv2.so
+		ln -sf "$8" /usr/lib32/libGLESv2.so.2
+		ln -sf "$8" /usr/lib32/libGLESv2.so.2.0.0
+
+		echo "lib32-libGLESv2: '$8'"
+	else
+		echo "warning: could not find '$8'!"
+	fi
+
+	if [ -e "$9" ]; then
+		ln -sf "$9" /usr/lib32/libEGL.so
+		ln -sf "$9" /usr/lib32/libEGL.so.1
+		ln -sf "$9" /usr/lib32/libEGL.so.1.0.0
+
+		echo "lib32-libEGL: '$9'"
+	else
+		echo "warning: could not find '$9'!"
+	fi
+
+	if [ -e "$5" ]; then
+		ln -sf "$5" /usr/lib/xorg/modules/extensions/libglx.so
+
+		echo "libglx: '$5'"
+	else
+		echo "warning: could not find '$5'!"
 	fi
 }
 
@@ -103,7 +169,13 @@ print_status()
 {
 	echo ":: status"
 	print_link_destination_if_exists "/usr/lib32/libGL.so" "  lib32-libGl:"
+	print_link_destination_if_exists "/usr/lib32/libGLESv1_CM.so" "  lib32-libGLESv1:"
+	print_link_destination_if_exists "/usr/lib32/libGLESv2.so" "  lib32-libGLESv2:"
+	print_link_destination_if_exists "/usr/lib32/libEGL.so" "  lib32-libEGL:"
 	print_link_destination_if_exists "/usr/lib/libGL.so" "  libGl:"
+	print_link_destination_if_exists "/usr/lib/libGLESv1_CM.so" "  libGLESv1:"
+	print_link_destination_if_exists "/usr/lib/libGLESv2.so" "  libGLESv2:"
+	print_link_destination_if_exists "/usr/lib/libEGL.so" "  libEGLl:"
 	print_link_destination_if_exists "/usr/lib/xorg/modules/extensions/libglx.so" "  libglx:"
 	print_link_destination_if_exists "${MHWDXORGCONF}" "  xorg configuration file:"
 }
@@ -169,13 +241,37 @@ fi
 # Set libGl and libglx
 if [ "${SETGL}" == "mesa" ] || [ "${SETGL}" == "default" ]; then
 	set_modules
-	set_Gl "/usr/lib/mesa/libGL.so.1.2.0" "/usr/lib/xorg/modules/extensions/libglx.xorg" "/usr/lib32/mesa/libGL.so.1.2.0"
+	set_Gl "/usr/lib/mesa/libGL.so.1.2.0" \
+               "/usr/lib/mesa/libGLESv1_CM.so.1.1.0" \
+               "/usr/lib/mesa/libGLESv2.so.2.0.0" \
+               "/usr/lib/mesa/libEGL.so.1.0.0" \
+               "/usr/lib/xorg/modules/extensions/libglx.xorg" \
+               "/usr/lib32/mesa/libGL.so.1.2.0" \
+               "/usr/lib32/mesa/libGLESv1_CM.so.1.1.0" \
+               "/usr/lib32/mesa/libGLESv2.so.2.0.0" \
+               "/usr/lib32/mesa/libEGL.so.1.0.0"
 elif [ "${SETGL}" == "nvidia" ]; then
 	set_modules "nvidia" "nouveau ttm drm_kms_helper drm"
-	set_Gl "/usr/lib/nvidia/libGL.so" "/usr/lib/nvidia/xorg/modules/extensions/libglx.so" "/usr/lib32/nvidia/libGL.so"
+	set_Gl "/usr/lib/nvidia/libGL.so" \
+               "/usr/lib/nvidia/libGLESv1_CM.so" \
+               "/usr/lib/nvidia/libGLESv2.so" \
+               "/usr/lib/nvidia/libEGL.so" \
+               "/usr/lib/nvidia/xorg/modules/extensions/libglx.so" \
+               "/usr/lib32/nvidia/libGL.so" \
+               "/usr/lib32/nvidia/libGLESv1_CM.so" \
+               "/usr/lib32/nvidia/libGLESv2.so" \
+               "/usr/lib32/nvidia/libEGL.so"
 elif [ "${SETGL}" == "catalyst" ] || [ "${SETGL}" == "ati" ]; then
 	set_modules "fglrx" "radeon"
-	set_Gl "/usr/lib/fglrx/libGL.so" "/usr/lib/fglrx/xorg/modules/extensions/libglx.so" "/usr/lib32/fglrx/libGL.so"
+	set_Gl "/usr/lib/fglrx/libGL.so" \
+               "/usr/lib/fglrx/libGLESv1_CM.so" \
+               "/usr/lib/fglrx/libGLESv2.so" \
+               "/usr/lib/fglrx/libEGL.so" \
+               "/usr/lib/fglrx/xorg/modules/extensions/libglx.so" \
+               "/usr/lib32/fglrx/libGL.so" \
+               "/usr/lib32/fglrx/libGLESv1_CM.so" \
+               "/usr/lib32/fglrx/libGLESv2.so" \
+               "/usr/lib32/fglrx/libEGL.so"
 elif [ "${SETGL}" != "" ]; then
 	echo "error: invalid argument '${SETGL}'"
 	exit 1
@@ -195,12 +291,30 @@ if [ "${CHECKCONFIG}" == "true" ]; then
 		echo "xorg configuration symlink valid..."
 	fi
 
-	if [ ! -e "/usr/lib/libGL.so" ] || [ ! -e "/usr/lib/xorg/modules/extensions/libglx.so" ] || [ -L "/usr/lib32/libGL.so" -a ! -e "/usr/lib32/libGL.so" ] || [ -e "/usr/lib32/libGL.so.mesa" -a ! -e "/usr/lib32/libGL.so" ]; then
+	if [ ! -e "/usr/lib/libGL.so" ] || [ ! -e "/usr/lib/xorg/modules/extensions/libglx.so" ] \
+	   [ ! -e "/usr/lib/libGLESv1_CM.so" ] || [ ! -e "/usr/lib/libGLESv2.so" ] || [ ! -e "/usr/lib/libEGL.so" ] || \
+	   [ -L "/usr/lib32/libGL.so" -a ! -e "/usr/lib32/libGL.so" ] || \
+	   [ -e "/usr/lib32/mesa/libGL.so.1.2.0" -a ! -e "/usr/lib32/libGL.so" ] || \
+	   [ -L "/usr/lib32/libGLESv1_CM.so" -a ! -e "/usr/lib32/libGLESv1_CM.so" ] || \
+	   [ -e "/usr/lib32/mesa/libGLESv1_CM.so.1.1.0" -a ! -e "/usr/lib32/libGLESv1_CM.so" ] || \
+	   [ -L "/usr/lib32/libGLESv2.so" -a ! -e "/usr/lib32/libGLESv2.so" ] || \
+	   [ -e "/usr/lib32/mesa/libGLESv2.so.2.0.0" -a ! -e "/usr/lib32/libGLESv2.so" ] || \
+	   [ -L "/usr/lib32/libEGL.so" -a ! -e "/usr/lib32/libEGL.so" ] || \
+	   [ -e "/usr/lib32/mesa/libEGL.so.1.0.0" -a ! -e "/usr/lib32/libEGL.so" ];
+ then
 		echo "libGl and libglx symlinks are invalid!"
 		echo "Falling back to default..."
 
 		set_modules
-		set_Gl "/usr/lib/libGL.so.mesa" "/usr/lib/xorg/modules/extensions/libglx.xorg" "/usr/lib32/libGL.so.mesa"
+		set_Gl "/usr/lib/mesa/libGL.so.1.2.0" \
+	               "/usr/lib/mesa/libGLESv1_CM.so.1.1.0" \
+	               "/usr/lib/mesa/libGLESv2.so.2.0.0" \
+	               "/usr/lib/mesa/libEGL.so.1.0.0" \
+	               "/usr/lib/xorg/modules/extensions/libglx.xorg" \
+	               "/usr/lib32/mesa/libGL.so.1.2.0" \
+	               "/usr/lib32/mesa/libGLESv1_CM.so.1.1.0" \
+	               "/usr/lib32/mesa/libGLESv2.so.2.0.0" \
+	               "/usr/lib32/mesa/libEGL.so.1.0.0"
 	else
 		echo "libGl and libglx symlinks valid..."
 	fi
