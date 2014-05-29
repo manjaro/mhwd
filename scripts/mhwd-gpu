@@ -169,7 +169,7 @@ print_status()
 	print_link_destination_if_exists "/usr/lib/libGL.so" "  libGl:"
 	print_link_destination_if_exists "/usr/lib/libGLESv1_CM.so" "  libGLESv1:"
 	print_link_destination_if_exists "/usr/lib/libGLESv2.so" "  libGLESv2:"
-	print_link_destination_if_exists "/usr/lib/libEGL.so" "  libEGLl:"
+	print_link_destination_if_exists "/usr/lib/libEGL.so" "  libEGL:"
 	print_link_destination_if_exists "/usr/lib/xorg/modules/extensions/libglx.so" "  libglx:"
 	print_link_destination_if_exists "${MHWDXORGCONF}" "  xorg configuration file:"
 }
