@@ -285,7 +285,7 @@ if [ "${CHECKCONFIG}" == "true" ]; then
 		echo "xorg configuration symlink valid..."
 	fi
 
-	if [ ! -e "/usr/lib/libGL.so" ] || [ ! -e "/usr/lib/xorg/modules/extensions/libglx.so" ] \
+	if [ ! -e "/usr/lib/libGL.so" ] || [ ! -e "/usr/lib/xorg/modules/extensions/libglx.so" ] || \
 	   [ ! -e "/usr/lib/libGLESv1_CM.so" ] || [ ! -e "/usr/lib/libGLESv2.so" ] || [ ! -e "/usr/lib/libEGL.so" ] || \
 	   [ -L "/usr/lib32/libGL.so" -a ! -e "/usr/lib32/libGL.so" ] || \
 	   [ -e "/usr/lib32/mesa/libGL.so.1.2.0" -a ! -e "/usr/lib32/libGL.so" ] || \
