@@ -123,8 +123,6 @@ set_Gl() {
 		ln -sf "$7" /usr/lib32/libGLESv1_CM.so.1.1.0
 
 		echo "lib32-libGLESv1: '$7'"
-	else
-		echo "warning: could not find '$7'!"
 	fi
 
 	if [ -e "$8" ]; then
@@ -133,8 +131,6 @@ set_Gl() {
 		ln -sf "$8" /usr/lib32/libGLESv2.so.2.0.0
 
 		echo "lib32-libGLESv2: '$8'"
-	else
-		echo "warning: could not find '$8'!"
 	fi
 
 	if [ -e "$9" ]; then
@@ -143,8 +139,6 @@ set_Gl() {
 		ln -sf "$9" /usr/lib32/libEGL.so.1.0.0
 
 		echo "lib32-libEGL: '$9'"
-	else
-		echo "warning: could not find '$9'!"
 	fi
 
 	if [ -e "$5" ]; then
