@@ -97,7 +97,7 @@ MHWD_CHECK_KMODS()
 			if [ "$(pacman -Qq | grep -o ${KERNEL} -m1)" != "" ]; then
 				for KMOD in ${DEPKMOD} ; do
 					DEPKMODS="${DEPKMODS} ${KERNEL}-${KMOD}"
-				done				        
+				done
 			fi
 		done
 	fi
@@ -135,6 +135,7 @@ PMCONFIG="/etc/pacman.conf"
 PMROOT="/"
 PACKAGES=""
 KERNELS=$(pacman -Qqs "^linux[0-9][0-9]?([0-9])$")
+MHWD_IS_LIB32=""
 
 if [ "${PARAM}" -lt 1 ]; then
 	echo "No Arguments!"
@@ -143,7 +144,51 @@ fi
 
 for (( I=1; $I <= $PARAM; I++ ))
 do
+if [ "${ARCH}" == "x86_64" ];then
 	case "$1" in
+		--install)
+			INSTALL="true"
+			;;
+		--remove)
+			REMOVE="true"
+			;;
+		--sync)
+			SYNC="y"
+			;;
+		--cachedir)
+			shift
+			CACHEPATH="$1"
+			;;
+		--config)
+			shift
+			CONFIGPATH="$1"
+			;;
+		--pmconfig)
+			shift
+			PMCONFIG="$1"
+			;;
+		--pmroot)
+			shift
+			PMROOT="$1"
+			;;
+		--device)
+			shift
+			MHWDDEVICES+=("$1")
+			;;
+		--lib32)
+			shift
+			IS_LIB32="${1:-true}"
+			;;
+		"")	;;
+		*)
+			echo "Wrong Argument: $1"
+			exit 1
+			;;
+	esac
+
+	shift
+else
+		case "$1" in
 		--install)
 			INSTALL="true"
 			;;
@@ -181,6 +226,7 @@ do
 	esac
 
 	shift
+fi
 done
 
 
@@ -201,6 +247,12 @@ if [ "${CONFIGPATH}" != "" ] && [ -e "${CONFIGPATH}" ]; then
 	done
 else
 	exit 1
+fi
+
+if [ "${MHWD_IS_LIB32}" == "true" ];then
+	export MHWD_IS_LIB32="true"
+else
+	export MHWD_IS_LIB32="false"
 fi
 
 if [ "${INSTALL}" == "true" ]; then
@@ -243,7 +295,11 @@ if [ "${INSTALL}" == "true" ]; then
 		PACKAGES="${PACKAGES} ${CONFLICTS_32}"
 	fi
 	if [ "${ARCH}" == "x86_64" ] && [ "${CONFLICTS_64}" != "" ]; then
-		PACKAGES="${PACKAGES} ${CONFLICTS_64}"
+		if [ "${MHWD_IS_LIB32}" == "true" ];then
+			PACKAGES="${PACKAGES} ${CONFLICTS_64}"
+		else
+			PACKAGES="${PACKAGES}"
+		fi
 	fi
 	if [ "${CONKMODS}" != "" ]; then
 		PACKAGES="${PACKAGES} ${CONKMODS}"
@@ -270,7 +326,11 @@ if [ "${INSTALL}" == "true" ]; then
 		PACKAGES="${PACKAGES} ${DEPENDS_32}"
 	fi
 	if [ "${ARCH}" == "x86_64" ] && [ "${DEPENDS_64}" != "" ]; then
-		PACKAGES="${PACKAGES} ${DEPENDS_64}"
+		if [ "${MHWD_IS_LIB32}" == "true" ];then
+			PACKAGES="${PACKAGES} ${DEPENDS_64}"
+		else
+			PACKAGES="${PACKAGES}"
+		fi
 	fi
 	if [ "${DEPKMODS}" != "" ]; then
 		PACKAGES="${PACKAGES} ${DEPKMODS}"
@@ -310,7 +370,11 @@ if [ "${REMOVE}" == "true" ]; then
 		PACKAGES="${PACKAGES} ${DEPENDS_32}"
 	fi
 	if [ "${ARCH}" == "x86_64" ] && [ "${DEPENDS_64}" != "" ]; then
-		PACKAGES="${PACKAGES} ${DEPENDS_64}"
+		if [ "${MHWD_IS_LIB32}" == "true" ];then
+			PACKAGES="${PACKAGES} ${DEPENDS_64}"
+		else
+			PACKAGES="${PACKAGES}"
+		fi
 	fi
 	if [ "${DEPKMODS}" != "" ]; then
 		PACKAGES="${PACKAGES} ${DEPKMODS}"
