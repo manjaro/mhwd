@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# set -x
-
 PARAM=$#
 MHWDXORGCONF="/etc/X11/xorg.conf.d/90-mhwd.conf"
 CHECKCONFIG="false"
@@ -222,6 +220,9 @@ print_help()
 	echo "   --check                         check for invalid symlinks and repair"
 	echo "   --setgl [mesa/nvidia/catalyst]  set libgl and libglx"
 	echo "   --setxorg [PATH]                set xorg configuration file"
+	if [ "${ARCH}" == "x86_64" ];then
+		echo "   --lib32 [true/false]            set lib32 support"
+	fi
 	echo ""
 }
 
@@ -231,39 +232,79 @@ if [ "${PARAM}" -lt 1 ]; then
 	exit 0
 fi
 
-for (( I=1; $I <= $PARAM; I++ ))
-do
-	case "$1" in
-		--help)
-			print_help
-			exit 0
+if [ "${ARCH}" == "x86_64" ];then
+	for (( I=1; $I <= $PARAM; I++ ));do
+		case "$1" in
+			--help)
+				print_help
+				exit 0
 			;;
-		--status)
-			print_status
-			exit 0
+			--status)
+				print_status
+				exit 0
 			;;
-		--check)
-			CHECKCONFIG="true"
+			--check)
+				CHECKCONFIG="true"
 			;;
-		--setgl)
-			shift
-			SETGL="$1"
+			--setgl)
+				shift
+				SETGL="$1"
 			;;
-		--setxorg)
-			shift
-			SETXORGCONF="$1"
+			--setxorg)
+				shift
+				SETXORGCONF="$1"
 			;;
-		"") ;;
-		*)
-			echo "error: invalid argument: $1"
-			echo ""
-			print_help
-			exit 1
+			--lib32)
+				shift
+				MHWD64_IS_LIB32="$1"
 			;;
-	esac
+			"") ;;
+			*)
+				echo "error: invalid argument: $1"
+				echo ""
+				print_help
+				exit 1
+			;;
+		esac
 
-	shift
-done
+		shift
+	done
+else
+	for (( I=1; $I <= $PARAM; I++ ));do
+		case "$1" in
+			--help)
+				print_help
+				exit 0
+			;;
+			--status)
+				print_status
+				exit 0
+			;;
+			--check)
+				CHECKCONFIG="true"
+			;;
+			--setgl)
+				shift
+				SETGL="$1"
+			;;
+			--setxorg)
+				shift
+				SETXORGCONF="$1"
+			;;
+			"") ;;
+			*)
+				echo "error: invalid argument: $1"
+				echo ""
+				print_help
+				exit 1
+			;;
+		esac
+
+		shift
+	done
+fi
+
+
 
 # Check root
 if [[ $EUID -ne 0 ]]; then
