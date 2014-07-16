@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -x
+
 MHWDDEVICES=()
 
 ### Module Functions ###
@@ -12,7 +14,6 @@ MHWD_HEADING()
 	echo ' ' >> "$1"
 	echo ' ' >> "$1"
 }
-
 
 MHWD_IS_DEVICE()
 {
@@ -30,7 +31,6 @@ MHWD_IS_DEVICE()
 
 	return 1
 }
-
 
 MHWD_FUNC_ON_MATCH()
 {
@@ -52,7 +52,6 @@ MHWD_FUNC_ON_MATCH()
 		done <<< "$(echo "$device" | sed 's/|/ /g')"
 	done
 }
-
 
 MHWD_DEVICE_BUS_ID()
 {
@@ -76,7 +75,6 @@ MHWD_DEVICE_BUS_ID()
 		done <<< "$(echo "$device" | sed 's/|/ /g')"
 	done
 }
-
 
 MHWD_CHECK_KMODS()
 {
@@ -135,101 +133,63 @@ PMCONFIG="/etc/pacman.conf"
 PMROOT="/"
 PACKAGES=""
 KERNELS=$(pacman -Qqs "^linux[0-9][0-9]?([0-9])$")
-MHWD_IS_LIB32=""
+# lib32 config true/false
+MHWD64CONF="/etc/mhwd-x86_64.conf"
+
+# source lib32 true/false for x86_64
+if [ "${ARCH}" == "x86_64" ];then
+	if [ -f ${MHWD64CONF} ];then
+		. ${MHWD64CONF}
+	else
+		MHWD64_IS_LIB32="true"
+	fi
+fi
 
 if [ "${PARAM}" -lt 1 ]; then
 	echo "No Arguments!"
 	exit 1
 fi
 
-for (( I=1; $I <= $PARAM; I++ ))
-do
-if [ "${ARCH}" == "x86_64" ];then
+for (( I=1; $I <= $PARAM; I++ ));do
 	case "$1" in
 		--install)
 			INSTALL="true"
-			;;
+		;;
 		--remove)
 			REMOVE="true"
-			;;
+		;;
 		--sync)
 			SYNC="y"
-			;;
+		;;
 		--cachedir)
 			shift
 			CACHEPATH="$1"
-			;;
+		;;
 		--config)
 			shift
 			CONFIGPATH="$1"
-			;;
+		;;
 		--pmconfig)
 			shift
 			PMCONFIG="$1"
-			;;
+		;;
 		--pmroot)
 			shift
 			PMROOT="$1"
-			;;
+		;;
 		--device)
 			shift
 			MHWDDEVICES+=("$1")
-			;;
-		--lib32)
-			shift
-			IS_LIB32="${1:-true}"
-			;;
+		;;
 		"")	;;
 		*)
 			echo "Wrong Argument: $1"
 			exit 1
-			;;
+		;;
 	esac
 
 	shift
-else
-		case "$1" in
-		--install)
-			INSTALL="true"
-			;;
-		--remove)
-			REMOVE="true"
-			;;
-		--sync)
-			SYNC="y"
-			;;
-		--cachedir)
-			shift
-			CACHEPATH="$1"
-			;;
-		--config)
-			shift
-			CONFIGPATH="$1"
-			;;
-		--pmconfig)
-			shift
-			PMCONFIG="$1"
-			;;
-		--pmroot)
-			shift
-			PMROOT="$1"
-			;;
-		--device)
-			shift
-			MHWDDEVICES+=("$1")
-			;;
-		"")	;;
-		*)
-			echo "Wrong Argument: $1"
-			exit 1
-			;;
-	esac
-
-	shift
-fi
 done
-
-
 
 # Set final variables
 PACMAN="${PACMAN} --cachedir ${CACHEPATH} --config ${PMCONFIG} --root ${PMROOT}"
@@ -249,12 +209,6 @@ else
 	exit 1
 fi
 
-if [ "${MHWD_IS_LIB32}" == "true" ];then
-	export MHWD_IS_LIB32="true"
-else
-	export MHWD_IS_LIB32="false"
-fi
-
 if [ "${INSTALL}" == "true" ]; then
 	# Run preinstall function
 	if [ "`grep "pre_install" "${CONFIGPATH}" | cut -d"#" -f1 | cut -d"(" -f1 | grep "pre_install"`" == "pre_install" ]; then
@@ -268,7 +222,11 @@ if [ "${INSTALL}" == "true" ]; then
 		PACKAGES="${CONFLDD}"
 	fi
 	if [ "${ARCH}" == "x86_64" ] && [ "${CONFLDD_64}" != "" ]; then
-		PACKAGES="${PACKAGES} ${CONFLDD_64}"
+		if [ "${MHWD_IS_LIB32}" == "true" ];then
+			PACKAGES="${PACKAGES} ${CONFLDD_64}"
+		else
+			PACKAGES="${PACKAGES}"
+		fi
 	fi
 
     # Check if packages are installed
