@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# set -x
+
 PARAM=$#
 MHWDXORGCONF="/etc/X11/xorg.conf.d/90-mhwd.conf"
 CHECKCONFIG="false"
@@ -25,6 +27,7 @@ if [ "${ARCH}" == "x86_64" ];then
 	else
 		MHWD64_IS_LIB32="true"
 	fi
+	echo "Check lib32 support: ${MHWD64_IS_LIB32}"
 fi
 
 # param 1: modules to load
@@ -194,6 +197,14 @@ print_link_destination_if_exists()
 	fi
 }
 
+# param 1: true/false
+set_lib32(){
+	MHWD64_IS_LIB32="$1"
+	echo "Save lib32 setting to ${MHWD64CONF}"
+	echo 'MHWD64_IS_LIB32="'$1'"' > ${MHWD64CONF}
+	echo "Check lib32 support: ${MHWD64_IS_LIB32}"
+}
+
 print_status()
 {
 	echo ":: status"
@@ -221,7 +232,7 @@ print_help()
 	echo "   --setgl [mesa/nvidia/catalyst]  set libgl and libglx"
 	echo "   --setxorg [PATH]                set xorg configuration file"
 	if [ "${ARCH}" == "x86_64" ];then
-		echo "   --lib32 [true/false]            set lib32 support"
+		echo "   --setlib32 [true/false]         set lib32 support"
 	fi
 	echo ""
 }
@@ -254,9 +265,9 @@ if [ "${ARCH}" == "x86_64" ];then
 				shift
 				SETXORGCONF="$1"
 			;;
-			--lib32)
+			--setlib32)
 				shift
-				MHWD64_IS_LIB32="$1"
+				set_lib32 "$1"
 			;;
 			"") ;;
 			*)

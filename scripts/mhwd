@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -x
-
 MHWDDEVICES=()
 
 ### Module Functions ###
@@ -143,6 +141,7 @@ if [ "${ARCH}" == "x86_64" ];then
 	else
 		MHWD64_IS_LIB32="true"
 	fi
+	echo "Check lib32 support: ${MHWD64_IS_LIB32}"
 fi
 
 if [ "${PARAM}" -lt 1 ]; then
@@ -222,7 +221,7 @@ if [ "${INSTALL}" == "true" ]; then
 		PACKAGES="${CONFLDD}"
 	fi
 	if [ "${ARCH}" == "x86_64" ] && [ "${CONFLDD_64}" != "" ]; then
-		if [ "${MHWD_IS_LIB32}" == "true" ];then
+		if [ "${MHWD64_IS_LIB32}" == "true" ];then
 			PACKAGES="${PACKAGES} ${CONFLDD_64}"
 		else
 			PACKAGES="${PACKAGES}"
@@ -253,7 +252,7 @@ if [ "${INSTALL}" == "true" ]; then
 		PACKAGES="${PACKAGES} ${CONFLICTS_32}"
 	fi
 	if [ "${ARCH}" == "x86_64" ] && [ "${CONFLICTS_64}" != "" ]; then
-		if [ "${MHWD_IS_LIB32}" == "true" ];then
+		if [ "${MHWD64_IS_LIB32}" == "true" ];then
 			PACKAGES="${PACKAGES} ${CONFLICTS_64}"
 		else
 			PACKAGES="${PACKAGES}"
@@ -284,7 +283,7 @@ if [ "${INSTALL}" == "true" ]; then
 		PACKAGES="${PACKAGES} ${DEPENDS_32}"
 	fi
 	if [ "${ARCH}" == "x86_64" ] && [ "${DEPENDS_64}" != "" ]; then
-		if [ "${MHWD_IS_LIB32}" == "true" ];then
+		if [ "${MHWD64_IS_LIB32}" == "true" ];then
 			PACKAGES="${PACKAGES} ${DEPENDS_64}"
 		else
 			PACKAGES="${PACKAGES}"
@@ -328,7 +327,7 @@ if [ "${REMOVE}" == "true" ]; then
 		PACKAGES="${PACKAGES} ${DEPENDS_32}"
 	fi
 	if [ "${ARCH}" == "x86_64" ] && [ "${DEPENDS_64}" != "" ]; then
-		if [ "${MHWD_IS_LIB32}" == "true" ];then
+		if [ "${MHWD64_IS_LIB32}" == "true" ];then
 			PACKAGES="${PACKAGES} ${DEPENDS_64}"
 		else
 			PACKAGES="${PACKAGES}"
