@@ -23,11 +23,13 @@ MHWD64CONF="/etc/mhwd-x86_64.conf"
 # source lib32 true/false for x86_64
 if [ "${ARCH}" == "x86_64" ];then
 	if [ -f ${MHWD64CONF} ];then
+		echo "Sourcing ${MHWD64CONF}"
 		. ${MHWD64CONF}
 	else
+		echo "Using default"
 		MHWD64_IS_LIB32="true"
 	fi
-	echo "Check lib32 support: ${MHWD64_IS_LIB32}"
+	echo "Has lib32 support: ${MHWD64_IS_LIB32}"
 fi
 
 # param 1: modules to load
@@ -188,6 +190,13 @@ set_Gl() {
 	fi
 }
 
+# param 1: true/false
+set_lib32(){
+	echo "Saving lib32 setting: ${MHWD64CONF}"
+	echo 'MHWD64_IS_LIB32="'$1'"' > ${MHWD64CONF}
+	echo "Has lib32 support: $1"
+}
+
 print_link_destination_if_exists()
 {
 	if [ -e "$1" ]; then
@@ -195,14 +204,6 @@ print_link_destination_if_exists()
 	else
 		echo "warning: could not find '$1'!"
 	fi
-}
-
-# param 1: true/false
-set_lib32(){
-	MHWD64_IS_LIB32="$1"
-	echo "Save lib32 setting to ${MHWD64CONF}"
-	echo 'MHWD64_IS_LIB32="'$1'"' > ${MHWD64CONF}
-	echo "Check lib32 support: ${MHWD64_IS_LIB32}"
 }
 
 print_status()
@@ -237,7 +238,6 @@ print_help()
 	echo ""
 }
 
-
 if [ "${PARAM}" -lt 1 ]; then
 	print_status
 	exit 0
@@ -267,7 +267,7 @@ if [ "${ARCH}" == "x86_64" ];then
 			;;
 			--setlib32)
 				shift
-				set_lib32 "$1"
+				MHWD64_IS_LIB32="$1"
 			;;
 			"") ;;
 			*)
@@ -315,12 +315,14 @@ else
 	done
 fi
 
-
-
 # Check root
 if [[ $EUID -ne 0 ]]; then
    echo "error: you cannot perform this operation unless you are root." 1>&2
    exit 1
+fi
+
+if [ "${MHWD64_IS_LIB32}" == "true" ] || [ "${MHWD64_IS_LIB32}" == "false" ]; then
+	set_lib32 "${MHWD64_IS_LIB32}"
 fi
 
 # Set libGl and libglx
