@@ -29,7 +29,8 @@ if [ "${ARCH}" == "x86_64" ];then
 		echo "Using default"
 		MHWD64_IS_LIB32="true"
 	fi
-	echo "Has lib32 support: ${MHWD64_IS_LIB32}"
+	DEFAULT_IS_LIB32=${MHWD64_IS_LIB32}
+	echo "Default lib32 support: ${DEFAULT_IS_LIB32}"
 fi
 
 # param 1: modules to load
@@ -321,8 +322,10 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
-if [ "${MHWD64_IS_LIB32}" == "true" ] || [ "${MHWD64_IS_LIB32}" == "false" ]; then
-	set_lib32 "${MHWD64_IS_LIB32}"
+if [ "${DEFAULT_IS_LIB32}" != "${MHWD64_IS_LIB32}" ];then
+	if [ "${MHWD64_IS_LIB32}" == "true" ] || [ "${MHWD64_IS_LIB32}" == "false" ]; then
+		set_lib32 "${MHWD64_IS_LIB32}"
+	fi
 fi
 
 # Set libGl and libglx
