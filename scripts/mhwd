@@ -13,7 +13,6 @@ MHWD_HEADING()
 	echo ' ' >> "$1"
 }
 
-
 MHWD_IS_DEVICE()
 {
 	local CCLASSID="$1"
@@ -30,7 +29,6 @@ MHWD_IS_DEVICE()
 
 	return 1
 }
-
 
 MHWD_FUNC_ON_MATCH()
 {
@@ -52,7 +50,6 @@ MHWD_FUNC_ON_MATCH()
 		done <<< "$(echo "$device" | sed 's/|/ /g')"
 	done
 }
-
 
 MHWD_DEVICE_BUS_ID()
 {
@@ -77,7 +74,6 @@ MHWD_DEVICE_BUS_ID()
 	done
 }
 
-
 MHWD_CHECK_KMODS()
 {
 	CONKMODS=""
@@ -97,7 +93,7 @@ MHWD_CHECK_KMODS()
 			if [ "$(pacman -Qq | grep -o ${KERNEL} -m1)" != "" ]; then
 				for KMOD in ${DEPKMOD} ; do
 					DEPKMODS="${DEPKMODS} ${KERNEL}-${KMOD}"
-				done				        
+				done
 			fi
 		done
 	fi
@@ -135,55 +131,66 @@ PMCONFIG="/etc/pacman.conf"
 PMROOT="/"
 PACKAGES=""
 KERNELS=$(pacman -Qqs "^linux[0-9][0-9]?([0-9])$")
+# lib32 config true/false
+MHWD64CONF="/etc/mhwd-x86_64.conf"
+
+# source lib32 true/false for x86_64
+if [ "${ARCH}" == "x86_64" ];then
+	if [ -f ${MHWD64CONF} ];then
+		echo "Sourcing ${MHWD64CONF}"
+		. ${MHWD64CONF}
+	else
+		echo "Using default"
+		MHWD64_IS_LIB32="true"
+	fi
+	echo "Has lib32 support: ${MHWD64_IS_LIB32}"
+fi
 
 if [ "${PARAM}" -lt 1 ]; then
 	echo "No Arguments!"
 	exit 1
 fi
 
-for (( I=1; $I <= $PARAM; I++ ))
-do
+for (( I=1; $I <= $PARAM; I++ ));do
 	case "$1" in
 		--install)
 			INSTALL="true"
-			;;
+		;;
 		--remove)
 			REMOVE="true"
-			;;
+		;;
 		--sync)
 			SYNC="y"
-			;;
+		;;
 		--cachedir)
 			shift
 			CACHEPATH="$1"
-			;;
+		;;
 		--config)
 			shift
 			CONFIGPATH="$1"
-			;;
+		;;
 		--pmconfig)
 			shift
 			PMCONFIG="$1"
-			;;
+		;;
 		--pmroot)
 			shift
 			PMROOT="$1"
-			;;
+		;;
 		--device)
 			shift
 			MHWDDEVICES+=("$1")
-			;;
+		;;
 		"")	;;
 		*)
 			echo "Wrong Argument: $1"
 			exit 1
-			;;
+		;;
 	esac
 
 	shift
 done
-
-
 
 # Set final variables
 PACMAN="${PACMAN} --cachedir ${CACHEPATH} --config ${PMCONFIG} --root ${PMROOT}"
@@ -216,7 +223,11 @@ if [ "${INSTALL}" == "true" ]; then
 		PACKAGES="${CONFLDD}"
 	fi
 	if [ "${ARCH}" == "x86_64" ] && [ "${CONFLDD_64}" != "" ]; then
-		PACKAGES="${PACKAGES} ${CONFLDD_64}"
+		if [ "${MHWD64_IS_LIB32}" == "true" ];then
+			PACKAGES="${PACKAGES} ${CONFLDD_64}"
+		else
+			PACKAGES="${PACKAGES}"
+		fi
 	fi
 
     # Check if packages are installed
@@ -243,7 +254,11 @@ if [ "${INSTALL}" == "true" ]; then
 		PACKAGES="${PACKAGES} ${CONFLICTS_32}"
 	fi
 	if [ "${ARCH}" == "x86_64" ] && [ "${CONFLICTS_64}" != "" ]; then
-		PACKAGES="${PACKAGES} ${CONFLICTS_64}"
+		if [ "${MHWD64_IS_LIB32}" == "true" ];then
+			PACKAGES="${PACKAGES} ${CONFLICTS_64}"
+		else
+			PACKAGES="${PACKAGES}"
+		fi
 	fi
 	if [ "${CONKMODS}" != "" ]; then
 		PACKAGES="${PACKAGES} ${CONKMODS}"
@@ -270,7 +285,11 @@ if [ "${INSTALL}" == "true" ]; then
 		PACKAGES="${PACKAGES} ${DEPENDS_32}"
 	fi
 	if [ "${ARCH}" == "x86_64" ] && [ "${DEPENDS_64}" != "" ]; then
-		PACKAGES="${PACKAGES} ${DEPENDS_64}"
+		if [ "${MHWD64_IS_LIB32}" == "true" ];then
+			PACKAGES="${PACKAGES} ${DEPENDS_64}"
+		else
+			PACKAGES="${PACKAGES}"
+		fi
 	fi
 	if [ "${DEPKMODS}" != "" ]; then
 		PACKAGES="${PACKAGES} ${DEPKMODS}"
@@ -289,7 +308,6 @@ if [ "${INSTALL}" == "true" ]; then
 	   post_install
 	fi
 fi
-
 
 if [ "${REMOVE}" == "true" ]; then
 	# Run preremove function
@@ -310,7 +328,11 @@ if [ "${REMOVE}" == "true" ]; then
 		PACKAGES="${PACKAGES} ${DEPENDS_32}"
 	fi
 	if [ "${ARCH}" == "x86_64" ] && [ "${DEPENDS_64}" != "" ]; then
-		PACKAGES="${PACKAGES} ${DEPENDS_64}"
+		if [ "${MHWD64_IS_LIB32}" == "true" ];then
+			PACKAGES="${PACKAGES} ${DEPENDS_64}"
+		else
+			PACKAGES="${PACKAGES}"
+		fi
 	fi
 	if [ "${DEPKMODS}" != "" ]; then
 		PACKAGES="${PACKAGES} ${DEPKMODS}"
