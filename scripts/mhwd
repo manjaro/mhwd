@@ -137,11 +137,13 @@ MHWD64CONF="/etc/mhwd-x86_64.conf"
 # source lib32 true/false for x86_64
 if [ "${ARCH}" == "x86_64" ];then
 	if [ -f ${MHWD64CONF} ];then
+		echo "Sourcing ${MHWD64CONF}"
 		. ${MHWD64CONF}
 	else
+		echo "Using default"
 		MHWD64_IS_LIB32="true"
 	fi
-	echo "Check lib32 support: ${MHWD64_IS_LIB32}"
+	echo "Has lib32 support: ${MHWD64_IS_LIB32}"
 fi
 
 if [ "${PARAM}" -lt 1 ]; then
@@ -306,7 +308,6 @@ if [ "${INSTALL}" == "true" ]; then
 	   post_install
 	fi
 fi
-
 
 if [ "${REMOVE}" == "true" ]; then
 	# Run preremove function
