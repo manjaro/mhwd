@@ -23,6 +23,3 @@ target_link_libraries(mhwd ${LIB_LIBS})
 INSTALL(TARGETS mhwd
   LIBRARY DESTINATION lib
 )
-
-INSTALL(FILES mhwd.h
-  DESTINATION /usr/include)
