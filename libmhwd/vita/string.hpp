@@ -11,7 +11,7 @@
 #ifndef INC_VITA_STRING_HPP
 #define INC_VITA_STRING_HPP
 
-#include <iostream>
+
 #include <string>
 #include <sstream>
 #include <vector>

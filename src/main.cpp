@@ -17,17 +17,10 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include "Mhwd.hpp"
 
-
-#define MHWD_CONFIG_NAME "MHWDCONFIG"
-#define MHWD_USB_CONFIG_DIR "/var/lib/mhwd/db/usb"
-#define MHWD_PCI_CONFIG_DIR "/var/lib/mhwd/db/pci"
-#define MHWD_USB_DATABASE_DIR "/var/lib/mhwd/local/usb"
-#define MHWD_PCI_DATABASE_DIR  "/var/lib/mhwd/local/pci"
-#define MHWD_SCRIPT_PATH "/var/lib/mhwd/scripts/mhwd"
-
-#define MHWD_PM_CACHE_DIR "/var/cache/pacman/pkg"
-#define MHWD_PM_CONFIG "/etc/pacman.conf"
-#define MHWD_PM_ROOT "/"
-
-#define ROOT_UID 0
+int main(int argc, char *argv[])
+{
+	Mhwd mhwd;
+	mhwd.launch(argc, argv);
+}

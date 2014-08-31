@@ -1,3 +1,11 @@
-*~
-build
-CMakeLists.txt.user
+libmhwd/cmake_install.cmake
+libmhwd/libmhwd.so
+src/cmake_install.cmake
+src/mhwd
+cmake_install.cmake
+CMakeCache.txt
+CMakeFiles
+Makefile
+*.o
+*settings
+*project

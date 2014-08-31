@@ -5,14 +5,11 @@ include_directories(. vita)
 ###
 
 set( LIB_HEADERS
-    mhwd.h
-    mhwd_p.h
     const.h
     vita/string.hpp
 )
 
 set( LIB_SOURCES
-    mhwd.cpp
     vita/string.cpp
 )
 

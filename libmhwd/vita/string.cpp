@@ -67,7 +67,7 @@ namespace Vita {
 			result += replace;
 			previous = current + search.length();
 			current = this->find(search, previous);
-			limit--;
+			--limit;
 		}
 		result += this->substr(previous);
 		return result;
