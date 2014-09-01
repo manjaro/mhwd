@@ -95,7 +95,7 @@ void Printer::printHelp() const
 			<< "  --pmroot <path>\t\t\tset package manager root\n" << std::endl;
 }
 
-void Printer::listDevices(std::vector<Device*> devices, std::string type) const
+void Printer::listDevices(const std::vector<Device*>& devices, std::string type) const
 {
 	if (devices.empty())
 	{
@@ -130,7 +130,7 @@ void Printer::listDevices(std::vector<Device*> devices, std::string type) const
 	std::cout << std::endl << std::endl;
 }
 
-void Printer::listConfigs(std::vector<Config*> configs, std::string beg, std::string empty) const
+void Printer::listConfigs(const std::vector<Config*>& configs, std::string beg, std::string empty) const
 {
 	if (configs.empty())
 	{
@@ -188,7 +188,7 @@ void Printer::listConfigs(std::vector<Config*> configs, std::string beg, std::st
 	}
 }
 
-void Printer::printAvailableConfigs(MHWD::DEVICETYPE type, std::vector<Device*> devices) const
+void Printer::printAvailableConfigs(MHWD::DEVICETYPE type, const std::vector<Device*>& devices) const
 {
 	std::string beg;
 
@@ -252,7 +252,7 @@ void Printer::printAvailableConfigs(MHWD::DEVICETYPE type, std::vector<Device*> 
 		printWarning("no configs for " + beg + " devices found!");
 }
 
-void Printer::printInstalledConfigs(MHWD::DEVICETYPE type, std::vector<Config*> installedConfigs) const
+void Printer::printInstalledConfigs(MHWD::DEVICETYPE type, const std::vector<Config*>& installedConfigs) const
 {
 	std::string beg;
 
