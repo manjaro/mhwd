@@ -565,7 +565,6 @@ void Data::fillDevices(std::string type)
 	}
 
 	hd_free_hd_list(hd2);
-	hd_free_hd_list(hd);
 	hd_free_hd_data(hd_data);
 	free(hd_data);
 }

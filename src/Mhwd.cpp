@@ -153,10 +153,6 @@ bool Mhwd::isUserRoot() const
 	return true;
 }
 
-//########################//
-//### Public Functions ###//
-//########################//
-
 std::string Mhwd::checkEnvironment()
 {
 	std::string retValue = "";

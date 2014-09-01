@@ -220,10 +220,14 @@ std::vector<std::string> Config::splitValue(Vita::string str, Vita::string onlyE
 			iterator++)
 	{
 		if (*iterator != "" && onlyEnding.empty())
+		{
 			final.push_back(*iterator);
+		}
 		else if (*iterator != "" && Vita::string(*iterator).explode(".").back() == onlyEnding
 				&& (*iterator).size() > 5)
+		{
 			final.push_back(Vita::string(*iterator).substr(0, (*iterator).size() - 5));
+		}
 	}
 
 	return final;
@@ -234,7 +238,9 @@ Vita::string Config::getRightConfigPath(Vita::string str, Vita::string baseConfi
 	str = str.trim();
 
 	if (str.size() <= 0 || str.substr(0, 1) == "/")
+	{
 		return str;
+	}
 
 	return baseConfigPath + "/" + str;
 }

@@ -29,7 +29,6 @@ struct Config
 		std::vector<std::string> blacklistedDeviceIDs;
 	};
 
-//	MHWD::DEVICETYPE type_;
 	std::string type_;
 	std::string basePath_;
 	std::string configPath_;

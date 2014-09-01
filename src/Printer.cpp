@@ -171,19 +171,8 @@ void Printer::listConfigs(const std::vector<Config*>& configs, std::string beg, 
 	}
 }
 
-void Printer::printAvailableConfigs(std::string type, const std::vector<Device*>& devices) const
+void Printer::printAvailableConfigs(std::string deviceType, const std::vector<Device*>& devices) const
 {
-	std::string deviceType;
-
-	if (type == "USB")
-	{
-		deviceType = "USB";
-	}
-	else
-	{
-		deviceType = "PCI";
-	}
-
 	bool configFound = false;
 
 	for (auto device : devices)
@@ -234,19 +223,8 @@ void Printer::printAvailableConfigs(std::string type, const std::vector<Device*>
 		printWarning("no configs for " + deviceType + " devices found!");
 }
 
-void Printer::printInstalledConfigs(std::string type, const std::vector<Config*>& installedConfigs) const
+void Printer::printInstalledConfigs(std::string deviceType, const std::vector<Config*>& installedConfigs) const
 {
-	std::string deviceType;
-
-	if (type == "USB")
-	{
-		deviceType = "USB";
-	}
-	else
-	{
-		deviceType = "PCI";
-	}
-
 	if (installedConfigs.empty())
 	{
 		printWarning("no installed configs for " + deviceType + " devices found!");
@@ -263,21 +241,11 @@ void Printer::printInstalledConfigs(std::string type, const std::vector<Config*>
 
 void Printer::printConfigDetails(const Config& config) const
 {
-	std::string type;
 	std::string dependencies;
 	std::string conflicts;
 	std::string info;
 	std::string classids;
 	std::string vendorids;
-
-	if (config.type_ == "USB")
-	{
-		type = "USB";
-	}
-	else
-	{
-		type = "PCI";
-	}
 
 	for (auto hwd : config.hwdIDs_)
 	{
@@ -319,7 +287,7 @@ void Printer::printConfigDetails(const Config& config) const
 	}
 
 	std::cout << "   NAME:\t" << config.name_
-			<< "\n   ATTACHED:\t" << type
+			<< "\n   ATTACHED:\t" << config.type_
 			<< "\n   VERSION:\t" << config.version_
 			<< "\n   INFO:\t" << info
 			<< "\n   PRIORITY:\t" << config.priority_

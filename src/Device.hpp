@@ -16,7 +16,6 @@
 
 struct Device
 {
-//	MHWD::DEVICETYPE type;
 	std::string type;
 	std::string className;
 	std::string deviceName;
