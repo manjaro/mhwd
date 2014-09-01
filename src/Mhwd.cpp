@@ -487,22 +487,24 @@ bool Mhwd::removeDirectory(const std::string directory)
 		{
 			continue;
 		}
-
-		struct stat filestatus;
-		lstat(filepath.c_str(), &filestatus);
-
-		if (S_ISREG(filestatus.st_mode))
+		else
 		{
-			if (unlink(filepath.c_str()) != 0)
+			struct stat filestatus;
+			lstat(filepath.c_str(), &filestatus);
+
+			if (S_ISREG(filestatus.st_mode))
 			{
-				success = false;
+				if (unlink(filepath.c_str()) != 0)
+				{
+					success = false;
+				}
 			}
-		}
-		else if (S_ISDIR(filestatus.st_mode))
-		{
-			if (!removeDirectory(filepath))
+			else if (S_ISDIR(filestatus.st_mode))
 			{
-				success = false;
+				if (!removeDirectory(filepath))
+				{
+					success = false;
+				}
 			}
 		}
 	}
