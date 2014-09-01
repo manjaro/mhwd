@@ -542,8 +542,7 @@ void Data::fillDevices(MHWD::DEVICETYPE type)
 	}
 
 	// Get the hardware devices
-	hd_data_t *hd_data;
-	hd_data = (hd_data_t*) calloc(1, sizeof *hd_data);
+	hd_data_t *hd_data = (hd_data_t*) calloc(1, sizeof *hd_data);
 
 	hd_t *hd;
 	hd = hd_list(hd_data, hw, 1, nullptr);
@@ -566,6 +565,7 @@ void Data::fillDevices(MHWD::DEVICETYPE type)
 	}
 
 	hd_free_hd_list(hd2);
+	hd_free_hd_list(hd);
 	hd_free_hd_data(hd_data);
 	free(hd_data);
 }
@@ -635,7 +635,9 @@ std::vector<std::string> Data::getRecursiveDirectoryFileList(const std::string d
 			std::string filepath = directoryPath + "/" + filename;
 
 			if (filename == "." || filename == ".." || filename == "")
+			{
 				continue;
+			}
 
 			struct stat filestatus;
 			lstat(filepath.c_str(), &filestatus);
@@ -761,9 +763,13 @@ bool Data::readConfigFile(Config *config, std::string configPath)
 			value = value.toLower();
 
 			if (value == "false")
+			{
 				config->freedriver_ = false;
+			}
 			else if (value == "true")
+			{
 				config->freedriver_ = true;
+			}
 		}
 		else if (key == "classids")
 		{
@@ -853,7 +859,9 @@ Vita::string Data::getRightConfigPath(Vita::string str, Vita::string baseConfigP
 	str = str.trim();
 
 	if (str.size() <= 0 || str.substr(0, 1) == "/")
+	{
 		return str;
+	}
 
 	return baseConfigPath + "/" + str;
 }
@@ -867,10 +875,14 @@ std::vector<std::string> Data::splitValue(Vita::string str, Vita::string onlyEnd
 			iterator++)
 	{
 		if (*iterator != "" && onlyEnding.empty())
+		{
 			final.push_back(*iterator);
+		}
 		else if (*iterator != "" && Vita::string(*iterator).explode(".").back() == onlyEnding
 				&& (*iterator).size() > 5)
+		{
 			final.push_back(Vita::string(*iterator).substr(0, (*iterator).size() - 5));
+		}
 	}
 
 	return final;
