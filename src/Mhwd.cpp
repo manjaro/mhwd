@@ -363,23 +363,6 @@ int Mhwd::hexToInt(std::string hex)
 	return std::stoi(hex, nullptr, 16);
 }
 
-//#########################//
-//### Private - Configs ###//
-//#########################//
-
-
-Vita::string Mhwd::getRightConfigPath(Vita::string str, Vita::string baseConfigPath)
-{
-	str = str.trim();
-
-	if (str.size() <= 0 || str.substr(0, 1) == "/")
-	{
-		return str;
-	}
-
-	return baseConfigPath + "/" + str;
-}
-
 //###############################################//
 //### Private - Directory and File Operations ###//
 //###############################################//

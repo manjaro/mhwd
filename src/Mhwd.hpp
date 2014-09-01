@@ -57,11 +57,6 @@ private:
 
     int hexToInt(std::string hex);
 
-    //###############//
-    //### Configs ###//
-    //###############//
-    Vita::string getRightConfigPath(Vita::string str, Vita::string baseConfigPath);
-
     //#####################################//
     //### Directory and File Operations ###//
     //#####################################//
