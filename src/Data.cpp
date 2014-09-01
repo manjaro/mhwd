@@ -638,23 +638,26 @@ std::vector<std::string> Data::getRecursiveDirectoryFileList(const std::string d
 			{
 				continue;
 			}
-
-			struct stat filestatus;
-			lstat(filepath.c_str(), &filestatus);
-
-			if (S_ISREG(filestatus.st_mode) && (onlyFilename.empty() || onlyFilename == filename))
+			else
 			{
-				list.push_back(filepath);
-			}
-			else if (S_ISDIR(filestatus.st_mode))
-			{
-				std::vector<std::string> templist = getRecursiveDirectoryFileList(filepath,
-						onlyFilename);
 
-				for (std::vector<std::string>::const_iterator iterator = templist.begin();
-						iterator != templist.end(); iterator++)
+				struct stat filestatus;
+				lstat(filepath.c_str(), &filestatus);
+
+				if (S_ISREG(filestatus.st_mode) && (onlyFilename.empty() || onlyFilename == filename))
 				{
-					list.push_back((*iterator));
+					list.push_back(filepath);
+				}
+				else if (S_ISDIR(filestatus.st_mode))
+				{
+					std::vector<std::string> templist = getRecursiveDirectoryFileList(filepath,
+							onlyFilename);
+
+					for (std::vector<std::string>::const_iterator iterator = templist.begin();
+							iterator != templist.end(); iterator++)
+					{
+						list.push_back((*iterator));
+					}
 				}
 			}
 		}
@@ -693,136 +696,140 @@ bool Data::readConfigFile(Config *config, std::string configPath)
 		{
 			continue;
 		}
-
-		parts = line.explode("=");
-		key = parts.front().trim().toLower();
-		value = parts.back().trim("\"").trim();
-
-		// Read in extern file
-		if (value.size() > 1 && value.substr(0, 1) == ">")
+		else
 		{
-			std::ifstream file(getRightConfigPath(value.substr(1), config->basePath_).c_str(),
-					std::ios::in);
-			if (!file.is_open())
+			parts = line.explode("=");
+			key = parts.front().trim().toLower();
+			value = parts.back().trim("\"").trim();
+
+			// Read in extern file
+			if (value.size() > 1 && value.substr(0, 1) == ">")
 			{
-				return false;
-			}
-
-			Vita::string line;
-			value.clear();
-
-			while (!file.eof())
-			{
-				getline(file, line);
-
-				size_t pos = line.find_first_of('#');
-				if (pos != std::string::npos)
+				std::ifstream file(getRightConfigPath(value.substr(1), config->basePath_).c_str(),
+						std::ios::in);
+				if (!file.is_open())
 				{
-					line.erase(pos);
+					return false;
 				}
 
-				if (line.trim().empty())
+				Vita::string line;
+				value.clear();
+
+				while (!file.eof())
 				{
-					continue;
+					getline(file, line);
+
+					size_t pos = line.find_first_of('#');
+					if (pos != std::string::npos)
+					{
+						line.erase(pos);
+					}
+
+					if (line.trim().empty())
+					{
+						continue;
+					}
+					else
+					{
+						value += " " + line.trim();
+					}
 				}
 
-				value += " " + line.trim();
+				value = value.trim();
+
+				// remove all multiple spaces
+				while (value.find("  ") != std::string::npos)
+				{
+					value = value.replace("  ", " ");
+				}
 			}
 
-			value = value.trim();
-
-			// remove all multiple spaces
-			while (value.find("  ") != std::string::npos)
+			if (key == "include")
 			{
-				value = value.replace("  ", " ");
+				readConfigFile(config, getRightConfigPath(value, config->basePath_));
 			}
-		}
-
-		if (key == "include")
-		{
-			readConfigFile(config, getRightConfigPath(value, config->basePath_));
-		}
-		else if (key == "name")
-		{
-			config->name_ = value.toLower();
-		}
-		else if (key == "version")
-		{
-			config->version_ = value;
-		}
-		else if (key == "info")
-		{
-			config->info_ = value;
-		}
-		else if (key == "priority")
-		{
-			config->priority_ = value.convert<int>();
-		}
-		else if (key == "freedriver")
-		{
-			value = value.toLower();
-
-			if (value == "false")
+			else if (key == "name")
 			{
-				config->freedriver_ = false;
+				config->name_ = value.toLower();
 			}
-			else if (value == "true")
+			else if (key == "version")
 			{
-				config->freedriver_ = true;
+				config->version_ = value;
 			}
-		}
-		else if (key == "classids")
-		{
-			// Add new HardwareIDs group to vector if vector is not empty
-			if (!config->hwdIDs_.back().classIDs.empty())
+			else if (key == "info")
 			{
-				Config::HardwareIDs hwdID;
-				config->hwdIDs_.push_back(hwdID);
+				config->info_ = value;
 			}
+			else if (key == "priority")
+			{
+				config->priority_ = value.convert<int>();
+			}
+			else if (key == "freedriver")
+			{
+				value = value.toLower();
 
-			config->hwdIDs_.back().classIDs = splitValue(value);
-		}
-		else if (key == "vendorids")
-		{
-			// Add new HardwareIDs group to vector if vector is not empty
-			if (!config->hwdIDs_.back().vendorIDs.empty())
-			{
-				Config::HardwareIDs hwdID;
-				config->hwdIDs_.push_back(hwdID);
+				if (value == "false")
+				{
+					config->freedriver_ = false;
+				}
+				else if (value == "true")
+				{
+					config->freedriver_ = true;
+				}
 			}
-
-			config->hwdIDs_.back().vendorIDs = splitValue(value);
-		}
-		else if (key == "deviceids")
-		{
-			// Add new HardwareIDs group to vector if vector is not empty
-			if (!config->hwdIDs_.back().deviceIDs.empty())
+			else if (key == "classids")
 			{
-				Config::HardwareIDs hwdID;
-				config->hwdIDs_.push_back(hwdID);
-			}
+				// Add new HardwareIDs group to vector if vector is not empty
+				if (!config->hwdIDs_.back().classIDs.empty())
+				{
+					Config::HardwareIDs hwdID;
+					config->hwdIDs_.push_back(hwdID);
+				}
 
-			config->hwdIDs_.back().deviceIDs = splitValue(value);
-		}
-		else if (key == "blacklistedclassids")
-		{
-			config->hwdIDs_.back().blacklistedClassIDs = splitValue(value);
-		}
-		else if (key == "blacklistedvendorids")
-		{
-			config->hwdIDs_.back().blacklistedVendorIDs = splitValue(value);
-		}
-		else if (key == "blacklisteddeviceids")
-		{
-			config->hwdIDs_.back().blacklistedDeviceIDs = splitValue(value);
-		}
-		else if (key == "mhwddepends")
-		{
-			config->dependencies_ = splitValue(value);
-		}
-		else if (key == "mhwdconflicts")
-		{
-			config->conflicts_ = splitValue(value);
+				config->hwdIDs_.back().classIDs = splitValue(value);
+			}
+			else if (key == "vendorids")
+			{
+				// Add new HardwareIDs group to vector if vector is not empty
+				if (!config->hwdIDs_.back().vendorIDs.empty())
+				{
+					Config::HardwareIDs hwdID;
+					config->hwdIDs_.push_back(hwdID);
+				}
+
+				config->hwdIDs_.back().vendorIDs = splitValue(value);
+			}
+			else if (key == "deviceids")
+			{
+				// Add new HardwareIDs group to vector if vector is not empty
+				if (!config->hwdIDs_.back().deviceIDs.empty())
+				{
+					Config::HardwareIDs hwdID;
+					config->hwdIDs_.push_back(hwdID);
+				}
+
+				config->hwdIDs_.back().deviceIDs = splitValue(value);
+			}
+			else if (key == "blacklistedclassids")
+			{
+				config->hwdIDs_.back().blacklistedClassIDs = splitValue(value);
+			}
+			else if (key == "blacklistedvendorids")
+			{
+				config->hwdIDs_.back().blacklistedVendorIDs = splitValue(value);
+			}
+			else if (key == "blacklisteddeviceids")
+			{
+				config->hwdIDs_.back().blacklistedDeviceIDs = splitValue(value);
+			}
+			else if (key == "mhwddepends")
+			{
+				config->dependencies_ = splitValue(value);
+			}
+			else if (key == "mhwdconflicts")
+			{
+				config->conflicts_ = splitValue(value);
+			}
 		}
 	}
 
