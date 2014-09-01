@@ -12,9 +12,11 @@
 #include "../libmhwd/vita/string.hpp"
 #include "Config.hpp"
 #include "Device.hpp"
+
+#include <hd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <hd.h>
+
 
 class Data {
 public:
