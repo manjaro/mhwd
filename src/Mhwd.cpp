@@ -469,54 +469,56 @@ bool Mhwd::copyFile(const std::string source, const std::string destination, con
 
 bool Mhwd::removeDirectory(const std::string directory)
 {
-	bool success = true;
-	struct dirent *dir;
 	DIR *d = opendir(directory.c_str());
 
 	if (!d)
 	{
 		return false;
 	}
-
-	while ((dir = readdir(d)) != nullptr)
+	else
 	{
-		std::string filename = std::string(dir->d_name);
-		std::string filepath = directory + "/" + filename;
-
-		if (filename == "." || filename == ".." || filename == "")
+		bool success = true;
+		struct dirent *dir;
+		while ((dir = readdir(d)) != nullptr)
 		{
-			continue;
-		}
-		else
-		{
-			struct stat filestatus;
-			lstat(filepath.c_str(), &filestatus);
+			std::string filename = std::string(dir->d_name);
+			std::string filepath = directory + "/" + filename;
 
-			if (S_ISREG(filestatus.st_mode))
+			if (filename == "." || filename == ".." || filename == "")
 			{
-				if (unlink(filepath.c_str()) != 0)
+				continue;
+			}
+			else
+			{
+				struct stat filestatus;
+				lstat(filepath.c_str(), &filestatus);
+
+				if (S_ISREG(filestatus.st_mode))
 				{
-					success = false;
+					if (unlink(filepath.c_str()) != 0)
+					{
+						success = false;
+					}
+				}
+				else if (S_ISDIR(filestatus.st_mode))
+				{
+					if (!removeDirectory(filepath))
+					{
+						success = false;
+					}
 				}
 			}
-			else if (S_ISDIR(filestatus.st_mode))
-			{
-				if (!removeDirectory(filepath))
-				{
-					success = false;
-				}
-			}
 		}
+
+		closedir(d);
+
+		if (rmdir(directory.c_str()) != 0)
+		{
+			success = false;
+		}
+
+		return success;
 	}
-
-	closedir(d);
-
-	if (rmdir(directory.c_str()) != 0)
-	{
-		success = false;
-	}
-
-	return success;
 }
 
 bool Mhwd::checkExist(const std::string path)
@@ -682,13 +684,12 @@ bool Mhwd::runScript(Config *config, MHWD::TRANSACTIONTYPE operationType)
 	cmd += " 2>&1";
 
 	FILE *in;
-	char buff[512];
 
 	if (!(in = popen(cmd.c_str(), "r")))
 	{
 		return false;
 	}
-
+	char buff[512];
 	while (fgets(buff, sizeof(buff), in) != nullptr)
 	{
 		printer_.printMessage(MHWD::MESSAGETYPE::CONSOLE_OUTPUT, std::string(buff));
