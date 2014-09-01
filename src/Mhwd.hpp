@@ -60,7 +60,6 @@ private:
     //###############//
     //### Configs ###//
     //###############//
-    std::vector<std::string> splitValue(Vita::string str, Vita::string onlyEnding = ""); // -> data // ??
     Vita::string getRightConfigPath(Vita::string str, Vita::string baseConfigPath);
 
     //#####################################//
