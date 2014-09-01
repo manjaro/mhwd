@@ -527,8 +527,6 @@ std::vector<Config*> Data::getAllLocalRequirements(Config *config)
 
 void Data::fillDevices(MHWD::DEVICETYPE type)
 {
-	hd_data_t *hd_data;
-	hd_t *hd;
 	hw_item hw;
 	std::vector<Device*>* devices;
 
@@ -544,8 +542,12 @@ void Data::fillDevices(MHWD::DEVICETYPE type)
 	}
 
 	// Get the hardware devices
+	hd_data_t *hd_data;
 	hd_data = (hd_data_t*) calloc(1, sizeof *hd_data);
+
+	hd_t *hd;
 	hd = hd_list(hd_data, hw, 1, nullptr);
+	hd_t *hd2 = hd;
 
 	Device *device;
 	for (; hd; hd = hd->next)
@@ -563,7 +565,7 @@ void Data::fillDevices(MHWD::DEVICETYPE type)
 		devices->push_back(device);
 	}
 
-	hd_free_hd_list(hd);
+	hd_free_hd_list(hd2);
 	hd_free_hd_data(hd_data);
 	free(hd_data);
 }
