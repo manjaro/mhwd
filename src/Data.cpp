@@ -13,8 +13,8 @@
 #include <sstream>
 Data::Data()
 {
-	fillDevices(MHWD::DEVICETYPE::PCI);
-	fillDevices(MHWD::DEVICETYPE::USB);
+	fillDevices("PCI");
+	fillDevices("USB");
 
 	updateConfigData();
 }
@@ -104,19 +104,19 @@ void Data::updateInstalledConfigData()
 	installedUSBConfigs.clear();
 
 	// Refill data
-	fillInstalledConfigs(MHWD::DEVICETYPE::PCI);
-	fillInstalledConfigs(MHWD::DEVICETYPE::USB);
+	fillInstalledConfigs("PCI");
+	fillInstalledConfigs("USB");
 
 	setMatchingConfigs(&PCIDevices, &installedPCIConfigs, true);
 	setMatchingConfigs(&USBDevices, &installedUSBConfigs, true);
 }
 
-void Data::fillInstalledConfigs(MHWD::DEVICETYPE type)
+void Data::fillInstalledConfigs(std::string type)
 {
 	std::vector<std::string> configPaths;
 	std::vector<Config*>* configs;
 
-	if (type == MHWD::DEVICETYPE::USB)
+	if (type == "USB")
 	{
 		configs = &installedUSBConfigs;
 		configPaths = getRecursiveDirectoryFileList(MHWD_USB_DATABASE_DIR, MHWD_CONFIG_NAME);
@@ -147,7 +147,7 @@ void Data::getAllDevicesOfConfig(Config *config, std::vector<Device*>* foundDevi
 {
 	std::vector<Device*> devices;
 
-	if (config->type_ == MHWD::DEVICETYPE::USB)
+	if (config->type_ == "USB")
 	{
 		devices = USBDevices;
 	}
@@ -313,7 +313,7 @@ std::vector<Config*> Data::getAllDependenciesToInstall(Config *config)
 	std::vector<Config*> installedConfigs;
 
 	// Get the right configs
-	if (config->type_ == MHWD::DEVICETYPE::USB)
+	if (config->type_ == "USB")
 	{
 		installedConfigs = installedUSBConfigs;
 	}
@@ -382,12 +382,12 @@ void Data::getAllDependenciesToInstall(Config *config,
 }
 
 Config* Data::getDatabaseConfig(const std::string configName,
-		const MHWD::DEVICETYPE configType)
+		const std::string configType)
 {
 	std::vector<Config*> allConfigs;
 
 	// Get the right configs
-	if (configType == MHWD::DEVICETYPE::USB)
+	if (configType == "USB")
 	{
 		allConfigs = allUSBConfigs;
 	}
@@ -415,7 +415,7 @@ std::vector<Config*> Data::getAllLocalConflicts(Config *config)
 	std::vector<Config*> installedConfigs;
 
 	// Get the right configs
-	if (config->type_ == MHWD::DEVICETYPE::USB)
+	if (config->type_ == "USB")
 	{
 		installedConfigs = installedUSBConfigs;
 	}
@@ -477,7 +477,7 @@ std::vector<Config*> Data::getAllLocalRequirements(Config *config)
 	std::vector<Config*> installedConfigs;
 
 	// Get the right configs
-	if (config->type_ == MHWD::DEVICETYPE::USB)
+	if (config->type_ == "USB")
 	{
 		installedConfigs = installedUSBConfigs;
 	}
@@ -525,12 +525,12 @@ std::vector<Config*> Data::getAllLocalRequirements(Config *config)
 }
 
 
-void Data::fillDevices(MHWD::DEVICETYPE type)
+void Data::fillDevices(std::string type)
 {
 	hw_item hw;
 	std::vector<Device*>* devices;
 
-	if (type == MHWD::DEVICETYPE::USB)
+	if (type == "USB")
 	{
 		hw = hw_usb;
 		devices = &USBDevices;
@@ -570,12 +570,12 @@ void Data::fillDevices(MHWD::DEVICETYPE type)
 	free(hd_data);
 }
 
-void Data::fillAllConfigs(MHWD::DEVICETYPE type)
+void Data::fillAllConfigs(std::string type)
 {
 	std::vector<std::string> configPaths;
 	std::vector<Config*>* configs;
 
-	if (type == MHWD::DEVICETYPE::USB)
+	if (type == "USB")
 	{
 		configs = &allUSBConfigs;
 		configPaths = getRecursiveDirectoryFileList(MHWD_USB_CONFIG_DIR, MHWD_CONFIG_NAME);
@@ -602,7 +602,7 @@ void Data::fillAllConfigs(MHWD::DEVICETYPE type)
 	}
 }
 
-bool Data::fillConfig(Config *config, std::string configPath, MHWD::DEVICETYPE type)
+bool Data::fillConfig(Config *config, std::string configPath, std::string type)
 {
 	config->type_ = type;
 	config->priority_ = 0;
@@ -927,8 +927,8 @@ void Data::updateConfigData()
 	allUSBConfigs.clear();
 
 	// Refill data
-	fillAllConfigs(MHWD::DEVICETYPE::PCI);
-	fillAllConfigs(MHWD::DEVICETYPE::USB);
+	fillAllConfigs("PCI");
+	fillAllConfigs("USB");
 
 	setMatchingConfigs(&PCIDevices, &allPCIConfigs, false);
 	setMatchingConfigs(&USBDevices, &allUSBConfigs, false);

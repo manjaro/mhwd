@@ -10,7 +10,7 @@
 #include <fstream>
 #include <string>
 
-Config::Config(std::string configPath, MHWD::DEVICETYPE type)
+Config::Config(std::string configPath, std::string type)
 	: type_(type), basePath_(configPath.substr(0, configPath.find_last_of('/'))),
 	  configPath_(configPath)
 {

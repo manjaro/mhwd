@@ -40,21 +40,21 @@ public:
 
 	void updateInstalledConfigData();
 	void getAllDevicesOfConfig(Config *config, std::vector<Device*>* foundDevices);
-	bool fillConfig(Config *config, std::string configPath, MHWD::DEVICETYPE type);
+	bool fillConfig(Config *config, std::string configPath, std::string type);
 
 	std::vector<Config*> getAllDependenciesToInstall(Config *config);
 	void getAllDependenciesToInstall(Config *config, std::vector<Config*>* installedConfigs,
 			std::vector<Config*> *depends);
-	Config* getDatabaseConfig(const std::string configName, const MHWD::DEVICETYPE configType);
+	Config* getDatabaseConfig(const std::string configName, const std::string configType);
 	std::vector<Config*> getAllLocalConflicts(Config *config);
 	std::vector<Config*> getAllLocalRequirements(Config *config);
 
 private:
 	void getAllDevicesOfConfig(std::vector<Device*>* devices, Config *config, std::vector<Device*>* foundDevices);
 
-	void fillInstalledConfigs(MHWD::DEVICETYPE type);
-	void fillDevices(MHWD::DEVICETYPE type);
-	void fillAllConfigs(MHWD::DEVICETYPE type);
+	void fillInstalledConfigs(std::string type);
+	void fillDevices(std::string type);
+	void fillAllConfigs(std::string type);
     void setMatchingConfigs(std::vector<Device*>* devices, std::vector<Config*>* configs, bool setAsInstalled);
     void setMatchingConfig(Config* config, std::vector<Device*>* devices, bool setAsInstalled);
     void addConfigSorted(std::vector<Config*>* configs, Config* config);

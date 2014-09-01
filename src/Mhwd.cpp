@@ -182,13 +182,13 @@ std::string Mhwd::checkEnvironment()
 	return retValue;
 }
 
-void Mhwd::printDeviceDetails(MHWD::DEVICETYPE type, FILE *f)
+void Mhwd::printDeviceDetails(std::string type, FILE *f)
 {
 	hd_data_t *hd_data;
 	hd_t *hd;
 	hw_item hw;
 
-	if (type == MHWD::DEVICETYPE::USB)
+	if (type == "USB")
 		hw = hw_usb;
 	else
 		hw = hw_pci;
@@ -206,13 +206,13 @@ void Mhwd::printDeviceDetails(MHWD::DEVICETYPE type, FILE *f)
 	free(hd_data);
 }
 
-Config* Mhwd::getInstalledConfig(const std::string configName,
-		const MHWD::DEVICETYPE configType)
+Config* Mhwd::getInstalledConfig(const std::string& configName,
+		const std::string& configType)
 {
 	std::vector<Config*>* installedConfigs;
 
 	// Get the right configs
-	if (configType == MHWD::DEVICETYPE::USB)
+	if (configType == "USB")
 	{
 		installedConfigs = &data_.installedUSBConfigs;
 	}
@@ -233,13 +233,13 @@ Config* Mhwd::getInstalledConfig(const std::string configName,
 	return nullptr;
 }
 
-Config* Mhwd::getDatabaseConfig(const std::string configName,
-		const MHWD::DEVICETYPE configType)
+Config* Mhwd::getDatabaseConfig(const std::string& configName,
+		const std::string configType)
 {
 	std::vector<Config*>* allConfigs;
 
 	// Get the right configs
-	if (configType == MHWD::DEVICETYPE::USB)
+	if (configType == "USB")
 	{
 		allConfigs = &data_.allUSBConfigs;
 	}
@@ -261,12 +261,12 @@ Config* Mhwd::getDatabaseConfig(const std::string configName,
 }
 
 Config* Mhwd::getAvailableConfig(const std::string& configName,
-		const MHWD::DEVICETYPE configType)
+		const std::string configType)
 {
 	std::vector<Device*> *devices;
 
 	// Get the right devices
-	if (configType == MHWD::DEVICETYPE::USB)
+	if (configType == "USB")
 	{
 		devices = &data_.USBDevices;
 	}
@@ -783,7 +783,7 @@ MHWD::STATUS Mhwd::installConfig(Config *config)
 	std::string databaseDir;
 
 	// Get the right configs
-	if (config->type_ == MHWD::DEVICETYPE::USB)
+	if (config->type_ == "USB")
 	{
 		databaseDir = MHWD_USB_DATABASE_DIR;
 	}
@@ -894,7 +894,7 @@ bool Mhwd::runScript(Config *config, MHWD::TRANSACTIONTYPE operationType)
 	{
 		Vita::string busID = (*dev)->sysfsBusID;
 
-		if (config->type_ == MHWD::DEVICETYPE::PCI)
+		if (config->type_ == "PCI")
 		{
 			std::vector<Vita::string> split = Vita::string(busID).replace(".", ":").explode(":");
 			const int size = split.size();
@@ -946,7 +946,7 @@ bool Mhwd::runScript(Config *config, MHWD::TRANSACTIONTYPE operationType)
 int Mhwd::launch(int argc, char *argv[])
 {
 	std::vector<std::string> configs;
-	MHWD::DEVICETYPE operationType;
+	std::string operationType;
 	bool autoConfigureNonFreeDriver;
 	std::string autoConfigureClassID;
 
@@ -1017,11 +1017,11 @@ int Mhwd::launch(int argc, char *argv[])
 
 			if (strcmp(argv[nArg], "usb") == 0)
 			{
-				operationType = MHWD::DEVICETYPE::USB;
+				operationType = "USB";
 			}
 			else
 			{
-				operationType = MHWD::DEVICETYPE::PCI;
+				operationType = "PCI";
 			}
 
 			++nArg;
@@ -1049,11 +1049,11 @@ int Mhwd::launch(int argc, char *argv[])
 
 			if (strcmp(argv[nArg], "usb") == 0)
 			{
-				operationType = MHWD::DEVICETYPE::USB;
+				operationType = "USB";
 			}
 			else
 			{
-				operationType = MHWD::DEVICETYPE::PCI;
+				operationType = "PCI";
 			}
 
 			arguments_ = static_cast<MHWD::ARGUMENTS>(arguments_ | MHWD::ARGUMENTS::INSTALL
@@ -1071,11 +1071,11 @@ int Mhwd::launch(int argc, char *argv[])
 
 			if (strcmp(argv[nArg], "usb") == 0)
 			{
-				operationType = MHWD::DEVICETYPE::USB;
+				operationType = "USB";
 			}
 			else
 			{
-				operationType = MHWD::DEVICETYPE::PCI;
+				operationType = "PCI";
 			}
 
 			arguments_ = static_cast<MHWD::ARGUMENTS>(arguments_ | MHWD::ARGUMENTS::INSTALL);
@@ -1092,11 +1092,11 @@ int Mhwd::launch(int argc, char *argv[])
 
 			if (strcmp(argv[nArg], "usb") == 0)
 			{
-				operationType = MHWD::DEVICETYPE::USB;
+				operationType = "USB";
 			}
 			else
 			{
-				operationType = MHWD::DEVICETYPE::PCI;
+				operationType = "PCI";
 			}
 
 			arguments_ = static_cast<MHWD::ARGUMENTS>(arguments_ | MHWD::ARGUMENTS::REMOVE);
@@ -1230,7 +1230,7 @@ int Mhwd::launch(int argc, char *argv[])
 	{
 		if (arguments_ & MHWD::ARGUMENTS::DETAIL)
 		{
-			printer_.printInstalledConfigs(MHWD::DEVICETYPE::PCI, data_.installedPCIConfigs);
+			printer_.printInstalledConfigs("PCI", data_.installedPCIConfigs);
 		}
 		else
 		{
@@ -1242,7 +1242,7 @@ int Mhwd::launch(int argc, char *argv[])
 	{
 		if (arguments_ & MHWD::ARGUMENTS::DETAIL)
 		{
-			printer_.printInstalledConfigs(MHWD::DEVICETYPE::USB, data_.installedUSBConfigs);
+			printer_.printInstalledConfigs("USB", data_.installedUSBConfigs);
 		}
 		else
 		{
@@ -1256,7 +1256,7 @@ int Mhwd::launch(int argc, char *argv[])
 	{
 		if (arguments_ & MHWD::ARGUMENTS::DETAIL)
 		{
-			printer_.printAvailableConfigs(MHWD::DEVICETYPE::PCI, data_.PCIDevices);
+			printer_.printAvailableConfigs("PCI", data_.PCIDevices);
 		}
 		else
 		{
@@ -1274,7 +1274,7 @@ int Mhwd::launch(int argc, char *argv[])
 	{
 		if (arguments_ & MHWD::ARGUMENTS::DETAIL)
 		{
-			printer_.printAvailableConfigs(MHWD::DEVICETYPE::USB, data_.USBDevices);
+			printer_.printAvailableConfigs("USB", data_.USBDevices);
 		}
 
 		else
@@ -1294,7 +1294,7 @@ int Mhwd::launch(int argc, char *argv[])
 	{
 		if (arguments_ & MHWD::ARGUMENTS::DETAIL)
 		{
-			printDeviceDetails(MHWD::DEVICETYPE::PCI);
+			printDeviceDetails("PCI");
 		}
 		else
 		{
@@ -1305,7 +1305,7 @@ int Mhwd::launch(int argc, char *argv[])
 	{
 		if (arguments_ & MHWD::ARGUMENTS::DETAIL)
 		{
-			printDeviceDetails(MHWD::DEVICETYPE::USB);
+			printDeviceDetails("USB");
 		}
 		else
 		{
@@ -1320,7 +1320,7 @@ int Mhwd::launch(int argc, char *argv[])
 		std::vector<Device*> *devices;
 		std::vector<Config*> *installedConfigs;
 
-		if (operationType == MHWD::DEVICETYPE::USB)
+		if (operationType == "USB")
 		{
 			devices = &data_.USBDevices;
 			installedConfigs = &data_.installedUSBConfigs;

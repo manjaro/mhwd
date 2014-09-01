@@ -27,10 +27,10 @@ enum ARGUMENTS
 	AUTOCONFIGURE = 0x0800
 };
 
-enum class DEVICETYPE
-{
-	PCI, USB
-};
+//enum class DEVICETYPE
+//{
+//	PCI, USB
+//};
 
 enum class STATUS
 {

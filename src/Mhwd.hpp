@@ -40,11 +40,11 @@ private:
     bool isUserRoot() const;
     std::string checkEnvironment();
 
-    void printDeviceDetails(MHWD::DEVICETYPE type, FILE *f = stdout);
+    void printDeviceDetails(std::string type, FILE *f = stdout);
 
-    Config* getInstalledConfig(const std::string configName, const MHWD::DEVICETYPE configType);
-    Config* getDatabaseConfig(const std::string configName, const MHWD::DEVICETYPE configType); // -> transaction ??
-    Config* getAvailableConfig(const std::string& configName, const MHWD::DEVICETYPE configType);
+    Config* getInstalledConfig(const std::string& configName, const std::string& configType);
+    Config* getDatabaseConfig(const std::string& configName, const std::string configType); // -> transaction ??
+    Config* getAvailableConfig(const std::string& configName, const std::string configType);
 
     std::vector<Config*> getAllLocalRequirements(Config *config);
 

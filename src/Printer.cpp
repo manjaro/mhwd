@@ -152,7 +152,7 @@ void Printer::listConfigs(const std::vector<Config*>& configs, std::string beg, 
 		{
 			std::string type;
 
-			if (config->type_ == MHWD::DEVICETYPE::USB)
+			if (config->type_ == "USB")
 			{
 				type = "USB";
 			}
@@ -171,11 +171,11 @@ void Printer::listConfigs(const std::vector<Config*>& configs, std::string beg, 
 	}
 }
 
-void Printer::printAvailableConfigs(MHWD::DEVICETYPE type, const std::vector<Device*>& devices) const
+void Printer::printAvailableConfigs(std::string type, const std::vector<Device*>& devices) const
 {
 	std::string deviceType;
 
-	if (type == MHWD::DEVICETYPE::USB)
+	if (type == "USB")
 	{
 		deviceType = "USB";
 	}
@@ -234,11 +234,11 @@ void Printer::printAvailableConfigs(MHWD::DEVICETYPE type, const std::vector<Dev
 		printWarning("no configs for " + deviceType + " devices found!");
 }
 
-void Printer::printInstalledConfigs(MHWD::DEVICETYPE type, const std::vector<Config*>& installedConfigs) const
+void Printer::printInstalledConfigs(std::string type, const std::vector<Config*>& installedConfigs) const
 {
 	std::string deviceType;
 
-	if (type == MHWD::DEVICETYPE::USB)
+	if (type == "USB")
 	{
 		deviceType = "USB";
 	}
@@ -270,7 +270,7 @@ void Printer::printConfigDetails(const Config& config) const
 	std::string classids;
 	std::string vendorids;
 
-	if (config.type_ == MHWD::DEVICETYPE::USB)
+	if (config.type_ == "USB")
 	{
 		type = "USB";
 	}

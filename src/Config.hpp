@@ -16,8 +16,7 @@
 
 struct Config
 {
-
-	Config(std::string configPath, MHWD::DEVICETYPE type);
+	Config(std::string configPath, std::string type);
 	bool readConfigFile(std::string configPath);
 
 	struct HardwareIDs
@@ -30,7 +29,8 @@ struct Config
 		std::vector<std::string> blacklistedDeviceIDs;
 	};
 
-	MHWD::DEVICETYPE type_;
+//	MHWD::DEVICETYPE type_;
+	std::string type_;
 	std::string basePath_;
 	std::string configPath_;
 	std::string name_;

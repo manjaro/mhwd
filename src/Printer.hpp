@@ -28,8 +28,8 @@ public:
     void printHelp() const;
     void listDevices(const std::vector<Device*>& devices, std::string typeOfDevice) const;
     void listConfigs(const std::vector<Config*>& configs, std::string beg, std::string empty = "") const;
-    void printAvailableConfigs(MHWD::DEVICETYPE type, const std::vector<Device*>& devices) const;
-    void printInstalledConfigs(MHWD::DEVICETYPE type, const std::vector<Config*>& installedConfigs) const;
+    void printAvailableConfigs(std::string type, const std::vector<Device*>& devices) const;
+    void printInstalledConfigs(std::string type, const std::vector<Config*>& installedConfigs) const;
     void printConfigDetails(const Config& config) const;
 private:
     void printLine() const;
