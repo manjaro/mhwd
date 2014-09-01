@@ -51,7 +51,6 @@ public:
 
 private:
 	void getAllDevicesOfConfig(std::vector<Device*>* devices, Config *config, std::vector<Device*>* foundDevices);
-
 	void fillInstalledConfigs(std::string type);
 	void fillDevices(std::string type);
 	void fillAllConfigs(std::string type);
