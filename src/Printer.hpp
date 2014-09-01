@@ -31,6 +31,8 @@ public:
     void printAvailableConfigs(MHWD::DEVICETYPE type, const std::vector<Device*>& devices) const;
     void printInstalledConfigs(MHWD::DEVICETYPE type, const std::vector<Config*>& installedConfigs) const;
     void printConfigDetails(const Config& config) const;
+private:
+    void printLine() const;
 };
 
 #endif /* PRINTER_HPP_ */

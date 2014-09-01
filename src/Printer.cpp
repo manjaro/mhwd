@@ -105,18 +105,16 @@ void Printer::listDevices(const std::vector<Device*>& devices, std::string type)
 
 	printStatus(type + " devices:");
 
-	std::cout << std::endl << std::setfill('-') << std::setw(80) << "-" << std::setfill(' ')
-			<< std::endl;
+	printLine();
 
 	std::cout << std::setw(30) << "TYPE"
 			<< std::setw(15) << "BUS"
 			<< std::setw(8) << "CLASS"
 			<< std::setw(8) << "VENDOR"
 			<< std::setw(8) << "DEVICE"
-			<< std::setw(10) << "CONFIGS";
+			<< std::setw(10) << "CONFIGS" << std::endl;
 
-	std::cout << std::endl << std::setfill('-') << std::setw(80) << "-" << std::setfill(' ')
-			<< std::endl;
+	printLine();
 
 	for (auto device : devices)
 	{
@@ -138,36 +136,21 @@ void Printer::listConfigs(const std::vector<Config*>& configs, std::string beg, 
 		{
 			printWarning(empty);
 		}
-		else
-		{
-			return;
-		}
 	}
 	else
 	{
 		printStatus(beg);
 
-		std::cout << std::endl << std::setfill('-') << std::setw(80) << "-" << std::setfill(' ')
-				<< std::endl;
+		printLine();
 		std::cout << std::setw(22) << "NAME"
 				<< std::setw(22) << "VERSION"
 				<< std::setw(20) << "FREEDRIVER"
 				<< std::setw(15) << "TYPE" << std::endl;
-		std::cout << std::setfill('-') << std::setw(80) << "-" << std::setfill(' ') << std::endl;
+		printLine();
 
 		for (auto config : configs)
 		{
-			std::string freedriver;
 			std::string type;
-
-			if (config->freedriver_)
-			{
-				freedriver = "true";
-			}
-			else
-			{
-				freedriver = "false";
-			}
 
 			if (config->type_ == MHWD::DEVICETYPE::USB)
 			{
@@ -180,7 +163,7 @@ void Printer::listConfigs(const std::vector<Config*>& configs, std::string beg, 
 
 			std::cout << std::setw(22) << config->name_
 					<< std::setw(22) << config->version_
-					<< std::setw(20) << freedriver
+					<< std::setw(20) << std::boolalpha << config->freedriver_
 					<< std::setw(15) << type << std::endl;
 		}
 
@@ -190,18 +173,18 @@ void Printer::listConfigs(const std::vector<Config*>& configs, std::string beg, 
 
 void Printer::printAvailableConfigs(MHWD::DEVICETYPE type, const std::vector<Device*>& devices) const
 {
-	std::string beg;
+	std::string deviceType;
 
 	if (type == MHWD::DEVICETYPE::USB)
 	{
-		beg = "USB";
+		deviceType = "USB";
 	}
 	else
 	{
-		beg = "PCI";
+		deviceType = "PCI";
 	}
 
-	bool found = false;
+	bool configFound = false;
 
 	for (auto device : devices)
 	{
@@ -211,20 +194,19 @@ void Printer::printAvailableConfigs(MHWD::DEVICETYPE type, const std::vector<Dev
 		}
 		else
 		{
-			found = true;
+			configFound = true;
 
-			std::cout << std::endl << std::setfill('-') << std::setw(80) << "-" << std::setfill(' ')
-			<< std::endl;
+			printLine();
 
 			printStatus(
-					beg + " Device: " + device->sysfsID + " (" + device->classID + ":"
+					deviceType + " Device: " + device->sysfsID + " (" + device->classID + ":"
 					+ device->vendorID + ":" + device->deviceID + ")");
 
 			std::cout << "  " << device->className
 					<< " " << device->vendorName
 					<< " " << device->deviceName << std::endl;
 
-			std::cout << std::setfill('-') << std::setw(80) << "-" << std::setfill(' ') << std::endl;
+			printLine();
 
 			if (!device->installedConfigs.empty())
 			{
@@ -248,26 +230,26 @@ void Printer::printAvailableConfigs(MHWD::DEVICETYPE type, const std::vector<Dev
 		}
 	}
 
-	if (!found)
-		printWarning("no configs for " + beg + " devices found!");
+	if (!configFound)
+		printWarning("no configs for " + deviceType + " devices found!");
 }
 
 void Printer::printInstalledConfigs(MHWD::DEVICETYPE type, const std::vector<Config*>& installedConfigs) const
 {
-	std::string beg;
+	std::string deviceType;
 
 	if (type == MHWD::DEVICETYPE::USB)
 	{
-		beg = "USB";
+		deviceType = "USB";
 	}
 	else
 	{
-		beg = "PCI";
+		deviceType = "PCI";
 	}
 
 	if (installedConfigs.empty())
 	{
-		printWarning("no installed configs for " + beg + " devices found!");
+		printWarning("no installed configs for " + deviceType + " devices found!");
 		return;
 	}
 
@@ -336,14 +318,19 @@ void Printer::printConfigDetails(const Config& config) const
 		info = "-";
 	}
 
-	std::cout << "   NAME:\t" << config.name_ << std::endl
-			<< "   ATTACHED:\t" << type << std::endl
-			<< "   VERSION:\t" << config.version_ << std::endl
-			<< "   INFO:\t" << info << std::endl
-			<< "   PRIORITY:\t" << config.priority_ << std::endl
-			<< "   FREEDRIVER:\t" << std::boolalpha << config.freedriver_ << std::endl
-			<< "   DEPENDS:\t" << dependencies << std::endl
-			<< "   CONFLICTS:\t" << conflicts << std::endl
-			<< "   CLASSIDS:\t" << classids << std::endl
-			<< "   VENDORIDS:\t" << vendorids << std::endl;
+	std::cout << "   NAME:\t" << config.name_
+			<< "\n   ATTACHED:\t" << type
+			<< "\n   VERSION:\t" << config.version_
+			<< "\n   INFO:\t" << info
+			<< "\n   PRIORITY:\t" << config.priority_
+			<< "\n   FREEDRIVER:\t" << std::boolalpha << config.freedriver_
+			<< "\n   DEPENDS:\t" << dependencies
+			<< "\n   CONFLICTS:\t" << conflicts
+			<< "\n   CLASSIDS:\t" << classids
+			<< "\n   VENDORIDS:\t" << vendorids << std::endl;
+}
+
+void Printer::printLine() const
+{
+	std::cout << std::setfill('-') << std::setw(80) << "-" << std::setfill(' ') << std::endl;
 }
