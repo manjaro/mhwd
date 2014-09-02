@@ -28,7 +28,8 @@ public:
     		std::string PMConfigPath {MHWD_PM_CONFIG};
     		std::string PMRootPath {MHWD_PM_ROOT};
     		bool syncPackageManagerDatabase = true;
-    	};
+    };
+
 	Environment environment;
 	std::vector<Device*> USBDevices;
 	std::vector<Device*> PCIDevices;

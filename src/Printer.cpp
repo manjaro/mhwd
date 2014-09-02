@@ -102,30 +102,33 @@ void Printer::listDevices(const std::vector<Device*>& devices, std::string type)
 		printWarning("No " + type + " devices found!");
 		return;
 	}
-
-	printStatus(type + " devices:");
-
-	printLine();
-
-	std::cout << std::setw(30) << "TYPE"
-			<< std::setw(15) << "BUS"
-			<< std::setw(8) << "CLASS"
-			<< std::setw(8) << "VENDOR"
-			<< std::setw(8) << "DEVICE"
-			<< std::setw(10) << "CONFIGS" << std::endl;
-
-	printLine();
-
-	for (auto device : devices)
+	else
 	{
-		std::cout << std::setw(30) << device->className
-				<< std::setw(15) << device->sysfsBusID
-				<< std::setw(8) << device->classID
-				<< std::setw(8) << device->vendorID
-				<< std::setw(8) << device->deviceID
-				<< std::setw(10) << device->availableConfigs.size() << std::endl;
+
+		printStatus(type + " devices:");
+
+		printLine();
+
+		std::cout << std::setw(30) << "TYPE"
+				<< std::setw(15) << "BUS"
+				<< std::setw(8) << "CLASS"
+				<< std::setw(8) << "VENDOR"
+				<< std::setw(8) << "DEVICE"
+				<< std::setw(10) << "CONFIGS" << std::endl;
+
+		printLine();
+
+		for (auto device : devices)
+		{
+			std::cout << std::setw(30) << device->className
+					<< std::setw(15) << device->sysfsBusID
+					<< std::setw(8) << device->classID
+					<< std::setw(8) << device->vendorID
+					<< std::setw(8) << device->deviceID
+					<< std::setw(10) << device->availableConfigs.size() << std::endl;
+		}
+		std::cout << std::endl << std::endl;
 	}
-	std::cout << std::endl << std::endl;
 }
 
 void Printer::listConfigs(const std::vector<Config*>& configs, std::string beg, std::string empty) const
@@ -150,21 +153,10 @@ void Printer::listConfigs(const std::vector<Config*>& configs, std::string beg, 
 
 		for (auto config : configs)
 		{
-			std::string type;
-
-			if (config->type_ == "USB")
-			{
-				type = "USB";
-			}
-			else
-			{
-				type = "PCI";
-			}
-
 			std::cout << std::setw(22) << config->name_
 					<< std::setw(22) << config->version_
 					<< std::setw(20) << std::boolalpha << config->freedriver_
-					<< std::setw(15) << type << std::endl;
+					<< std::setw(15) << config->type_ << std::endl;
 		}
 
 		std::cout << std::endl << std::endl;
