@@ -314,13 +314,18 @@ MHWD::STATUS Mhwd::performTransaction(Transaction *transaction)
 		{
 			return MHWD::STATUS::ERROR_NOT_INSTALLED;
 		}
-
-		printer_.printMessage(MHWD::MESSAGETYPE::REMOVE_START, installedConfig->name_);
-		if ((status = uninstallConfig(installedConfig)) != MHWD::STATUS::SUCCESS)
+		else
 		{
-			return status;
+			printer_.printMessage(MHWD::MESSAGETYPE::REMOVE_START, installedConfig->name_);
+			if ((status = uninstallConfig(installedConfig)) != MHWD::STATUS::SUCCESS)
+			{
+				return status;
+			}
+			else
+			{
+				printer_.printMessage(MHWD::MESSAGETYPE::REMOVE_END, installedConfig->name_);
+			}
 		}
-		printer_.printMessage(MHWD::MESSAGETYPE::REMOVE_END, installedConfig->name_);
 	}
 
 	if (transaction->type_ == MHWD::TRANSACTIONTYPE::INSTALL)
@@ -330,25 +335,33 @@ MHWD::STATUS Mhwd::performTransaction(Transaction *transaction)
 		{
 			return MHWD::STATUS::ERROR_ALREADY_INSTALLED;
 		}
-
-		// Install all dependencies first
-		for (std::vector<Config*>::const_iterator dependencyConfig = transaction->dependencyConfigs_.end() - 1;
-				dependencyConfig != transaction->dependencyConfigs_.begin() - 1; --dependencyConfig)
+		else
 		{
-			printer_.printMessage(MHWD::MESSAGETYPE::INSTALLDEPENDENCY_START, (*dependencyConfig)->name_);
-			if ((status = installConfig((*dependencyConfig))) != MHWD::STATUS::SUCCESS)
+			// Install all dependencies first
+			for (std::vector<Config*>::const_iterator dependencyConfig = transaction->dependencyConfigs_.end() - 1;
+					dependencyConfig != transaction->dependencyConfigs_.begin() - 1; --dependencyConfig)
+			{
+				printer_.printMessage(MHWD::MESSAGETYPE::INSTALLDEPENDENCY_START, (*dependencyConfig)->name_);
+				if ((status = installConfig((*dependencyConfig))) != MHWD::STATUS::SUCCESS)
+				{
+					return status;
+				}
+				else
+				{
+					printer_.printMessage(MHWD::MESSAGETYPE::INSTALLDEPENDENCY_END, (*dependencyConfig)->name_);
+				}
+			}
+
+			printer_.printMessage(MHWD::MESSAGETYPE::INSTALL_START, transaction->config_->name_);
+			if ((status = installConfig(transaction->config_)) != MHWD::STATUS::SUCCESS)
 			{
 				return status;
 			}
-			printer_.printMessage(MHWD::MESSAGETYPE::INSTALLDEPENDENCY_END, (*dependencyConfig)->name_);
+			else
+			{
+				printer_.printMessage(MHWD::MESSAGETYPE::INSTALL_END, transaction->config_->name_);
+			}
 		}
-
-		printer_.printMessage(MHWD::MESSAGETYPE::INSTALL_START, transaction->config_->name_);
-		if ((status = installConfig(transaction->config_)) != MHWD::STATUS::SUCCESS)
-		{
-			return status;
-		}
-		printer_.printMessage(MHWD::MESSAGETYPE::INSTALL_END, transaction->config_->name_);
 	}
 
 	return status;
@@ -435,36 +448,21 @@ bool Mhwd::copyDirectory(const std::string source, const std::string destination
 
 bool Mhwd::copyFile(const std::string source, const std::string destination, const mode_t mode)
 {
-	int c;
-	FILE *in, *out;
+	std::ifstream src(source, std::ios::binary);
+	std::ofstream dst(destination, std::ios::binary);
+	if (src.is_open() && dst.is_open())
+	{
+		dst << src.rdbuf();
+		mode_t process_mask = umask(0);
+		chmod(destination.c_str(), mode);
+		umask(process_mask);
 
-	in = fopen(source.c_str(), "r");
-	out = fopen(destination.c_str(), "w");
-
-	if (in == nullptr || !in)
+		return true;
+	}
+	else
 	{
 		return false;
 	}
-	else if (out == nullptr || !out)
-	{
-		fclose(in);
-		return false;
-	}
-
-	while ((c = getc(in)) != EOF)
-	{
-		putc(c, out);
-	}
-
-	fclose(in);
-	fclose(out);
-
-	// Set right permission
-	mode_t process_mask = umask(0);
-	chmod(destination.c_str(), mode);
-	umask(process_mask);
-
-	return true;
 }
 
 bool Mhwd::removeDirectory(const std::string directory)
