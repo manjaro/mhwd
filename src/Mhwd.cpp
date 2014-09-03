@@ -5,8 +5,6 @@
  *      Author: dec
  */
 
-#define ROOT_UID 0
-
 #include "Mhwd.hpp"
 #include "vita/string.hpp"
 
@@ -142,6 +140,7 @@ bool Mhwd::performTransaction(Config* config, MHWD::TRANSACTIONTYPE type)
 
 bool Mhwd::isUserRoot() const
 {
+	constexpr unsigned short ROOT_UID = 0;
 	if (getuid() != ROOT_UID)
 	{
 		return false;
@@ -187,13 +186,14 @@ void Mhwd::printDeviceDetails(std::string type, FILE *f)
 
 	hd_data = (hd_data_t*) calloc(1, sizeof *hd_data);
 	hd = hd_list(hd_data, hw, 1, nullptr);
+	hd_t *beginningOfhd = hd;
 
 	for (; hd; hd = hd->next)
 	{
 		hd_dump_entry(hd_data, hd, f);
 	}
 
-	hd_free_hd_list(hd);
+	hd_free_hd_list(beginningOfhd);
 	hd_free_hd_data(hd_data);
 	free(hd_data);
 }
@@ -772,7 +772,6 @@ int Mhwd::launch(int argc, char *argv[])
 		else if (option == "-a" || option == "--auto")
 		{
 			++nArg;
-
 			if (nArg + 2 >= argc
 					|| (strcmp(argv[nArg], "pci") != 0 && strcmp(argv[nArg], "usb") != 0)
 					|| (strcmp(argv[nArg + 1], "free") != 0
@@ -808,7 +807,7 @@ int Mhwd::launch(int argc, char *argv[])
 		else if (strcmp(argv[nArg], "-ic") == 0 || strcmp(argv[nArg], "--installcustom") == 0)
 		{
 			++nArg;
-			if (nArg >= argc || (strcmp(argv[nArg], "pci") != 0 && strcmp(argv[nArg], "usb") != 0))
+			if ((nArg >= argc) || ((strcmp(argv[nArg], "pci") != 0) && (strcmp(argv[nArg], "usb") != 0)))
 			{
 				printer_.printError("invalid use of option: -ic/--installcustom\n");
 				printer_.printHelp();
@@ -910,7 +909,7 @@ int Mhwd::launch(int argc, char *argv[])
 
 			if (arguments_ & MHWD::ARGUMENTS::CUSTOMINSTALL)
 			{
-				name = Vita::string(argv[nArg]);
+				name = std::string{argv[nArg]};
 			}
 			else
 			{
@@ -1107,7 +1106,6 @@ int Mhwd::launch(int argc, char *argv[])
 			}
 			else
 			{
-
 				founddevice = true;
 				Config *config = nullptr;
 
