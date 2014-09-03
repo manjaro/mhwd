@@ -546,7 +546,7 @@ void Data::fillDevices(std::string type)
 
 	hd_t *hd;
 	hd = hd_list(hd_data, hw, 1, nullptr);
-	hd_t *hd2 = hd;
+	hd_t *beginningOfhd = hd;
 
 	Device *device;
 	for (; hd; hd = hd->next)
@@ -564,7 +564,7 @@ void Data::fillDevices(std::string type)
 		devices->push_back(device);
 	}
 
-	hd_free_hd_list(hd2);
+	hd_free_hd_list(beginningOfhd);
 	hd_free_hd_data(hd_data);
 	free(hd_data);
 }

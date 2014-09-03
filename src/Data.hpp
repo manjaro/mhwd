@@ -17,7 +17,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-
 class Data {
 public:
 	Data();

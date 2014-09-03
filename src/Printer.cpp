@@ -76,7 +76,8 @@ void Printer::printHelp() const
 	std::cout << "Usage: mhwd [OPTIONS] <config(s)>\n\n"
 			<< "  --pci\t\t\t\t\tlist only pci devices and driver configs\n"
 			<< "  --usb\t\t\t\t\tlist only usb devices and driver configsn"
-			<< "  -h/--help\t\t\t\tshow help\n" << "  -f/--force\t\t\t\tforce reinstallation\n"
+			<< "  -h/--help\t\t\t\tshow help\n"
+			<< "  -f/--force\t\t\t\tforce reinstallation\n"
 			<< "  -d/--detail\t\t\t\tshow detailed info for -l/-li/-lh\n"
 			<< "  -l/--list\t\t\t\tlist available configs for devices\n"
 			<< "  -la/--listall\t\t\t\tlist all driver configs\n"
@@ -99,20 +100,15 @@ void Printer::listDevices(const std::vector<Device*>& devices, std::string type)
 	}
 	else
 	{
-
 		printStatus(type + " devices:");
-
 		printLine();
-
 		std::cout << std::setw(30) << "TYPE"
 				<< std::setw(15) << "BUS"
 				<< std::setw(8) << "CLASS"
 				<< std::setw(8) << "VENDOR"
 				<< std::setw(8) << "DEVICE"
 				<< std::setw(10) << "CONFIGS" << std::endl;
-
 		printLine();
-
 		for (auto device : devices)
 		{
 			std::cout << std::setw(30) << device->className
@@ -138,14 +134,12 @@ void Printer::listConfigs(const std::vector<Config*>& configs, std::string beg, 
 	else
 	{
 		printStatus(beg);
-
 		printLine();
 		std::cout << std::setw(22) << "NAME"
 				<< std::setw(22) << "VERSION"
 				<< std::setw(20) << "FREEDRIVER"
 				<< std::setw(15) << "TYPE" << std::endl;
 		printLine();
-
 		for (auto config : configs)
 		{
 			std::cout << std::setw(22) << config->name_
@@ -153,7 +147,6 @@ void Printer::listConfigs(const std::vector<Config*>& configs, std::string beg, 
 					<< std::setw(20) << std::boolalpha << config->freedriver_
 					<< std::setw(15) << config->type_ << std::endl;
 		}
-
 		std::cout << std::endl << std::endl;
 	}
 }
@@ -173,17 +166,13 @@ void Printer::printAvailableConfigs(const std::string& deviceType, const std::ve
 			configFound = true;
 
 			printLine();
-
 			printStatus(
 					deviceType + " Device: " + device->sysfsID + " (" + device->classID + ":"
 					+ device->vendorID + ":" + device->deviceID + ")");
-
 			std::cout << "  " << device->className
 					<< " " << device->vendorName
 					<< " " << device->deviceName << std::endl;
-
 			printLine();
-
 			if (!device->installedConfigs.empty())
 			{
 				std::cout << "  > INSTALLED:" << std::endl;
@@ -193,7 +182,6 @@ void Printer::printAvailableConfigs(const std::string& deviceType, const std::ve
 				}
 				std::cout << std::endl << std::endl;
 			}
-
 			if (!device->availableConfigs.empty())
 			{
 				std::cout << "  > AVAILABLE:" << std::endl;
@@ -224,7 +212,6 @@ void Printer::printInstalledConfigs(const std::string& deviceType, const std::ve
 		{
 			printConfigDetails(*config);
 		}
-
 		std::cout << std::endl;
 	}
 }
