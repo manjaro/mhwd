@@ -33,6 +33,10 @@ public:
     void printConfigDetails(const Config& config) const;
 private:
     void printLine() const;
+
+    const char* CONSOLE_COLOR_RESET {"\e[m"};
+    const char* CONSOLE_MESSAGE_COLOR {"\e[1m\e[31m"};
+    const char* CONSOLE_TEXT_OUTPUT_COLOR {"\e[0;32m"};
 };
 
 #endif /* PRINTER_HPP_ */

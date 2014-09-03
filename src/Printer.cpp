@@ -5,10 +5,6 @@
  *      Author: dec
  */
 
-#define CONSOLE_COLOR_RESET "\e[m"
-#define CONSOLE_MESSAGE_COLOR "\e[1m\e[31m"
-#define CONSOLE_TEXT_OUTPUT_COLOR "\e[0;32m"
-
 #include "Printer.hpp"
 #include <iomanip>
 #include <iostream>
