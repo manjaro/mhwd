@@ -96,7 +96,6 @@ void Printer::listDevices(const std::vector<Device*>& devices, std::string type)
 	if (devices.empty())
 	{
 		printWarning("No " + type + " devices found!");
-		return;
 	}
 	else
 	{
@@ -159,7 +158,7 @@ void Printer::listConfigs(const std::vector<Config*>& configs, std::string beg, 
 	}
 }
 
-void Printer::printAvailableConfigs(std::string deviceType, const std::vector<Device*>& devices) const
+void Printer::printAvailableConfigs(const std::string& deviceType, const std::vector<Device*>& devices) const
 {
 	bool configFound = false;
 
@@ -208,23 +207,26 @@ void Printer::printAvailableConfigs(std::string deviceType, const std::vector<De
 	}
 
 	if (!configFound)
+	{
 		printWarning("no configs for " + deviceType + " devices found!");
+	}
 }
 
-void Printer::printInstalledConfigs(std::string deviceType, const std::vector<Config*>& installedConfigs) const
+void Printer::printInstalledConfigs(const std::string& deviceType, const std::vector<Config*>& installedConfigs) const
 {
 	if (installedConfigs.empty())
 	{
 		printWarning("no installed configs for " + deviceType + " devices found!");
-		return;
 	}
-
-	for (auto config : installedConfigs)
+	else
 	{
-		printConfigDetails(*config);
-	}
+		for (auto config : installedConfigs)
+		{
+			printConfigDetails(*config);
+		}
 
-	std::cout << std::endl;
+		std::cout << std::endl;
+	}
 }
 
 void Printer::printConfigDetails(const Config& config) const
