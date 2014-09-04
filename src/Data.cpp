@@ -639,7 +639,6 @@ std::vector<std::string> Data::getRecursiveDirectoryFileList(const std::string d
 			}
 			else
 			{
-
 				struct stat filestatus;
 				lstat(filepath.c_str(), &filestatus);
 

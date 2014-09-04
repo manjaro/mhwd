@@ -453,6 +453,7 @@ bool Mhwd::copyFile(const std::string source, const std::string destination, con
 	if (src.is_open() && dst.is_open())
 	{
 		dst << src.rdbuf();
+
 		mode_t process_mask = umask(0);
 		chmod(destination.c_str(), mode);
 		umask(process_mask);
@@ -687,26 +688,30 @@ bool Mhwd::runScript(Config *config, MHWD::TRANSACTIONTYPE operationType)
 	{
 		return false;
 	}
-	char buff[512];
-	while (fgets(buff, sizeof(buff), in) != nullptr)
+	else
 	{
-		printer_.printMessage(MHWD::MESSAGETYPE::CONSOLE_OUTPUT, std::string(buff));
+		char buff[512];
+		while (fgets(buff, sizeof(buff), in) != nullptr)
+		{
+			printer_.printMessage(MHWD::MESSAGETYPE::CONSOLE_OUTPUT, std::string(buff));
+		}
+
+		int stat = pclose(in);
+
+		if (WEXITSTATUS(stat) != 0)
+		{
+			return false;
+		}
+		else
+		{
+			// Only one database sync is required
+			if (operationType == MHWD::TRANSACTIONTYPE::INSTALL)
+			{
+				data_.environment.syncPackageManagerDatabase = false;
+			}
+			return true;
+		}
 	}
-
-	int stat = pclose(in);
-
-	if (WEXITSTATUS(stat) != 0)
-	{
-		return false;
-	}
-
-	// Only one database sync is required
-	if (operationType == MHWD::TRANSACTIONTYPE::INSTALL)
-	{
-		data_.environment.syncPackageManagerDatabase = false;
-	}
-
-	return true;
 }
 
 int Mhwd::launch(int argc, char *argv[])
