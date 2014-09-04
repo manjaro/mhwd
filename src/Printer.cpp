@@ -75,7 +75,7 @@ void Printer::printHelp() const
 {
 	std::cout << "Usage: mhwd [OPTIONS] <config(s)>\n\n"
 			<< "  --pci\t\t\t\t\tlist only pci devices and driver configs\n"
-			<< "  --usb\t\t\t\t\tlist only usb devices and driver configsn"
+			<< "  --usb\t\t\t\t\tlist only usb devices and driver configs\n"
 			<< "  -h/--help\t\t\t\tshow help\n"
 			<< "  -f/--force\t\t\t\tforce reinstallation\n"
 			<< "  -d/--detail\t\t\t\tshow detailed info for -l/-li/-lh\n"
