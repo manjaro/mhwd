@@ -33,8 +33,15 @@ Mhwd::~Mhwd()
 
 bool Mhwd::performTransaction(Config* config, MHWD::TRANSACTIONTYPE type)
 {
-	Transaction transaction (data_, config, type,
-			(arguments_ & MHWD::ARGUMENTS::FORCE));
+//	Transaction transaction (data_, config, type,
+//			(arguments_ & MHWD::ARGUMENTS::FORCE));
+	Transaction transaction;
+	transaction.config_ = config;
+	transaction.allowedToReinstall_ = (arguments_ & MHWD::ARGUMENTS::FORCE);
+	transaction.type_ = type;
+	transaction.dependencyConfigs_ = data_.getAllDependenciesToInstall(config);
+	transaction.conflictedConfigs_ = data_.getAllLocalConflicts(config);
+	transaction.configsRequirements_ = data_.getAllLocalRequirements(config);
 
 	// Print things to do
 	if (type == MHWD::TRANSACTIONTYPE::INSTALL)

@@ -15,6 +15,7 @@
 class Transaction
 {
 public:
+	Transaction(){}
 	Transaction(Data data, Config* config, MHWD::TRANSACTIONTYPE type, bool allowReinstallation);
 
 	bool isAllowedToReinstall() const;
@@ -24,7 +25,7 @@ public:
 	std::vector<Config*> conflictedConfigs_;
 	std::vector<Config*> configsRequirements_;
 
-private:
+//private:
 	Data data_;
 	bool allowedToReinstall_;
 };
