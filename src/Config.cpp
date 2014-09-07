@@ -17,7 +17,7 @@ Config::Config(std::string configPath, std::string type)
 	// Add new HardwareIDs group to vector if vector is empty
 	if (hwdIDs_.empty())
 	{
-		Config::HardwareIDs hwdID;
+		Config::HardwareID hwdID;
 		hwdIDs_.push_back(hwdID);
 	}
 }
@@ -133,7 +133,7 @@ bool Config::readConfigFile(std::string configPath)
 			// Add new HardwareIDs group to vector if vector is not empty
 			if (!hwdIDs_.back().classIDs.empty())
 			{
-				Config::HardwareIDs hwdID;
+				Config::HardwareID hwdID;
 				hwdIDs_.push_back(hwdID);
 			}
 
@@ -144,7 +144,7 @@ bool Config::readConfigFile(std::string configPath)
 			// Add new HardwareIDs group to vector if vector is not empty
 			if (!hwdIDs_.back().vendorIDs.empty())
 			{
-				Config::HardwareIDs hwdID;
+				Config::HardwareID hwdID;
 				hwdIDs_.push_back(hwdID);
 			}
 
@@ -155,7 +155,7 @@ bool Config::readConfigFile(std::string configPath)
 			// Add new HardwareIDs group to vector if vector is not empty
 			if (!hwdIDs_.back().deviceIDs.empty())
 			{
-				Config::HardwareIDs hwdID;
+				Config::HardwareID hwdID;
 				hwdIDs_.push_back(hwdID);
 			}
 
@@ -184,7 +184,7 @@ bool Config::readConfigFile(std::string configPath)
 	}
 
 	// Append * to all empty vectors
-	for (std::vector<Config::HardwareIDs>::iterator hwdID = hwdIDs_.begin();
+	for (std::vector<Config::HardwareID>::iterator hwdID = hwdIDs_.begin();
 			hwdID != hwdIDs_.end(); hwdID++)
 	{
 		if ((*hwdID).classIDs.empty())

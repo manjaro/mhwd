@@ -19,7 +19,7 @@ struct Config
 	Config(std::string configPath, std::string type);
 	bool readConfigFile(std::string configPath);
 
-	struct HardwareIDs
+	struct HardwareID
 	{
 		std::vector<std::string> classIDs;
 		std::vector<std::string> vendorIDs;
@@ -37,7 +37,7 @@ struct Config
 	std::string version_;
 	bool freedriver_ = true;
 	int priority_ = 0;
-	std::vector<HardwareIDs> hwdIDs_;
+	std::vector<HardwareID> hwdIDs_;
 	std::vector<std::string> conflicts_;
 	std::vector<std::string> dependencies_;
 

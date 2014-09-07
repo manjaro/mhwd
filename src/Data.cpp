@@ -165,7 +165,7 @@ void Data::getAllDevicesOfConfig(std::vector<Device*>* devices, Config *config,
 {
 	foundDevices->clear();
 
-	for (std::vector<Config::HardwareIDs>::const_iterator hwdID = config->hwdIDs_.begin();
+	for (std::vector<Config::HardwareID>::const_iterator hwdID = config->hwdIDs_.begin();
 			hwdID != config->hwdIDs_.end(); ++hwdID)
 	{
 		bool foundDevice = false;
@@ -305,7 +305,6 @@ void Data::getAllDevicesOfConfig(std::vector<Device*>* devices, Config *config,
 		}
 	}
 }
-
 
 std::vector<Config*> Data::getAllDependenciesToInstall(Config *config)
 {
@@ -524,7 +523,6 @@ std::vector<Config*> Data::getAllLocalRequirements(Config *config)
 	return requirements;
 }
 
-
 void Data::fillDevices(std::string type)
 {
 	hw_item hw;
@@ -612,7 +610,7 @@ bool Data::fillConfig(Config *config, std::string configPath, std::string type)
 	// Add new HardwareIDs group to vector if vector is empty
 	if (config->hwdIDs_.empty())
 	{
-		Config::HardwareIDs hwdID;
+		Config::HardwareID hwdID;
 		config->hwdIDs_.push_back(hwdID);
 	}
 
@@ -674,189 +672,194 @@ bool Data::readConfigFile(Config *config, std::string configPath)
 	{
 		return false;
 	}
-
-	Vita::string line;
-	Vita::string key;
-	Vita::string value;
-	std::vector<Vita::string> parts;
-
-	while (!file.eof())
+	else
 	{
-		getline(file, line);
+		Vita::string line;
+		Vita::string key;
+		Vita::string value;
+		std::vector<Vita::string> parts;
 
-		size_t pos = line.find_first_of('#');
-		if (pos != std::string::npos)
+		while (!file.eof())
 		{
-			line.erase(pos);
-		}
+			getline(file, line);
 
-		if (line.trim().empty())
-		{
-			continue;
-		}
-		else
-		{
-			parts = line.explode("=");
-			key = parts.front().trim().toLower();
-			value = parts.back().trim("\"").trim();
-
-			// Read in extern file
-			if (value.size() > 1 && value.substr(0, 1) == ">")
+			size_t pos = line.find_first_of('#');
+			if (pos != std::string::npos)
 			{
-				std::ifstream file(getRightConfigPath(value.substr(1), config->basePath_).c_str(),
-						std::ios::in);
-				if (!file.is_open())
+				line.erase(pos);
+			}
+
+			if (line.trim().empty())
+			{
+				continue;
+			}
+			else
+			{
+				parts = line.explode("=");
+				key = parts.front().trim().toLower();
+				value = parts.back().trim("\"").trim();
+
+				// Read in extern file
+				if ((value.size() > 1) && (value.substr(0, 1) == ">"))
 				{
-					return false;
-				}
-
-				Vita::string line;
-				value.clear();
-
-				while (!file.eof())
-				{
-					getline(file, line);
-
-					size_t pos = line.find_first_of('#');
-					if (pos != std::string::npos)
+					std::ifstream file(
+							getRightConfigPath(value.substr(1), config->basePath_).c_str(),
+							std::ios::in);
+					if (!file.is_open())
 					{
-						line.erase(pos);
-					}
-
-					if (line.trim().empty())
-					{
-						continue;
+						return false;
 					}
 					else
 					{
-						value += " " + line.trim();
+						Vita::string line;
+						value.clear();
+
+						while (!file.eof())
+						{
+							getline(file, line);
+
+							size_t pos = line.find_first_of('#');
+							if (pos != std::string::npos)
+							{
+								line.erase(pos);
+							}
+
+							if (line.trim().empty())
+							{
+								continue;
+							}
+							else
+							{
+								value += " " + line.trim();
+							}
+						}
+
+						value = value.trim();
+						// remove all multiple spaces
+						while (value.find("  ") != std::string::npos)
+						{
+							value = value.replace("  ", " ");
+						}
 					}
 				}
 
-				value = value.trim();
-
-				// remove all multiple spaces
-				while (value.find("  ") != std::string::npos)
+				if (key == "include")
 				{
-					value = value.replace("  ", " ");
+					readConfigFile(config, getRightConfigPath(value, config->basePath_));
+				}
+				else if (key == "name")
+				{
+					config->name_ = value.toLower();
+				}
+				else if (key == "version")
+				{
+					config->version_ = value;
+				}
+				else if (key == "info")
+				{
+					config->info_ = value;
+				}
+				else if (key == "priority")
+				{
+					config->priority_ = value.convert<int>();
+				}
+				else if (key == "freedriver")
+				{
+					value = value.toLower();
+
+					if (value == "false")
+					{
+						config->freedriver_ = false;
+					}
+					else if (value == "true")
+					{
+						config->freedriver_ = true;
+					}
+				}
+				else if (key == "classids")
+				{
+					// Add new HardwareIDs group to vector if vector is not empty
+					if (!config->hwdIDs_.back().classIDs.empty())
+					{
+						Config::HardwareID hwdID;
+						config->hwdIDs_.push_back(hwdID);
+					}
+
+					config->hwdIDs_.back().classIDs = splitValue(value);
+				}
+				else if (key == "vendorids")
+				{
+					// Add new HardwareIDs group to vector if vector is not empty
+					if (!config->hwdIDs_.back().vendorIDs.empty())
+					{
+						Config::HardwareID hwdID;
+						config->hwdIDs_.push_back(hwdID);
+					}
+
+					config->hwdIDs_.back().vendorIDs = splitValue(value);
+				}
+				else if (key == "deviceids")
+				{
+					// Add new HardwareIDs group to vector if vector is not empty
+					if (!config->hwdIDs_.back().deviceIDs.empty())
+					{
+						Config::HardwareID hwdID;
+						config->hwdIDs_.push_back(hwdID);
+					}
+
+					config->hwdIDs_.back().deviceIDs = splitValue(value);
+				}
+				else if (key == "blacklistedclassids")
+				{
+					config->hwdIDs_.back().blacklistedClassIDs = splitValue(value);
+				}
+				else if (key == "blacklistedvendorids")
+				{
+					config->hwdIDs_.back().blacklistedVendorIDs = splitValue(value);
+				}
+				else if (key == "blacklisteddeviceids")
+				{
+					config->hwdIDs_.back().blacklistedDeviceIDs = splitValue(value);
+				}
+				else if (key == "mhwddepends")
+				{
+					config->dependencies_ = splitValue(value);
+				}
+				else if (key == "mhwdconflicts")
+				{
+					config->conflicts_ = splitValue(value);
 				}
 			}
+		}
 
-			if (key == "include")
+		// Append * to all empty vectors
+		for (Config::HardwareID& hwdID : config->hwdIDs_)
+		{
+			if (hwdID.classIDs.empty())
 			{
-				readConfigFile(config, getRightConfigPath(value, config->basePath_));
+				hwdID.classIDs.push_back("*");
 			}
-			else if (key == "name")
-			{
-				config->name_ = value.toLower();
-			}
-			else if (key == "version")
-			{
-				config->version_ = value;
-			}
-			else if (key == "info")
-			{
-				config->info_ = value;
-			}
-			else if (key == "priority")
-			{
-				config->priority_ = value.convert<int>();
-			}
-			else if (key == "freedriver")
-			{
-				value = value.toLower();
 
-				if (value == "false")
-				{
-					config->freedriver_ = false;
-				}
-				else if (value == "true")
-				{
-					config->freedriver_ = true;
-				}
-			}
-			else if (key == "classids")
+			if (hwdID.vendorIDs.empty())
 			{
-				// Add new HardwareIDs group to vector if vector is not empty
-				if (!config->hwdIDs_.back().classIDs.empty())
-				{
-					Config::HardwareIDs hwdID;
-					config->hwdIDs_.push_back(hwdID);
-				}
+				hwdID.vendorIDs.push_back("*");
+			}
 
-				config->hwdIDs_.back().classIDs = splitValue(value);
-			}
-			else if (key == "vendorids")
+			if (hwdID.deviceIDs.empty())
 			{
-				// Add new HardwareIDs group to vector if vector is not empty
-				if (!config->hwdIDs_.back().vendorIDs.empty())
-				{
-					Config::HardwareIDs hwdID;
-					config->hwdIDs_.push_back(hwdID);
-				}
+				hwdID.deviceIDs.push_back("*");
+			}
+		}
 
-				config->hwdIDs_.back().vendorIDs = splitValue(value);
-			}
-			else if (key == "deviceids")
-			{
-				// Add new HardwareIDs group to vector if vector is not empty
-				if (!config->hwdIDs_.back().deviceIDs.empty())
-				{
-					Config::HardwareIDs hwdID;
-					config->hwdIDs_.push_back(hwdID);
-				}
-
-				config->hwdIDs_.back().deviceIDs = splitValue(value);
-			}
-			else if (key == "blacklistedclassids")
-			{
-				config->hwdIDs_.back().blacklistedClassIDs = splitValue(value);
-			}
-			else if (key == "blacklistedvendorids")
-			{
-				config->hwdIDs_.back().blacklistedVendorIDs = splitValue(value);
-			}
-			else if (key == "blacklisteddeviceids")
-			{
-				config->hwdIDs_.back().blacklistedDeviceIDs = splitValue(value);
-			}
-			else if (key == "mhwddepends")
-			{
-				config->dependencies_ = splitValue(value);
-			}
-			else if (key == "mhwdconflicts")
-			{
-				config->conflicts_ = splitValue(value);
-			}
+		if (config->name_.empty())
+		{
+			return false;
+		}
+		else
+		{
+			return true;
 		}
 	}
-
-	// Append * to all empty vectors
-	for (std::vector<Config::HardwareIDs>::iterator hwdID = config->hwdIDs_.begin();
-			hwdID != config->hwdIDs_.end(); hwdID++)
-	{
-		if ((*hwdID).classIDs.empty())
-		{
-			(*hwdID).classIDs.push_back("*");
-		}
-
-		if ((*hwdID).vendorIDs.empty())
-		{
-			(*hwdID).vendorIDs.push_back("*");
-		}
-
-		if ((*hwdID).deviceIDs.empty())
-		{
-			(*hwdID).deviceIDs.push_back("*");
-		}
-	}
-
-	if (config->name_.empty())
-	{
-		return false;
-	}
-
-	return true;
 }
 
 Vita::string Data::getRightConfigPath(Vita::string str, Vita::string baseConfigPath)
