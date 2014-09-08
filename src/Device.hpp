@@ -16,17 +16,17 @@
 
 struct Device
 {
-	std::string type;
-	std::string className;
-	std::string deviceName;
-	std::string vendorName;
-	std::string classID;
-	std::string deviceID;
-	std::string vendorID;
-	std::string sysfsBusID;
-	std::string sysfsID;
-	std::vector<Config*> availableConfigs;
-	std::vector<Config*> installedConfigs;
+    std::string type;
+    std::string className;
+    std::string deviceName;
+    std::string vendorName;
+    std::string classID;
+    std::string deviceID;
+    std::string vendorID;
+    std::string sysfsBusID;
+    std::string sysfsID;
+    std::vector<Config*> availableConfigs;
+    std::vector<Config*> installedConfigs;
 };
 
 #endif /* DEVICE_HPP_ */

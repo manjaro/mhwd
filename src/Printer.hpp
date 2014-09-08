@@ -18,8 +18,8 @@
 class Printer
 {
 public:
-	Printer();
-	~Printer();
+    Printer();
+    ~Printer();
 
     void printStatus(std::string statusMsg) const;
     void printError(std::string errorMsg) const;
