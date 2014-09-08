@@ -8,6 +8,8 @@
 #ifndef TRANSACTION_HPP_
 #define TRANSACTION_HPP_
 
+#include <vector>
+
 #include "Config.hpp"
 #include "Data.hpp"
 #include "Enums.hpp"
@@ -15,7 +17,7 @@
 class Transaction
 {
 public:
-    Transaction(){}
+    Transaction() {}
     Transaction(Data data, Config* config, MHWD::TRANSACTIONTYPE type, bool allowReinstallation);
 
     bool isAllowedToReinstall() const;
@@ -25,7 +27,6 @@ public:
     std::vector<Config*> conflictedConfigs_;
     std::vector<Config*> configsRequirements_;
 
-//private:
     Data data_;
     bool allowedToReinstall_;
 };

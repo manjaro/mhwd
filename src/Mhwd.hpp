@@ -8,8 +8,19 @@
 #ifndef MHWD_HPP_
 #define MHWD_HPP_
 
+#include <dirent.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+#include <cstdio>
+#include <cstdlib>
+#include <memory>
+#include <string>
+#include <vector>
+
 #include "Config.hpp"
-#include "const.h"
+#include "../libmhwd/const.h"
 #include "Data.hpp"
 #include "Device.hpp"
 #include "Enums.hpp"
@@ -17,20 +28,9 @@
 #include "vita/string.hpp"
 #include "Transaction.hpp"
 
-#include <cstdio>
-#include <cstdlib>
-#include <dirent.h>
-#include <memory>
-#include <string>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <vector>
-
 class Mhwd
 {
 public:
-
     Mhwd();
     ~Mhwd();
     int launch(int argc, char *argv[]);
@@ -43,7 +43,7 @@ private:
     void printDeviceDetails(std::string type, FILE *f = stdout);
 
     Config* getInstalledConfig(const std::string& configName, const std::string& configType);
-    Config* getDatabaseConfig(const std::string& configName, const std::string configType); // -> transaction ??
+    Config* getDatabaseConfig(const std::string& configName, const std::string configType);
     Config* getAvailableConfig(const std::string& configName, const std::string configType);
 
     std::vector<Config*> getAllLocalRequirements(Config *config);
@@ -61,10 +61,12 @@ private:
     //### Directory and File Operations ###//
     //#####################################//
     bool copyDirectory(const std::string source, const std::string destination);
-    bool copyFile(const std::string source, const std::string destination, const mode_t mode = S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IROTH);
+    bool copyFile(const std::string source, const std::string destination, const mode_t mode =
+            S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IROTH);
     bool removeDirectory(const std::string directory);
     bool checkExist(const std::string path);
-    bool createDir(const std::string path, const mode_t mode = S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IROTH | S_IXGRP | S_IXOTH);
+    bool createDir(const std::string path, const mode_t mode =
+            S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IROTH | S_IXGRP | S_IXOTH);
 
     //###########################//
     //### Script & Operations ###//

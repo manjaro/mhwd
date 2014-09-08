@@ -5,8 +5,9 @@
  *      Author: dec
  */
 
-#include "Mhwd.hpp"
-#include "vita/string.hpp"
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #include <algorithm>
 #include <cctype>
@@ -17,11 +18,11 @@
 #include <iomanip>
 #include <iostream>
 #include <memory>
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <string>
-#include <unistd.h>
 #include <vector>
+
+#include "Mhwd.hpp"
+#include "vita/string.hpp"
 
 Mhwd::Mhwd() : arguments_(MHWD::ARGUMENTS::NONE), data_(), printer_()
 {
@@ -56,7 +57,8 @@ bool Mhwd::performTransaction(Config* config, MHWD::TRANSACTIONTYPE type)
                 conflicts += " " + conflictedConfig->name_;
             }
 
-            printer_.printError("config '" + config->name_ + "' conflicts with config(s):" + conflicts);
+            printer_.printError("config '" + config->name_ + "' conflicts with config(s):" +
+                    conflicts);
             return false;
         }
 
@@ -70,7 +72,8 @@ bool Mhwd::performTransaction(Config* config, MHWD::TRANSACTIONTYPE type)
                 dependencies += " " + dependencyConfig->name_;
             }
 
-            printer_.printStatus("Dependencies to install:" + dependencies + "\nProceed with installation? [Y/n]" );
+            printer_.printStatus("Dependencies to install:" + dependencies +
+                    "\nProceed with installation? [Y/n]");
 
             std::string input;
             std::getline(std::cin, input);
@@ -101,7 +104,8 @@ bool Mhwd::performTransaction(Config* config, MHWD::TRANSACTIONTYPE type)
                 requirements += " " + requirement->name_;
             }
 
-            printer_.printError("config '" + config->name_ + "' is required by config(s):" + requirements);
+            printer_.printError("config '" + config->name_ + "' is required by config(s):" +
+                    requirements);
             return false;
         }
     }
@@ -187,11 +191,15 @@ void Mhwd::printDeviceDetails(std::string type, FILE *f)
     hw_item hw;
 
     if (type == "USB")
+    {
         hw = hw_usb;
+    }
     else
+    {
         hw = hw_pci;
+    }
 
-    hd_data = (hd_data_t*) calloc(1, sizeof *hd_data);
+    hd_data = reinterpret_cast<hd_data_t*>(calloc(1, sizeof *hd_data));
     hd = hd_list(hd_data, hw, 1, nullptr);
     hd_t *beginningOfhd = hd;
 
@@ -220,7 +228,7 @@ Config* Mhwd::getInstalledConfig(const std::string& configName,
         installedConfigs = &data_.installedPCIConfigs;
     }
 
-    for (std::vector<Config*>::iterator installedConfig = installedConfigs->begin();
+    for (auto installedConfig = installedConfigs->begin();
             installedConfig != installedConfigs->end(); installedConfig++)
     {
         if (configName == (*installedConfig)->name_)
@@ -247,7 +255,7 @@ Config* Mhwd::getDatabaseConfig(const std::string& configName,
         allConfigs = &data_.allPCIConfigs;
     }
 
-    for (std::vector<Config*>::iterator iterator = allConfigs->begin();
+    for (auto iterator = allConfigs->begin();
             iterator != allConfigs->end(); iterator++)
     {
         if (configName == (*iterator)->name_)
@@ -274,7 +282,7 @@ Config* Mhwd::getAvailableConfig(const std::string& configName,
         devices = &data_.PCIDevices;
     }
 
-    for (std::vector<Device*>::iterator device = devices->begin(); device != devices->end();
+    for (auto device = devices->begin(); device != devices->end();
             device++)
     {
         if ((*device)->availableConfigs.empty())
@@ -283,7 +291,7 @@ Config* Mhwd::getAvailableConfig(const std::string& configName,
         }
         else
         {
-            for (std::vector<Config*>::iterator availableConfig = (*device)->availableConfigs.begin();
+            for (auto availableConfig = (*device)->availableConfigs.begin();
                     availableConfig != (*device)->availableConfigs.end(); availableConfig++)
             {
                 if (configName == (*availableConfig)->name_)
@@ -299,7 +307,8 @@ Config* Mhwd::getAvailableConfig(const std::string& configName,
 
 MHWD::STATUS Mhwd::performTransaction(Transaction *transaction)
 {
-    if (transaction->type_ == MHWD::TRANSACTIONTYPE::INSTALL && !transaction->conflictedConfigs_.empty())
+    if ((transaction->type_ == MHWD::TRANSACTIONTYPE::INSTALL) &&
+            !transaction->conflictedConfigs_.empty())
     {
         return MHWD::STATUS::ERROR_CONFLICTS;
     }
@@ -338,24 +347,27 @@ MHWD::STATUS Mhwd::performTransaction(Transaction *transaction)
     if (transaction->type_ == MHWD::TRANSACTIONTYPE::INSTALL)
     {
         // Check if already installed but not allowed to reinstall
-        if (installedConfig != nullptr && !transaction->isAllowedToReinstall())
+        if ((installedConfig != nullptr) && !transaction->isAllowedToReinstall())
         {
             return MHWD::STATUS::ERROR_ALREADY_INSTALLED;
         }
         else
         {
             // Install all dependencies first
-            for (std::vector<Config*>::const_iterator dependencyConfig = transaction->dependencyConfigs_.end() - 1;
-                    dependencyConfig != transaction->dependencyConfigs_.begin() - 1; --dependencyConfig)
+            for (auto dependencyConfig = transaction->dependencyConfigs_.end() - 1;
+                    dependencyConfig != transaction->dependencyConfigs_.begin() - 1;
+                    --dependencyConfig)
             {
-                printer_.printMessage(MHWD::MESSAGETYPE::INSTALLDEPENDENCY_START, (*dependencyConfig)->name_);
+                printer_.printMessage(MHWD::MESSAGETYPE::INSTALLDEPENDENCY_START,
+                        (*dependencyConfig)->name_);
                 if ((status = installConfig((*dependencyConfig))) != MHWD::STATUS::SUCCESS)
                 {
                     return status;
                 }
                 else
                 {
-                    printer_.printMessage(MHWD::MESSAGETYPE::INSTALLDEPENDENCY_END, (*dependencyConfig)->name_);
+                    printer_.printMessage(MHWD::MESSAGETYPE::INSTALLDEPENDENCY_END,
+                            (*dependencyConfig)->name_);
                 }
             }
 
@@ -366,7 +378,8 @@ MHWD::STATUS Mhwd::performTransaction(Transaction *transaction)
             }
             else
             {
-                printer_.printMessage(MHWD::MESSAGETYPE::INSTALL_END, transaction->config_->name_);
+                printer_.printMessage(MHWD::MESSAGETYPE::INSTALL_END,
+                        transaction->config_->name_);
             }
         }
     }
@@ -378,10 +391,6 @@ int Mhwd::hexToInt(std::string hex)
 {
     return std::stoi(hex, nullptr, 16);
 }
-
-//###############################################//
-//### Private - Directory and File Operations ###//
-//###############################################//
 
 bool Mhwd::copyDirectory(const std::string source, const std::string destination)
 {
@@ -548,10 +557,6 @@ bool Mhwd::createDir(const std::string path, const mode_t mode)
 
     return (ret == 0);
 }
-
-//#####################################//
-//### Private - Script & Operations ###//
-//#####################################//
 
 MHWD::STATUS Mhwd::installConfig(Config *config)
 {
@@ -817,7 +822,8 @@ int Mhwd::launch(int argc, char *argv[])
         else if (strcmp(argv[nArg], "-ic") == 0 || strcmp(argv[nArg], "--installcustom") == 0)
         {
             ++nArg;
-            if ((nArg >= argc) || ((strcmp(argv[nArg], "pci") != 0) && (strcmp(argv[nArg], "usb") != 0)))
+            if ((nArg >= argc) || ((strcmp(argv[nArg], "pci") != 0) &&
+                    (strcmp(argv[nArg], "usb") != 0)))
             {
                 printer_.printError("invalid use of option: -ic/--installcustom\n");
                 printer_.printHelp();
@@ -839,7 +845,8 @@ int Mhwd::launch(int argc, char *argv[])
         else if (strcmp(argv[nArg], "-i") == 0 || strcmp(argv[nArg], "--install") == 0)
         {
             ++nArg;
-            if (nArg >= argc || (strcmp(argv[nArg], "pci") != 0 && strcmp(argv[nArg], "usb") != 0))
+            if (nArg >= argc || (strcmp(argv[nArg], "pci") != 0 &&
+                    strcmp(argv[nArg], "usb") != 0))
             {
                 printer_.printError("invalid use of option: -i/--install\n");
                 printer_.printHelp();
@@ -1174,19 +1181,20 @@ int Mhwd::launch(int argc, char *argv[])
                     if (skip)
                     {
                         printer_.printStatus(
-                                "Skipping already installed config '" + config->name_ + "' for device: "
-                                + device->sysfsBusID + " (" + device->classID + ":"
-                                + device->vendorID + ":" + device->deviceID + ") "
-                                + device->className + " " + device->vendorName + " "
-                                + device->deviceName);
+                                "Skipping already installed config '" + config->name_ +
+                                "' for device: " + device->sysfsBusID + " (" +
+                                device->classID + ":" + device->vendorID + ":" +
+                                device->deviceID + ") " + device->className + " " +
+                                device->vendorName + " " + device->deviceName);
                     }
                     else
                     {
                         printer_.printStatus(
-                                "Using config '" + config->name_ + "' for device: " + device->sysfsBusID
-                                + " (" + device->classID + ":" + device->vendorID + ":"
-                                + device->deviceID + ") " + device->className + " "
-                                + device->vendorName + " " + device->deviceName);
+                                "Using config '" + config->name_ + "' for device: " +
+                                device->sysfsBusID + " (" + device->classID + ":" +
+                                device->vendorID + ":" + device->deviceID + ") " +
+                                device->className + " " + device->vendorName + " " +
+                                device->deviceName);
                     }
 
                     if (!found && !skip)

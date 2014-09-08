@@ -5,11 +5,11 @@
  *      Author: dec
  */
 
-#include "Config.hpp"
-
 #include <fstream>
 #include <string>
+#include <vector>
 
+#include "Config.hpp"
 Config::Config(std::string configPath, std::string type)
     : type_(type), basePath_(configPath.substr(0, configPath.find_last_of('/'))),
       configPath_(configPath)
@@ -184,7 +184,7 @@ bool Config::readConfigFile(std::string configPath)
     }
 
     // Append * to all empty vectors
-    for (std::vector<Config::HardwareID>::iterator hwdID = hwdIDs_.begin();
+    for (auto hwdID = hwdIDs_.begin();
             hwdID != hwdIDs_.end(); hwdID++)
     {
         if ((*hwdID).classIDs.empty())
@@ -216,7 +216,7 @@ std::vector<std::string> Config::splitValue(Vita::string str, Vita::string onlyE
     std::vector<Vita::string> work = str.toLower().explode(" ");
     std::vector<std::string> final;
 
-    for (std::vector<Vita::string>::const_iterator iterator = work.begin(); iterator != work.end();
+    for (auto iterator = work.begin(); iterator != work.end();
             iterator++)
     {
         if (*iterator != "" && onlyEnding.empty())

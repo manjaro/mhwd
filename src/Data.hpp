@@ -8,14 +8,17 @@
 #ifndef DATA_HPP_
 #define DATA_HPP_
 
-#include "../libmhwd/const.h"
-#include "../libmhwd/vita/string.hpp"
-#include "Config.hpp"
-#include "Device.hpp"
-
 #include <hd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+
+#include <string>
+#include <vector>
+
+#include "Config.hpp"
+#include "Device.hpp"
+#include "../libmhwd/const.h"
+#include "../libmhwd/vita/string.hpp"
 
 class Data {
 public:
@@ -50,11 +53,13 @@ public:
     std::vector<Config*> getAllLocalRequirements(Config *config);
 
 private:
-    void getAllDevicesOfConfig(std::vector<Device*>* devices, Config *config, std::vector<Device*>* foundDevices);
+    void getAllDevicesOfConfig(std::vector<Device*>* devices, Config *config,
+            std::vector<Device*>* foundDevices);
     void fillInstalledConfigs(std::string type);
     void fillDevices(std::string type);
     void fillAllConfigs(std::string type);
-    void setMatchingConfigs(std::vector<Device*>* devices, std::vector<Config*>* configs, bool setAsInstalled);
+    void setMatchingConfigs(std::vector<Device*>* devices, std::vector<Config*>* configs,
+            bool setAsInstalled);
     void setMatchingConfig(Config* config, std::vector<Device*>* devices, bool setAsInstalled);
     void addConfigSorted(std::vector<Config*>* configs, Config* config);
     std::vector<std::string> getRecursiveDirectoryFileList(const std::string directoryPath,

@@ -8,11 +8,11 @@
 #ifndef DEVICE_HPP_
 #define DEVICE_HPP_
 
-#include "Config.hpp"
-#include "Enums.hpp"
-
 #include <string>
 #include <vector>
+
+#include "Config.hpp"
+#include "Enums.hpp"
 
 struct Device
 {

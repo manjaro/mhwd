@@ -8,11 +8,11 @@
 #ifndef CONFIG_HPP_
 #define CONFIG_HPP_
 
-#include "Enums.hpp"
-#include "../libmhwd/vita/string.hpp"
-
 #include <string>
 #include <vector>
+
+#include "Enums.hpp"
+#include "../libmhwd/vita/string.hpp"
 
 struct Config
 {

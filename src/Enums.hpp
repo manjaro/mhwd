@@ -55,6 +55,6 @@ enum class TRANSACTIONTYPE
     INSTALL, REMOVE
 };
 
-}
+}  // namespace MHWD
 
 #endif /* ENUMS_HPP_ */

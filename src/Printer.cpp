@@ -5,9 +5,12 @@
  *      Author: dec
  */
 
-#include "Printer.hpp"
 #include <iomanip>
 #include <iostream>
+#include <string>
+#include <vector>
+
+#include "Printer.hpp"
 
 Printer::Printer()
 {
@@ -122,7 +125,8 @@ void Printer::listDevices(const std::vector<Device*>& devices, std::string type)
     }
 }
 
-void Printer::listConfigs(const std::vector<Config*>& configs, std::string beg, std::string empty) const
+void Printer::listConfigs(const std::vector<Config*>& configs, std::string beg,
+        std::string empty) const
 {
     if (configs.empty())
     {
@@ -151,7 +155,8 @@ void Printer::listConfigs(const std::vector<Config*>& configs, std::string beg, 
     }
 }
 
-void Printer::printAvailableConfigs(const std::string& deviceType, const std::vector<Device*>& devices) const
+void Printer::printAvailableConfigs(const std::string& deviceType,
+        const std::vector<Device*>& devices) const
 {
     bool configFound = false;
 
@@ -200,7 +205,8 @@ void Printer::printAvailableConfigs(const std::string& deviceType, const std::ve
     }
 }
 
-void Printer::printInstalledConfigs(const std::string& deviceType, const std::vector<Config*>& installedConfigs) const
+void Printer::printInstalledConfigs(const std::string& deviceType,
+        const std::vector<Config*>& installedConfigs) const
 {
     if (installedConfigs.empty())
     {
