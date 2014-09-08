@@ -1232,27 +1232,29 @@ int Mhwd::launch(int argc, char *argv[])
 						return 1;
 					}
 
-					config_ = std::make_shared<Config>(filepath, operationType);
-					if (!data_.fillConfig(config_.get(), filepath, operationType))
+					config_ = new Config(filepath, operationType);
+					if (!data_.fillConfig(config_, filepath, operationType))
 					{
 						printer_.printError("failed to read custom config '" + filepath + "'!");
+						delete config_;
 						return 1;
 					}
 
-					if (!performTransaction(config_.get(), MHWD::TRANSACTIONTYPE::INSTALL))
+					if (!performTransaction(config_, MHWD::TRANSACTIONTYPE::INSTALL))
 					{
 						return 1;
 					}
 				}
 				else if (arguments_ & MHWD::ARGUMENTS::INSTALL)
 				{
-					config_.reset(getAvailableConfig((*configName), operationType));
-					if (config_.get() == nullptr)
+					config_ = getAvailableConfig((*configName), operationType);
+					if (config_ == nullptr)
 					{
-						config_.reset(getDatabaseConfig((*configName), operationType));
-						if (config_.get() == nullptr)
+						config_ = getDatabaseConfig((*configName), operationType);
+						if (config_ == nullptr)
 						{
 							printer_.printError("config '" + (*configName) + "' does not exist!");
+							delete config_;
 							return 1;
 						}
 						else
@@ -1262,23 +1264,26 @@ int Mhwd::launch(int argc, char *argv[])
 						}
 					}
 
-					if (!performTransaction(config_.get(), MHWD::TRANSACTIONTYPE::INSTALL))
+					if (!performTransaction(config_, MHWD::TRANSACTIONTYPE::INSTALL))
 					{
+						delete config_;
 						return 1;
 					}
 				}
 				else if (arguments_ & MHWD::ARGUMENTS::REMOVE)
 				{
-					config_.reset(getInstalledConfig((*configName), operationType));
+					config_ = getInstalledConfig((*configName), operationType);
 
-					if (config_.get() == nullptr)
+					if (config_ == nullptr)
 					{
 						printer_.printError("config '" + (*configName) + "' is not installed!");
+						delete config_;
 						return 1;
 					}
 
-					if (!performTransaction(config_.get(), MHWD::TRANSACTIONTYPE::REMOVE))
+					if (!performTransaction(config_, MHWD::TRANSACTIONTYPE::REMOVE))
 					{
+						delete config_;
 						return 1;
 					}
 				}

@@ -49,7 +49,7 @@ private:
     std::vector<Config*> getAllLocalRequirements(Config *config);
 
     MHWD::ARGUMENTS arguments_;
-    std::shared_ptr<Config> config_;
+    Config* config_;
     Data data_;
     Printer printer_;
 
