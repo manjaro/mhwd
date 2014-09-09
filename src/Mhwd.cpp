@@ -63,7 +63,7 @@ bool Mhwd::performTransaction(Config* config, MHWD::TRANSACTIONTYPE type)
         }
 
         // Print dependencies
-        if (!transaction.dependencyConfigs_.empty())
+        else if (!transaction.dependencyConfigs_.empty())
         {
             std::string dependencies;
 
@@ -648,13 +648,13 @@ bool Mhwd::runScript(Config *config, MHWD::TRANSACTIONTYPE operationType)
     std::vector<Device*> devices;
     data_.getAllDevicesOfConfig(config, &foundDevices);
 
-    for (std::vector<Device*>::iterator iterator = foundDevices.begin();
+    for (auto iterator = foundDevices.begin();
             iterator != foundDevices.end(); iterator++)
     {
         bool found = false;
 
         // Check if already in list
-        for (std::vector<Device*>::iterator dev = devices.begin(); dev != devices.end(); dev++)
+        for (auto dev = devices.begin(); dev != devices.end(); dev++)
         {
             if ((*iterator)->sysfsBusID == (*dev)->sysfsBusID
                     && (*iterator)->sysfsID == (*dev)->sysfsID)
@@ -670,7 +670,7 @@ bool Mhwd::runScript(Config *config, MHWD::TRANSACTIONTYPE operationType)
         }
     }
 
-    for (std::vector<Device*>::iterator dev = devices.begin(); dev != devices.end(); dev++)
+    for (auto dev = devices.begin(); dev != devices.end(); dev++)
     {
         Vita::string busID = (*dev)->sysfsBusID;
 
@@ -796,28 +796,31 @@ int Mhwd::launch(int argc, char *argv[])
                 printer_.printHelp();
                 return 1;
             }
-
-            if (strcmp(argv[nArg], "usb") == 0)
-            {
-                operationType = "USB";
-            }
             else
             {
-                operationType = "PCI";
-            }
+                if (strcmp(argv[nArg], "usb") == 0)
+                {
+                    operationType = "USB";
+                }
+                else
+                {
+                    operationType = "PCI";
+                }
 
-            ++nArg;
-            if (strcmp(argv[nArg], "nonfree") == 0)
-            {
-                autoConfigureNonFreeDriver = true;
-            }
-            else
-            {
-                autoConfigureNonFreeDriver = false;
-            }
+                ++nArg;
+                if (strcmp(argv[nArg], "nonfree") == 0)
+                {
+                    autoConfigureNonFreeDriver = true;
+                }
+                else
+                {
+                    autoConfigureNonFreeDriver = false;
+                }
 
-            autoConfigureClassID = Vita::string(argv[++nArg]).toLower().trim();
-            arguments_ = static_cast<MHWD::ARGUMENTS>(arguments_ | MHWD::ARGUMENTS::AUTOCONFIGURE);
+                autoConfigureClassID = Vita::string(argv[++nArg]).toLower().trim();
+                arguments_ = static_cast<MHWD::ARGUMENTS>(arguments_ |
+                        MHWD::ARGUMENTS::AUTOCONFIGURE);
+            }
         }
         else if (strcmp(argv[nArg], "-ic") == 0 || strcmp(argv[nArg], "--installcustom") == 0)
         {
@@ -829,18 +832,20 @@ int Mhwd::launch(int argc, char *argv[])
                 printer_.printHelp();
                 return 1;
             }
-
-            if (strcmp(argv[nArg], "usb") == 0)
-            {
-                operationType = "USB";
-            }
             else
             {
-                operationType = "PCI";
-            }
+                if (strcmp(argv[nArg], "usb") == 0)
+                {
+                    operationType = "USB";
+                }
+                else
+                {
+                    operationType = "PCI";
+                }
 
-            arguments_ = static_cast<MHWD::ARGUMENTS>(arguments_ | MHWD::ARGUMENTS::INSTALL
-                    | MHWD::ARGUMENTS::CUSTOMINSTALL);
+                arguments_ = static_cast<MHWD::ARGUMENTS>(arguments_ | MHWD::ARGUMENTS::INSTALL
+                        | MHWD::ARGUMENTS::CUSTOMINSTALL);
+            }
         }
         else if (strcmp(argv[nArg], "-i") == 0 || strcmp(argv[nArg], "--install") == 0)
         {
@@ -852,17 +857,19 @@ int Mhwd::launch(int argc, char *argv[])
                 printer_.printHelp();
                 return 1;
             }
-
-            if (strcmp(argv[nArg], "usb") == 0)
-            {
-                operationType = "USB";
-            }
             else
             {
-                operationType = "PCI";
-            }
+                if (strcmp(argv[nArg], "usb") == 0)
+                {
+                    operationType = "USB";
+                }
+                else
+                {
+                    operationType = "PCI";
+                }
 
-            arguments_ = static_cast<MHWD::ARGUMENTS>(arguments_ | MHWD::ARGUMENTS::INSTALL);
+                arguments_ = static_cast<MHWD::ARGUMENTS>(arguments_ | MHWD::ARGUMENTS::INSTALL);
+            }
         }
         else if (strcmp(argv[nArg], "-r") == 0 || strcmp(argv[nArg], "--remove") == 0)
         {
@@ -873,17 +880,19 @@ int Mhwd::launch(int argc, char *argv[])
                 printer_.printHelp();
                 return 1;
             }
-
-            if (strcmp(argv[nArg], "usb") == 0)
-            {
-                operationType = "USB";
-            }
             else
             {
-                operationType = "PCI";
-            }
+                if (strcmp(argv[nArg], "usb") == 0)
+                {
+                    operationType = "USB";
+                }
+                else
+                {
+                    operationType = "PCI";
+                }
 
-            arguments_ = static_cast<MHWD::ARGUMENTS>(arguments_ | MHWD::ARGUMENTS::REMOVE);
+                arguments_ = static_cast<MHWD::ARGUMENTS>(arguments_ | MHWD::ARGUMENTS::REMOVE);
+            }
         }
         else if (strcmp(argv[nArg], "--pmcachedir") == 0)
         {
@@ -893,8 +902,10 @@ int Mhwd::launch(int argc, char *argv[])
                 printer_.printHelp();
                 return 1;
             }
-
-            data_.environment.PMCachePath = Vita::string(argv[++nArg]).trim("\"").trim();
+            else
+            {
+                data_.environment.PMCachePath = Vita::string(argv[++nArg]).trim("\"").trim();
+            }
         }
         else if (strcmp(argv[nArg], "--pmconfig") == 0)
         {
@@ -904,8 +915,10 @@ int Mhwd::launch(int argc, char *argv[])
                 printer_.printHelp();
                 return 1;
             }
-
-            data_.environment.PMConfigPath = Vita::string(argv[++nArg]).trim("\"").trim();
+            else
+            {
+                data_.environment.PMConfigPath = Vita::string(argv[++nArg]).trim("\"").trim();
+            }
         }
         else if (strcmp(argv[nArg], "--pmroot") == 0)
         {
@@ -915,8 +928,10 @@ int Mhwd::launch(int argc, char *argv[])
                 printer_.printHelp();
                 return 1;
             }
-
-            data_.environment.PMRootPath = Vita::string(argv[++nArg]).trim("\"").trim();
+            else
+            {
+                data_.environment.PMRootPath = Vita::string(argv[++nArg]).trim("\"").trim();
+            }
         }
         else if (((arguments_ & MHWD::ARGUMENTS::INSTALL))
                 || (arguments_ & MHWD::ARGUMENTS::REMOVE))
@@ -976,8 +991,8 @@ int Mhwd::launch(int argc, char *argv[])
         printer_.printHelp();
         return 1;
     }
-
-    if (!((arguments_ & MHWD::ARGUMENTS::SHOWPCI)) && !((arguments_ & MHWD::ARGUMENTS::SHOWUSB)))
+    else if (!((arguments_ & MHWD::ARGUMENTS::SHOWPCI)) &&
+            !((arguments_ & MHWD::ARGUMENTS::SHOWUSB)))
     {
         arguments_ = static_cast<MHWD::ARGUMENTS>(arguments_ | MHWD::ARGUMENTS::SHOWUSB
                 | MHWD::ARGUMENTS::SHOWPCI);
@@ -1152,7 +1167,7 @@ int Mhwd::launch(int argc, char *argv[])
                 {
                     // Check if already in list
                     bool found = false;
-                    for (std::vector<std::string>::iterator iter = configs.begin();
+                    for (auto iter = configs.begin();
                             iter != configs.end(); iter++)
                     {
                         if ((*iter) == config->name_)
@@ -1166,7 +1181,7 @@ int Mhwd::launch(int argc, char *argv[])
                     bool skip = false;
                     if (!(arguments_ & MHWD::ARGUMENTS::FORCE))
                     {
-                        for (std::vector<Config*>::iterator iter = installedConfigs->begin();
+                        for (auto iter = installedConfigs->begin();
                                 iter != installedConfigs->end(); iter++)
                         {
                             if ((*iter)->name_ == config->name_)
@@ -1220,7 +1235,7 @@ int Mhwd::launch(int argc, char *argv[])
     {
         if (isUserRoot())
         {
-            for (std::vector<std::string>::iterator configName = configs.begin();
+            for (auto configName = configs.begin();
                     configName != configs.end(); configName++)
             {
                 if (arguments_ & MHWD::ARGUMENTS::CUSTOMINSTALL)
