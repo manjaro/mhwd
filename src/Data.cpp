@@ -689,9 +689,9 @@ bool Data::readConfigFile(Config *config, std::string configPath)
 
         while (!file.eof())
         {
-            getline(file, line);
+            std::getline(file, line);
 
-            size_t pos = line.find_first_of('#');
+            std::size_t pos = line.find_first_of('#');
             if (pos != std::string::npos)
             {
                 line.erase(pos);
@@ -724,9 +724,9 @@ bool Data::readConfigFile(Config *config, std::string configPath)
 
                         while (!file.eof())
                         {
-                            getline(file, line);
+                            std::getline(file, line);
 
-                            size_t pos = line.find_first_of('#');
+                            std::size_t pos = line.find_first_of('#');
                             if (pos != std::string::npos)
                             {
                                 line.erase(pos);
@@ -873,12 +873,10 @@ bool Data::readConfigFile(Config *config, std::string configPath)
 Vita::string Data::getRightConfigPath(Vita::string str, Vita::string baseConfigPath)
 {
     str = str.trim();
-
-    if (str.size() <= 0 || str.substr(0, 1) == "/")
+    if ((str.size() <= 0) || (str.substr(0, 1) == "/"))
     {
         return str;
     }
-
     return baseConfigPath + "/" + str;
 }
 
@@ -920,13 +918,13 @@ void Data::updateConfigData()
     }
 
     // Clear installed config vectors
-    for (auto PCIConfig : allPCIConfigs)
+    for (auto& PCIConfig : allPCIConfigs)
     {
         delete PCIConfig;
         PCIConfig = nullptr;
     }
 
-    for (auto USBConfig : allUSBConfigs)
+    for (auto& USBConfig : allUSBConfigs)
     {
         delete USBConfig;
         USBConfig = nullptr;

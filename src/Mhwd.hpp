@@ -57,9 +57,6 @@ private:
 
     int hexToInt(std::string hex);
 
-    //#####################################//
-    //### Directory and File Operations ###//
-    //#####################################//
     bool copyDirectory(const std::string source, const std::string destination);
     bool copyFile(const std::string source, const std::string destination, const mode_t mode =
             S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IROTH);
@@ -68,9 +65,6 @@ private:
     bool createDir(const std::string path, const mode_t mode =
             S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IROTH | S_IXGRP | S_IXOTH);
 
-    //###########################//
-    //### Script & Operations ###//
-    //###########################//
     MHWD::STATUS installConfig(Config *config);
     MHWD::STATUS uninstallConfig(Config *config);
     bool runScript(Config *config, MHWD::TRANSACTIONTYPE operationType);
