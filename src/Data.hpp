@@ -65,7 +65,6 @@ private:
     std::vector<std::string> getRecursiveDirectoryFileList(const std::string directoryPath,
             std::string onlyFilename = "");
 
-    bool readConfigFile(Config *config, std::string configPath);
     Vita::string getRightConfigPath(Vita::string str, Vita::string baseConfigPath);
     std::vector<std::string> splitValue(Vita::string str, Vita::string onlyEnding = "");
     void updateConfigData();
