@@ -114,12 +114,12 @@ void Printer::listDevices(const std::vector<Device*>& devices, std::string type)
         printLine();
         for (auto device : devices)
         {
-            std::cout << std::setw(30) << device->className
-                    << std::setw(15) << device->sysfsBusID
-                    << std::setw(8) << device->classID
-                    << std::setw(8) << device->vendorID
-                    << std::setw(8) << device->deviceID
-                    << std::setw(10) << device->availableConfigs.size() << std::endl;
+            std::cout << std::setw(30) << device->className_
+                    << std::setw(15) << device->sysfsBusID_
+                    << std::setw(8) << device->classID_
+                    << std::setw(8) << device->vendorID_
+                    << std::setw(8) << device->deviceID_
+                    << std::setw(10) << device->availableConfigs_.size() << std::endl;
         }
         std::cout << std::endl << std::endl;
     }
@@ -162,7 +162,7 @@ void Printer::printAvailableConfigs(const std::string& deviceType,
 
     for (auto device : devices)
     {
-        if (device->availableConfigs.empty() && device->installedConfigs.empty())
+        if (device->availableConfigs_.empty() && device->installedConfigs_.empty())
         {
             continue;
         }
@@ -172,25 +172,25 @@ void Printer::printAvailableConfigs(const std::string& deviceType,
 
             printLine();
             printStatus(
-                    deviceType + " Device: " + device->sysfsID + " (" + device->classID + ":"
-                    + device->vendorID + ":" + device->deviceID + ")");
-            std::cout << "  " << device->className
-                    << " " << device->vendorName
-                    << " " << device->deviceName << std::endl;
+                    deviceType + " Device: " + device->sysfsID_ + " (" + device->classID_ + ":"
+                    + device->vendorID_ + ":" + device->deviceID_ + ")");
+            std::cout << "  " << device->className_
+                    << " " << device->vendorName_
+                    << " " << device->deviceName_ << std::endl;
             printLine();
-            if (!device->installedConfigs.empty())
+            if (!device->installedConfigs_.empty())
             {
                 std::cout << "  > INSTALLED:" << std::endl;
-                for (auto installedConfig : device->installedConfigs)
+                for (auto installedConfig : device->installedConfigs_)
                 {
                     printConfigDetails(*installedConfig);
                 }
                 std::cout << std::endl << std::endl;
             }
-            if (!device->availableConfigs.empty())
+            if (!device->availableConfigs_.empty())
             {
                 std::cout << "  > AVAILABLE:" << std::endl;
-                for (auto availableConfig : device->availableConfigs)
+                for (auto availableConfig : device->availableConfigs_)
                 {
                     printConfigDetails(*availableConfig);
                 }

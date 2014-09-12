@@ -82,13 +82,13 @@ void Data::updateInstalledConfigData()
     for (auto PCIDevice = PCIDevices.begin();
             PCIDevice != PCIDevices.end(); PCIDevice++)
     {
-        (*PCIDevice)->installedConfigs.clear();
+        (*PCIDevice)->installedConfigs_.clear();
     }
 
     for (auto USBDevice = USBDevices.begin();
             USBDevice != USBDevices.end(); USBDevice++)
     {
-        (*USBDevice)->installedConfigs.clear();
+        (*USBDevice)->installedConfigs_.clear();
     }
 
     // Clear installed config vectors
@@ -163,7 +163,6 @@ void Data::getAllDevicesOfConfig(Config *config, std::vector<Device*>* foundDevi
     getAllDevicesOfConfig(&devices, config, foundDevices);
 }
 
-
 void Data::getAllDevicesOfConfig(std::vector<Device*>* devices, Config *config,
         std::vector<Device*>* foundDevices)
 {
@@ -182,7 +181,7 @@ void Data::getAllDevicesOfConfig(std::vector<Device*>* devices, Config *config,
             for (auto classID = hwdID->classIDs.begin();
                     classID != hwdID->classIDs.end(); ++classID)
             {
-                if (*classID == "*" || *classID == (*i_device)->classID)
+                if (*classID == "*" || *classID == (*i_device)->classID_)
                 {
                     found = true;
                     break;
@@ -203,7 +202,7 @@ void Data::getAllDevicesOfConfig(std::vector<Device*>* devices, Config *config,
                         blacklistedClassID != (*hwdID).blacklistedClassIDs.end();
                         ++blacklistedClassID)
                 {
-                    if (*blacklistedClassID == (*i_device)->classID)
+                    if (*blacklistedClassID == (*i_device)->classID_)
                     {
                         found = true;
                         break;
@@ -222,7 +221,7 @@ void Data::getAllDevicesOfConfig(std::vector<Device*>* devices, Config *config,
                     for (auto vendorID = hwdID->vendorIDs.begin();
                             vendorID != hwdID->vendorIDs.end(); ++vendorID)
                     {
-                        if (*vendorID == "*" || *vendorID == (*i_device)->vendorID)
+                        if (*vendorID == "*" || *vendorID == (*i_device)->vendorID_)
                         {
                             found = true;
                             break;
@@ -243,7 +242,7 @@ void Data::getAllDevicesOfConfig(std::vector<Device*>* devices, Config *config,
                                 blacklistedVendorID != hwdID->blacklistedVendorIDs.end();
                                 ++blacklistedVendorID)
                         {
-                            if (*blacklistedVendorID == (*i_device)->vendorID)
+                            if (*blacklistedVendorID == (*i_device)->vendorID_)
                             {
                                 found = true;
                                 break;
@@ -262,7 +261,7 @@ void Data::getAllDevicesOfConfig(std::vector<Device*>* devices, Config *config,
                             for (auto deviceID = hwdID->deviceIDs.begin();
                                     deviceID != hwdID->deviceIDs.end(); ++deviceID)
                             {
-                                if (*deviceID == "*" || *deviceID == (*i_device)->deviceID)
+                                if (*deviceID == "*" || *deviceID == (*i_device)->deviceID_)
                                 {
                                     found = true;
                                     break;
@@ -283,7 +282,7 @@ void Data::getAllDevicesOfConfig(std::vector<Device*>* devices, Config *config,
                                         blacklistedDeviceID != hwdID->blacklistedDeviceIDs.end();
                                         ++blacklistedDeviceID)
                                 {
-                                    if (*blacklistedDeviceID == (*i_device)->deviceID)
+                                    if (*blacklistedDeviceID == (*i_device)->deviceID_)
                                     {
                                         found = true;
                                         break;
@@ -557,15 +556,15 @@ void Data::fillDevices(std::string type)
     for (; hd; hd = hd->next)
     {
         device = new Device();
-        device->type = type;
-        device->classID = from_Hex(hd->base_class.id, 2) + from_Hex(hd->sub_class.id, 2).toLower();
-        device->vendorID = from_Hex(hd->vendor.id, 4).toLower();
-        device->deviceID = from_Hex(hd->device.id, 4).toLower();
-        device->className = from_CharArray(hd->base_class.name);
-        device->vendorName = from_CharArray(hd->vendor.name);
-        device->deviceName = from_CharArray(hd->device.name);
-        device->sysfsBusID = from_CharArray(hd->sysfs_bus_id);
-        device->sysfsID = from_CharArray(hd->sysfs_id);
+        device->type_ = type;
+        device->classID_ = from_Hex(hd->base_class.id, 2) + from_Hex(hd->sub_class.id, 2).toLower();
+        device->vendorID_ = from_Hex(hd->vendor.id, 4).toLower();
+        device->deviceID_ = from_Hex(hd->device.id, 4).toLower();
+        device->className_ = from_CharArray(hd->base_class.name);
+        device->vendorName_ = from_CharArray(hd->vendor.name);
+        device->deviceName_ = from_CharArray(hd->device.name);
+        device->sysfsBusID_ = from_CharArray(hd->sysfs_bus_id);
+        device->sysfsID_ = from_CharArray(hd->sysfs_id);
         devices->push_back(device);
     }
 
@@ -710,13 +709,13 @@ void Data::updateConfigData()
     for (auto PCIDevice = PCIDevices.begin();
             PCIDevice != PCIDevices.end(); PCIDevice++)
     {
-        (*PCIDevice)->availableConfigs.clear();
+        (*PCIDevice)->availableConfigs_.clear();
     }
 
     for (auto USBDevice = USBDevices.begin();
             USBDevice != USBDevices.end(); USBDevice++)
     {
-        (*USBDevice)->availableConfigs.clear();
+        (*USBDevice)->availableConfigs_.clear();
     }
 
     // Clear installed config vectors
@@ -768,11 +767,11 @@ void Data::setMatchingConfig(Config* config, std::vector<Device*>* devices, bool
     {
         if (setAsInstalled)
         {
-            addConfigSorted(&(*foundDevice)->installedConfigs, config);
+            addConfigSorted(&(*foundDevice)->installedConfigs_, config);
         }
         else
         {
-            addConfigSorted(&(*foundDevice)->availableConfigs, config);
+            addConfigSorted(&(*foundDevice)->availableConfigs_, config);
         }
     }
 }

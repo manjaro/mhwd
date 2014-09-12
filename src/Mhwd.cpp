@@ -285,14 +285,14 @@ Config* Mhwd::getAvailableConfig(const std::string& configName,
     for (auto device = devices->begin(); device != devices->end();
             device++)
     {
-        if ((*device)->availableConfigs.empty())
+        if ((*device)->availableConfigs_.empty())
         {
             continue;
         }
         else
         {
-            for (auto availableConfig = (*device)->availableConfigs.begin();
-                    availableConfig != (*device)->availableConfigs.end(); availableConfig++)
+            for (auto availableConfig = (*device)->availableConfigs_.begin();
+                    availableConfig != (*device)->availableConfigs_.end(); availableConfig++)
             {
                 if (configName == (*availableConfig)->name_)
                 {
@@ -659,8 +659,8 @@ bool Mhwd::runScript(Config *config, MHWD::TRANSACTIONTYPE operationType)
         // Check if already in list
         for (auto dev = devices.begin(); dev != devices.end(); dev++)
         {
-            if ((*iterator)->sysfsBusID == (*dev)->sysfsBusID
-                    && (*iterator)->sysfsID == (*dev)->sysfsID)
+            if ((*iterator)->sysfsBusID_ == (*dev)->sysfsBusID_
+                    && (*iterator)->sysfsID_ == (*dev)->sysfsID_)
             {
                 found = true;
                 break;
@@ -675,7 +675,7 @@ bool Mhwd::runScript(Config *config, MHWD::TRANSACTIONTYPE operationType)
 
     for (auto dev = devices.begin(); dev != devices.end(); dev++)
     {
-        Vita::string busID = (*dev)->sysfsBusID;
+        Vita::string busID = (*dev)->sysfsBusID_;
 
         if (config->type_ == "PCI")
         {
@@ -691,7 +691,7 @@ bool Mhwd::runScript(Config *config, MHWD::TRANSACTIONTYPE operationType)
             }
         }
 
-        cmd += " --device \"" + (*dev)->classID + "|" + (*dev)->vendorID + "|" + (*dev)->deviceID
+        cmd += " --device \"" + (*dev)->classID_ + "|" + (*dev)->vendorID_ + "|" + (*dev)->deviceID_
                 + "|" + busID + "\"";
     }
 
@@ -1064,10 +1064,10 @@ int Mhwd::launch(int argc, char *argv[])
         {
             for (auto PCIDevice : data_.PCIDevices)
             {
-                printer_.listConfigs(PCIDevice->availableConfigs,
-                        PCIDevice->sysfsBusID + " (" + PCIDevice->classID + ":"
-                                + PCIDevice->vendorID + ":" + PCIDevice->deviceID + ") "
-                                + PCIDevice->className + " " + PCIDevice->vendorName + ":");
+                printer_.listConfigs(PCIDevice->availableConfigs_,
+                        PCIDevice->sysfsBusID_ + " (" + PCIDevice->classID_ + ":"
+                                + PCIDevice->vendorID_ + ":" + PCIDevice->deviceID_ + ") "
+                                + PCIDevice->className_ + " " + PCIDevice->vendorName_ + ":");
             }
         }
     }
@@ -1083,10 +1083,10 @@ int Mhwd::launch(int argc, char *argv[])
         {
             for (auto device : data_.USBDevices)
             {
-                printer_.listConfigs(device->availableConfigs,
-                        device->sysfsBusID + " (" + device->classID + ":" + device->vendorID + ":"
-                                + device->deviceID + ") " + device->className + " "
-                                + device->vendorName + ":");
+                printer_.listConfigs(device->availableConfigs_,
+                        device->sysfsBusID_ + " (" + device->classID_ + ":" + device->vendorID_ + ":"
+                                + device->deviceID_ + ") " + device->className_ + " "
+                                + device->vendorName_ + ":");
             }
         }
     }
@@ -1135,7 +1135,7 @@ int Mhwd::launch(int argc, char *argv[])
 
         for (auto device : *devices)
         {
-            if (device->classID != autoConfigureClassID)
+            if (device->classID_ != autoConfigureClassID)
             {
                 continue;
             }
@@ -1144,7 +1144,7 @@ int Mhwd::launch(int argc, char *argv[])
                 founddevice = true;
                 Config *config = nullptr;
 
-                for (auto availableConfig : device->availableConfigs)
+                for (auto availableConfig : device->availableConfigs_)
                 {
                     if (!autoConfigureNonFreeDriver && !(availableConfig->freedriver_))
                     {
@@ -1160,10 +1160,10 @@ int Mhwd::launch(int argc, char *argv[])
                 if (config == nullptr)
                 {
                     printer_.printWarning(
-                            "No config found for device: " + device->sysfsBusID + " ("
-                                    + device->classID + ":" + device->vendorID + ":"
-                                    + device->deviceID + ") " + device->className + " "
-                                    + device->vendorName + " " + device->deviceName);
+                            "No config found for device: " + device->sysfsBusID_ + " ("
+                                    + device->classID_ + ":" + device->vendorID_ + ":"
+                                    + device->deviceID_ + ") " + device->className_ + " "
+                                    + device->vendorName_ + " " + device->deviceName_);
                     continue;
                 }
                 else
@@ -1200,19 +1200,19 @@ int Mhwd::launch(int argc, char *argv[])
                     {
                         printer_.printStatus(
                                 "Skipping already installed config '" + config->name_ +
-                                "' for device: " + device->sysfsBusID + " (" +
-                                device->classID + ":" + device->vendorID + ":" +
-                                device->deviceID + ") " + device->className + " " +
-                                device->vendorName + " " + device->deviceName);
+                                "' for device: " + device->sysfsBusID_ + " (" +
+                                device->classID_ + ":" + device->vendorID_ + ":" +
+                                device->deviceID_ + ") " + device->className_ + " " +
+                                device->vendorName_ + " " + device->deviceName_);
                     }
                     else
                     {
                         printer_.printStatus(
                                 "Using config '" + config->name_ + "' for device: " +
-                                device->sysfsBusID + " (" + device->classID + ":" +
-                                device->vendorID + ":" + device->deviceID + ") " +
-                                device->className + " " + device->vendorName + " " +
-                                device->deviceName);
+                                device->sysfsBusID_ + " (" + device->classID_ + ":" +
+                                device->vendorID_ + ":" + device->deviceID_ + ") " +
+                                device->className_ + " " + device->vendorName_ + " " +
+                                device->deviceName_);
                     }
 
                     if (!found && !skip)
