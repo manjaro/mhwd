@@ -10,11 +10,11 @@
 #include <vector>
 
 #include "Config.hpp"
+
 Config::Config(std::string configPath, std::string type)
     : type_(type), basePath_(configPath.substr(0, configPath.find_last_of('/'))),
       configPath_(configPath)
 {
-    // Add new HardwareIDs group to vector if vector is empty
     if (hwdIDs_.empty())
     {
         Config::HardwareID hwdID;
@@ -38,9 +38,9 @@ bool Config::readConfigFile(std::string configPath)
 
     while (!file.eof())
     {
-        getline(file, line);
+        std::getline(file, line);
 
-        size_t pos = line.find_first_of('#');
+        std::size_t pos = line.find_first_of('#');
         if (pos != std::string::npos)
         {
             line.erase(pos);

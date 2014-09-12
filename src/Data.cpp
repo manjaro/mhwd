@@ -672,7 +672,6 @@ std::vector<std::string> Data::getRecursiveDirectoryFileList(const std::string d
     return list;
 }
 
-
 Vita::string Data::getRightConfigPath(Vita::string str, Vita::string baseConfigPath)
 {
     str = str.trim();

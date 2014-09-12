@@ -22,5 +22,5 @@
 int main(int argc, char *argv[])
 {
     Mhwd mhwd;
-    mhwd.launch(argc, argv);
+    return mhwd.launch(argc, argv);
 }

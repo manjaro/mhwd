@@ -1249,7 +1249,7 @@ int Mhwd::launch(int argc, char *argv[])
                         printer_.printError("custom config '" + filepath + "' does not exist!");
                         return 1;
                     }
-                    if (!S_ISREG(filestatus.st_mode))
+                    else if (!S_ISREG(filestatus.st_mode))
                     {
                         printer_.printError("custom config '" + filepath + "' is invalid!");
                         return 1;
@@ -1263,7 +1263,7 @@ int Mhwd::launch(int argc, char *argv[])
                         return 1;
                     }
 
-                    if (!performTransaction(config_, MHWD::TRANSACTIONTYPE::INSTALL))
+                    else if (!performTransaction(config_, MHWD::TRANSACTIONTYPE::INSTALL))
                     {
                         return 1;
                     }
@@ -1304,7 +1304,7 @@ int Mhwd::launch(int argc, char *argv[])
                         return 1;
                     }
 
-                    if (!performTransaction(config_, MHWD::TRANSACTIONTYPE::REMOVE))
+                    else if (!performTransaction(config_, MHWD::TRANSACTIONTYPE::REMOVE))
                     {
                         delete config_;
                         return 1;
