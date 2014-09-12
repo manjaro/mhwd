@@ -317,74 +317,77 @@ MHWD::STATUS Mhwd::performTransaction(Transaction *transaction)
     {
         return MHWD::STATUS::ERROR_REQUIREMENTS;
     }
-
-    // Check if already installed
-    Config *installedConfig = getInstalledConfig(transaction->config_->name_,
-            transaction->config_->type_);
-    MHWD::STATUS status = MHWD::STATUS::SUCCESS;
-
-    if ((transaction->type_ == MHWD::TRANSACTIONTYPE::REMOVE)
-            || (installedConfig != nullptr && transaction->isAllowedToReinstall()))
+    else
     {
-        if (installedConfig == nullptr)
+
+        // Check if already installed
+        Config *installedConfig = getInstalledConfig(transaction->config_->name_,
+                transaction->config_->type_);
+        MHWD::STATUS status = MHWD::STATUS::SUCCESS;
+
+        if ((transaction->type_ == MHWD::TRANSACTIONTYPE::REMOVE)
+                || (installedConfig != nullptr && transaction->isAllowedToReinstall()))
         {
-            return MHWD::STATUS::ERROR_NOT_INSTALLED;
-        }
-        else
-        {
-            printer_.printMessage(MHWD::MESSAGETYPE::REMOVE_START, installedConfig->name_);
-            if ((status = uninstallConfig(installedConfig)) != MHWD::STATUS::SUCCESS)
+            if (installedConfig == nullptr)
             {
-                return status;
+                return MHWD::STATUS::ERROR_NOT_INSTALLED;
             }
             else
             {
-                printer_.printMessage(MHWD::MESSAGETYPE::REMOVE_END, installedConfig->name_);
-            }
-        }
-    }
-
-    if (transaction->type_ == MHWD::TRANSACTIONTYPE::INSTALL)
-    {
-        // Check if already installed but not allowed to reinstall
-        if ((installedConfig != nullptr) && !transaction->isAllowedToReinstall())
-        {
-            return MHWD::STATUS::ERROR_ALREADY_INSTALLED;
-        }
-        else
-        {
-            // Install all dependencies first
-            for (auto dependencyConfig = transaction->dependencyConfigs_.end() - 1;
-                    dependencyConfig != transaction->dependencyConfigs_.begin() - 1;
-                    --dependencyConfig)
-            {
-                printer_.printMessage(MHWD::MESSAGETYPE::INSTALLDEPENDENCY_START,
-                        (*dependencyConfig)->name_);
-                if ((status = installConfig((*dependencyConfig))) != MHWD::STATUS::SUCCESS)
+                printer_.printMessage(MHWD::MESSAGETYPE::REMOVE_START, installedConfig->name_);
+                if ((status = uninstallConfig(installedConfig)) != MHWD::STATUS::SUCCESS)
                 {
                     return status;
                 }
                 else
                 {
-                    printer_.printMessage(MHWD::MESSAGETYPE::INSTALLDEPENDENCY_END,
-                            (*dependencyConfig)->name_);
+                    printer_.printMessage(MHWD::MESSAGETYPE::REMOVE_END, installedConfig->name_);
                 }
             }
+        }
 
-            printer_.printMessage(MHWD::MESSAGETYPE::INSTALL_START, transaction->config_->name_);
-            if ((status = installConfig(transaction->config_)) != MHWD::STATUS::SUCCESS)
+        if (transaction->type_ == MHWD::TRANSACTIONTYPE::INSTALL)
+        {
+            // Check if already installed but not allowed to reinstall
+            if ((installedConfig != nullptr) && !transaction->isAllowedToReinstall())
             {
-                return status;
+                return MHWD::STATUS::ERROR_ALREADY_INSTALLED;
             }
             else
             {
-                printer_.printMessage(MHWD::MESSAGETYPE::INSTALL_END,
-                        transaction->config_->name_);
+                // Install all dependencies first
+                for (auto dependencyConfig = transaction->dependencyConfigs_.end() - 1;
+                        dependencyConfig != transaction->dependencyConfigs_.begin() - 1;
+                        --dependencyConfig)
+                {
+                    printer_.printMessage(MHWD::MESSAGETYPE::INSTALLDEPENDENCY_START,
+                            (*dependencyConfig)->name_);
+                    if ((status = installConfig((*dependencyConfig))) != MHWD::STATUS::SUCCESS)
+                    {
+                        return status;
+                    }
+                    else
+                    {
+                        printer_.printMessage(MHWD::MESSAGETYPE::INSTALLDEPENDENCY_END,
+                                (*dependencyConfig)->name_);
+                    }
+                }
+
+                printer_.printMessage(MHWD::MESSAGETYPE::INSTALL_START, transaction->config_->name_);
+                if ((status = installConfig(transaction->config_)) != MHWD::STATUS::SUCCESS)
+                {
+                    return status;
+                }
+                else
+                {
+                    printer_.printMessage(MHWD::MESSAGETYPE::INSTALL_END,
+                            transaction->config_->name_);
+                }
             }
         }
-    }
 
-    return status;
+        return status;
+    }
 }
 
 int Mhwd::hexToInt(std::string hex)
