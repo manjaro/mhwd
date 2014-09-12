@@ -547,7 +547,7 @@ void Data::fillDevices(std::string type)
     }
 
     // Get the hardware devices
-    hd_data_t *hd_data = reinterpret_cast<hd_data_t*>(calloc(1, sizeof *hd_data));
+    hd_data_t *hd_data = new hd_data_t();
 
     hd_t *hd;
     hd = hd_list(hd_data, hw, 1, nullptr);
@@ -571,7 +571,7 @@ void Data::fillDevices(std::string type)
 
     hd_free_hd_list(beginningOfhd);
     hd_free_hd_data(hd_data);
-    free(hd_data);
+    delete hd_data;
 }
 
 void Data::fillAllConfigs(std::string type)

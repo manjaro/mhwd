@@ -186,8 +186,6 @@ std::string Mhwd::checkEnvironment()
 
 void Mhwd::printDeviceDetails(std::string type, FILE *f)
 {
-    hd_data_t *hd_data;
-    hd_t *hd;
     hw_item hw;
 
     if (type == "USB")
@@ -199,7 +197,9 @@ void Mhwd::printDeviceDetails(std::string type, FILE *f)
         hw = hw_pci;
     }
 
-    hd_data = reinterpret_cast<hd_data_t*>(calloc(1, sizeof *hd_data));
+    hd_data_t *hd_data;
+    hd_t *hd;
+    hd_data = new hd_data_t();
     hd = hd_list(hd_data, hw, 1, nullptr);
     hd_t *beginningOfhd = hd;
 
@@ -210,7 +210,7 @@ void Mhwd::printDeviceDetails(std::string type, FILE *f)
 
     hd_free_hd_list(beginningOfhd);
     hd_free_hd_data(hd_data);
-    free(hd_data);
+    delete hd_data;
 }
 
 Config* Mhwd::getInstalledConfig(const std::string& configName,
