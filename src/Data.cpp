@@ -628,7 +628,7 @@ std::vector<std::string> Data::getRecursiveDirectoryFileList(const std::string d
         std::string onlyFilename)
 {
     std::vector<std::string> list;
-    struct dirent *dir;
+    struct dirent *dir = nullptr;
     DIR *d = opendir(directoryPath.c_str());
 
     if (d)
@@ -668,7 +668,7 @@ std::vector<std::string> Data::getRecursiveDirectoryFileList(const std::string d
 
         closedir(d);
     }
-
+    delete dir;
     return list;
 }
 
