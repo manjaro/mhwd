@@ -7,6 +7,7 @@
 
 #include <dirent.h>
 
+#include <algorithm>
 #include <fstream>
 #include <iomanip>
 #include <sstream>
@@ -340,48 +341,41 @@ void Data::getAllDependenciesToInstall(Config *config,
     for (auto configDependency = config->dependencies_.begin();
             configDependency != config->dependencies_.end(); configDependency++)
     {
-        bool found = false;
+        auto found = std::find_if(installedConfigs->begin(), installedConfigs->end(),
+                [configDependency](const Config* rhs)->bool
+                {
+                    return (*configDependency == rhs->name_);
+                });
 
-        for (auto installedConfig = installedConfigs->begin();
-                installedConfig != installedConfigs->end(); installedConfig++)
-        {
-            if ((*configDependency) == (*installedConfig)->name_)
-            {
-                found = true;
-                break;
-            }
-        }
-
-        if (found)
-            continue;
-
-        // Check if already in vector
-        for (auto dependency = dependencies->begin();
-                dependency != dependencies->end(); dependency++)
-        {
-            if ((*dependency)->name_ == (*configDependency))
-            {
-                found = true;
-                break;
-            }
-        }
-
-        if (found)
+        if (found != installedConfigs->end())
         {
             continue;
         }
         else
         {
-            // Add to vector and check for further subdepends...
-            Config *dependconfig = getDatabaseConfig((*configDependency), config->type_);
-            if (dependconfig == nullptr)
+            found = std::find_if(dependencies->begin(), dependencies->end(),
+                    [configDependency](const Config* rhs)->bool
+                    {
+                        return (*configDependency == rhs->name_);
+                    });
+
+            if (found != dependencies->end())
             {
                 continue;
             }
             else
             {
-                dependencies->push_back(dependconfig);
-                getAllDependenciesToInstall(dependconfig, installedConfigs, dependencies);
+                // Add to vector and check for further subdepends...
+                Config *dependconfig = getDatabaseConfig((*configDependency), config->type_);
+                if (dependconfig == nullptr)
+                {
+                    continue;
+                }
+                else
+                {
+                    dependencies->push_back(dependconfig);
+                    getAllDependenciesToInstall(dependconfig, installedConfigs, dependencies);
+                }
             }
         }
     }
