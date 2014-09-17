@@ -112,8 +112,8 @@ void Data::updateInstalledConfigData()
     fillInstalledConfigs("PCI");
     fillInstalledConfigs("USB");
 
-    setMatchingConfigs(PCIDevices, &installedPCIConfigs, true);
-    setMatchingConfigs(USBDevices, &installedUSBConfigs, true);
+    setMatchingConfigs(PCIDevices, installedPCIConfigs, true);
+    setMatchingConfigs(USBDevices, installedUSBConfigs, true);
 }
 
 void Data::fillInstalledConfigs(std::string type)
@@ -148,7 +148,7 @@ void Data::fillInstalledConfigs(std::string type)
     }
 }
 
-void Data::getAllDevicesOfConfig(Config *config, std::vector<Device*>* foundDevices)
+void Data::getAllDevicesOfConfig(Config *config, std::vector<Device*>& foundDevices)
 {
     std::vector<Device*> devices;
 
@@ -165,9 +165,9 @@ void Data::getAllDevicesOfConfig(Config *config, std::vector<Device*>* foundDevi
 }
 
 void Data::getAllDevicesOfConfig(const std::vector<Device*>& devices, Config *config,
-        std::vector<Device*>* foundDevices)
+        std::vector<Device*>& foundDevices)
 {
-    foundDevices->clear();
+    foundDevices.clear();
 
     for (auto hwdID = config->hwdIDs_.begin();
             hwdID != config->hwdIDs_.end(); ++hwdID)
@@ -297,7 +297,7 @@ void Data::getAllDevicesOfConfig(const std::vector<Device*>& devices, Config *co
                                 else
                                 {
                                     foundDevice = true;
-                                    foundDevices->push_back((*i_device));
+                                    foundDevices.push_back(*i_device);
                                 }
                             }
                         }
@@ -308,7 +308,7 @@ void Data::getAllDevicesOfConfig(const std::vector<Device*>& devices, Config *co
 
         if (!foundDevice)
         {
-            foundDevices->clear();
+            foundDevices.clear();
             return;
         }
     }
@@ -330,24 +330,24 @@ std::vector<Config*> Data::getAllDependenciesToInstall(Config *config)
     }
 
     // Get all depends
-    getAllDependenciesToInstall(config, &installedConfigs, &depends);
+    getAllDependenciesToInstall(config, installedConfigs, &depends);
 
     return depends;
 }
 
 void Data::getAllDependenciesToInstall(Config *config,
-        std::vector<Config*>* installedConfigs, std::vector<Config*> *dependencies)
+        std::vector<Config*>& installedConfigs, std::vector<Config*> *dependencies)
 {
     for (auto configDependency = config->dependencies_.begin();
             configDependency != config->dependencies_.end(); configDependency++)
     {
-        auto found = std::find_if(installedConfigs->begin(), installedConfigs->end(),
+        auto found = std::find_if(installedConfigs.begin(), installedConfigs.end(),
                 [configDependency](const Config* rhs)->bool
                 {
                     return (*configDependency == rhs->name_);
                 });
 
-        if (found != installedConfigs->end())
+        if (found != installedConfigs.end())
         {
             continue;
         }
@@ -732,17 +732,17 @@ void Data::updateConfigData()
     fillAllConfigs("PCI");
     fillAllConfigs("USB");
 
-    setMatchingConfigs(PCIDevices, &allPCIConfigs, false);
-    setMatchingConfigs(USBDevices, &allUSBConfigs, false);
+    setMatchingConfigs(PCIDevices, allPCIConfigs, false);
+    setMatchingConfigs(USBDevices, allUSBConfigs, false);
 
     // Update also installed config data
     updateInstalledConfigData();
 }
 
-void Data::setMatchingConfigs(const std::vector<Device*>& devices, std::vector<Config*>* configs,
+void Data::setMatchingConfigs(const std::vector<Device*>& devices, std::vector<Config*>& configs,
         bool setAsInstalled)
 {
-    for (auto config = configs->begin(); config != configs->end();
+    for (auto config = configs.begin(); config != configs.end();
             ++config)
     {
         setMatchingConfig((*config), devices, setAsInstalled);
@@ -753,7 +753,7 @@ void Data::setMatchingConfig(Config* config, const std::vector<Device*>& devices
 {
     std::vector<Device*> foundDevices;
 
-    getAllDevicesOfConfig(devices, config, &foundDevices);
+    getAllDevicesOfConfig(devices, config, foundDevices);
 
     // Set config to all matching devices
     for (auto foundDevice = foundDevices.begin();
@@ -761,19 +761,19 @@ void Data::setMatchingConfig(Config* config, const std::vector<Device*>& devices
     {
         if (setAsInstalled)
         {
-            addConfigSorted(&(*foundDevice)->installedConfigs_, config);
+            addConfigSorted((*foundDevice)->installedConfigs_, config);
         }
         else
         {
-            addConfigSorted(&(*foundDevice)->availableConfigs_, config);
+            addConfigSorted((*foundDevice)->availableConfigs_, config);
         }
     }
 }
 
-void Data::addConfigSorted(std::vector<Config*>* configs, Config* config)
+void Data::addConfigSorted(std::vector<Config*>& configs, Config* config)
 {
-    for (auto iterator = configs->begin();
-            iterator != configs->end(); iterator++)
+    for (auto iterator = configs.begin();
+            iterator != configs.end(); iterator++)
     {
         if (config->name_ == (*iterator)->name_)
         {
@@ -781,20 +781,20 @@ void Data::addConfigSorted(std::vector<Config*>* configs, Config* config)
         }
     }
 
-    for (auto iterator = configs->begin(); iterator != configs->end();
+    for (auto iterator = configs.begin(); iterator != configs.end();
             iterator++)
     {
         if (config->priority_ > (*iterator)->priority_)
         {
-            configs->insert(iterator, config);
+            configs.insert(iterator, config);
             return;
         }
     }
 
-    configs->push_back(config);
+    configs.push_back(config);
 }
 
-Vita::string Data::from_Hex(uint16_t hexnum, int fill)
+Vita::string Data::from_Hex(std::uint16_t hexnum, int fill)
 {
     std::stringstream stream;
     stream << std::hex << std::setfill('0') << std::setw(fill) << hexnum;

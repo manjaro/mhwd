@@ -649,7 +649,7 @@ bool Mhwd::runScript(Config *config, MHWD::TRANSACTIONTYPE operationType)
     // Set all config devices as argument
     std::vector<Device*> foundDevices;
     std::vector<Device*> devices;
-    data_.getAllDevicesOfConfig(config, &foundDevices);
+    data_.getAllDevicesOfConfig(config, foundDevices);
 
     for (auto iterator = foundDevices.begin();
             iterator != foundDevices.end(); iterator++)

@@ -42,11 +42,11 @@ public:
     std::vector<Config*> invalidConfigs;
 
     void updateInstalledConfigData();
-    void getAllDevicesOfConfig(Config *config, std::vector<Device*>* foundDevices);
+    void getAllDevicesOfConfig(Config *config, std::vector<Device*>& foundDevices);
     bool fillConfig(Config *config, std::string configPath, std::string type);
 
     std::vector<Config*> getAllDependenciesToInstall(Config *config);
-    void getAllDependenciesToInstall(Config *config, std::vector<Config*>* installedConfigs,
+    void getAllDependenciesToInstall(Config *config, std::vector<Config*>& installedConfigs,
             std::vector<Config*> *depends);
     Config* getDatabaseConfig(const std::string configName, const std::string configType);
     std::vector<Config*> getAllLocalConflicts(Config *config);
@@ -54,14 +54,14 @@ public:
 
 private:
     void getAllDevicesOfConfig(const std::vector<Device*>& devices, Config *config,
-            std::vector<Device*>* foundDevices);
+            std::vector<Device*>& foundDevices);
     void fillInstalledConfigs(std::string type);
     void fillDevices(std::string type);
     void fillAllConfigs(std::string type);
-    void setMatchingConfigs(const std::vector<Device*>& devices, std::vector<Config*>* configs,
+    void setMatchingConfigs(const std::vector<Device*>& devices, std::vector<Config*>& configs,
             bool setAsInstalled);
     void setMatchingConfig(Config* config, const std::vector<Device*>& devices, bool setAsInstalled);
-    void addConfigSorted(std::vector<Config*>* configs, Config* config);
+    void addConfigSorted(std::vector<Config*>& configs, Config* config);
     std::vector<std::string> getRecursiveDirectoryFileList(const std::string directoryPath,
             std::string onlyFilename = "");
 
