@@ -164,7 +164,7 @@ void Data::getAllDevicesOfConfig(Config *config, std::vector<Device*>* foundDevi
     getAllDevicesOfConfig(devices, config, foundDevices);
 }
 
-void Data::getAllDevicesOfConfig(std::vector<Device*>& devices, Config *config,
+void Data::getAllDevicesOfConfig(const std::vector<Device*>& devices, Config *config,
         std::vector<Device*>* foundDevices)
 {
     foundDevices->clear();
@@ -739,7 +739,7 @@ void Data::updateConfigData()
     updateInstalledConfigData();
 }
 
-void Data::setMatchingConfigs(std::vector<Device*>& devices, std::vector<Config*>* configs,
+void Data::setMatchingConfigs(const std::vector<Device*>& devices, std::vector<Config*>* configs,
         bool setAsInstalled)
 {
     for (auto config = configs->begin(); config != configs->end();
@@ -749,7 +749,7 @@ void Data::setMatchingConfigs(std::vector<Device*>& devices, std::vector<Config*
     }
 }
 
-void Data::setMatchingConfig(Config* config, std::vector<Device*>& devices, bool setAsInstalled)
+void Data::setMatchingConfig(Config* config, const std::vector<Device*>& devices, bool setAsInstalled)
 {
     std::vector<Device*> foundDevices;
 
