@@ -112,8 +112,8 @@ void Data::updateInstalledConfigData()
     fillInstalledConfigs("PCI");
     fillInstalledConfigs("USB");
 
-    setMatchingConfigs(&PCIDevices, &installedPCIConfigs, true);
-    setMatchingConfigs(&USBDevices, &installedUSBConfigs, true);
+    setMatchingConfigs(PCIDevices, &installedPCIConfigs, true);
+    setMatchingConfigs(USBDevices, &installedUSBConfigs, true);
 }
 
 void Data::fillInstalledConfigs(std::string type)
@@ -161,10 +161,10 @@ void Data::getAllDevicesOfConfig(Config *config, std::vector<Device*>* foundDevi
         devices = PCIDevices;
     }
 
-    getAllDevicesOfConfig(&devices, config, foundDevices);
+    getAllDevicesOfConfig(devices, config, foundDevices);
 }
 
-void Data::getAllDevicesOfConfig(std::vector<Device*>* devices, Config *config,
+void Data::getAllDevicesOfConfig(std::vector<Device*>& devices, Config *config,
         std::vector<Device*>* foundDevices)
 {
     foundDevices->clear();
@@ -174,7 +174,7 @@ void Data::getAllDevicesOfConfig(std::vector<Device*>* devices, Config *config,
     {
         bool foundDevice = false;
         // Check all devices
-        for (auto i_device = devices->begin(); i_device != devices->end();
+        for (auto i_device = devices.begin(); i_device != devices.end();
                 ++i_device)
         {
             bool found = false;
@@ -732,14 +732,14 @@ void Data::updateConfigData()
     fillAllConfigs("PCI");
     fillAllConfigs("USB");
 
-    setMatchingConfigs(&PCIDevices, &allPCIConfigs, false);
-    setMatchingConfigs(&USBDevices, &allUSBConfigs, false);
+    setMatchingConfigs(PCIDevices, &allPCIConfigs, false);
+    setMatchingConfigs(USBDevices, &allUSBConfigs, false);
 
     // Update also installed config data
     updateInstalledConfigData();
 }
 
-void Data::setMatchingConfigs(std::vector<Device*>* devices, std::vector<Config*>* configs,
+void Data::setMatchingConfigs(std::vector<Device*>& devices, std::vector<Config*>* configs,
         bool setAsInstalled)
 {
     for (auto config = configs->begin(); config != configs->end();
@@ -749,7 +749,7 @@ void Data::setMatchingConfigs(std::vector<Device*>* devices, std::vector<Config*
     }
 }
 
-void Data::setMatchingConfig(Config* config, std::vector<Device*>* devices, bool setAsInstalled)
+void Data::setMatchingConfig(Config* config, std::vector<Device*>& devices, bool setAsInstalled)
 {
     std::vector<Device*> foundDevices;
 
