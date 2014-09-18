@@ -12,6 +12,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -33,35 +34,38 @@ public:
     };
 
     Environment environment;
-    std::vector<Device*> USBDevices;
-    std::vector<Device*> PCIDevices;
-    std::vector<Config*> installedUSBConfigs;
-    std::vector<Config*> installedPCIConfigs;
-    std::vector<Config*> allUSBConfigs;
-    std::vector<Config*> allPCIConfigs;
-    std::vector<Config*> invalidConfigs;
+    std::vector<std::shared_ptr<Device>> USBDevices;
+    std::vector<std::shared_ptr<Device>> PCIDevices;
+    std::vector<std::shared_ptr<Config>> installedUSBConfigs;
+    std::vector<std::shared_ptr<Config>> installedPCIConfigs;
+    std::vector<std::shared_ptr<Config>> allUSBConfigs;
+    std::vector<std::shared_ptr<Config>> allPCIConfigs;
+    std::vector<std::shared_ptr<Config>> invalidConfigs;
 
     void updateInstalledConfigData();
-    void getAllDevicesOfConfig(Config *config, std::vector<Device*>& foundDevices);
-    bool fillConfig(Config *config, std::string configPath, std::string type);
+    void getAllDevicesOfConfig(std::shared_ptr<Config> config, std::vector<std::shared_ptr<Device>>& foundDevices);
+    bool fillConfig(std::shared_ptr<Config> config, std::string configPath, std::string type);
 
-    std::vector<Config*> getAllDependenciesToInstall(Config *config);
-    void getAllDependenciesToInstall(Config *config, std::vector<Config*>& installedConfigs,
-            std::vector<Config*> *depends);
-    Config* getDatabaseConfig(const std::string configName, const std::string configType);
-    std::vector<Config*> getAllLocalConflicts(Config *config);
-    std::vector<Config*> getAllLocalRequirements(Config *config);
+    std::vector<std::shared_ptr<Config>> getAllDependenciesToInstall(std::shared_ptr<Config> config);
+    void getAllDependenciesToInstall(std::shared_ptr<Config> config,
+            std::vector<std::shared_ptr<Config>>& installedConfigs,
+            std::vector<std::shared_ptr<Config>> *depends);
+    std::shared_ptr<Config> getDatabaseConfig(const std::string configName,
+            const std::string configType);
+    std::vector<std::shared_ptr<Config>> getAllLocalConflicts(std::shared_ptr<Config> config);
+    std::vector<std::shared_ptr<Config>> getAllLocalRequirements(std::shared_ptr<Config> config);
 
 private:
-    void getAllDevicesOfConfig(const std::vector<Device*>& devices, Config *config,
-            std::vector<Device*>& foundDevices);
+    void getAllDevicesOfConfig(const std::vector<std::shared_ptr<Device>>& devices,
+            std::shared_ptr<Config> config, std::vector<std::shared_ptr<Device>>& foundDevices);
     void fillInstalledConfigs(std::string type);
     void fillDevices(std::string type);
     void fillAllConfigs(std::string type);
-    void setMatchingConfigs(const std::vector<Device*>& devices, std::vector<Config*>& configs,
+    void setMatchingConfigs(const std::vector<std::shared_ptr<Device>>& devices,
+            std::vector<std::shared_ptr<Config>>& configs, bool setAsInstalled);
+    void setMatchingConfig(std::shared_ptr<Config> config, const std::vector<std::shared_ptr<Device>>& devices,
             bool setAsInstalled);
-    void setMatchingConfig(Config* config, const std::vector<Device*>& devices, bool setAsInstalled);
-    void addConfigSorted(std::vector<Config*>& configs, Config* config);
+    void addConfigSorted(std::vector<std::shared_ptr<Config>>& configs, std::shared_ptr<Config> config);
     std::vector<std::string> getRecursiveDirectoryFileList(const std::string directoryPath,
             std::string onlyFilename = "");
 

@@ -26,48 +26,6 @@ Data::Data()
 
 Data::~Data()
 {
-    for (auto& PCIDevice : PCIDevices)
-    {
-        delete PCIDevice;
-        PCIDevice = nullptr;
-    }
-
-    for (auto& USBDevice : USBDevices)
-    {
-        delete USBDevice;
-        USBDevice = nullptr;
-    }
-
-    for (auto& installedPCIConfig : installedPCIConfigs)
-    {
-        delete installedPCIConfig;
-        installedPCIConfig = nullptr;
-    }
-
-    for (auto& installedUSBConfig : installedUSBConfigs)
-    {
-        delete installedUSBConfig;
-        installedUSBConfig = nullptr;
-    }
-
-    for (auto& PCIConfig : allPCIConfigs)
-    {
-        delete PCIConfig;
-        PCIConfig = nullptr;
-    }
-
-    for (auto& USBConfig : allUSBConfigs)
-    {
-        delete USBConfig;
-        USBConfig = nullptr;
-    }
-
-    for (auto& invalidConfig : invalidConfigs)
-    {
-        delete invalidConfig;
-        invalidConfig = nullptr;
-    }
-
     PCIDevices.clear();
     USBDevices.clear();
     installedPCIConfigs.clear();
@@ -92,19 +50,6 @@ void Data::updateInstalledConfigData()
         (*USBDevice)->installedConfigs_.clear();
     }
 
-    // Clear installed config vectors
-    for (auto& PCIConfig : installedPCIConfigs)
-    {
-        delete PCIConfig;
-        PCIConfig = nullptr;
-    }
-
-    for (auto& USBConfig : installedUSBConfigs)
-    {
-        delete USBConfig;
-        USBConfig = nullptr;
-    }
-
     installedPCIConfigs.clear();
     installedUSBConfigs.clear();
 
@@ -119,7 +64,7 @@ void Data::updateInstalledConfigData()
 void Data::fillInstalledConfigs(std::string type)
 {
     std::vector<std::string> configPaths;
-    std::vector<Config*>* configs;
+    std::vector<std::shared_ptr<Config>>* configs;
 
     if (type == "USB")
     {
@@ -139,18 +84,18 @@ void Data::fillInstalledConfigs(std::string type)
 
         if (config->readConfigFile((*configPath)))
         {
-            configs->push_back(config);
+            configs->push_back(std::shared_ptr<Config>{config});
         }
         else
         {
-            invalidConfigs.push_back(config);
+            invalidConfigs.push_back(std::shared_ptr<Config>{config});
         }
     }
 }
 
-void Data::getAllDevicesOfConfig(Config *config, std::vector<Device*>& foundDevices)
+void Data::getAllDevicesOfConfig(std::shared_ptr<Config> config, std::vector<std::shared_ptr<Device>>& foundDevices)
 {
-    std::vector<Device*> devices;
+    std::vector<std::shared_ptr<Device>> devices;
 
     if (config->type_ == "USB")
     {
@@ -164,8 +109,9 @@ void Data::getAllDevicesOfConfig(Config *config, std::vector<Device*>& foundDevi
     getAllDevicesOfConfig(devices, config, foundDevices);
 }
 
-void Data::getAllDevicesOfConfig(const std::vector<Device*>& devices, Config *config,
-        std::vector<Device*>& foundDevices)
+void Data::getAllDevicesOfConfig(const std::vector<std::shared_ptr<Device>>& devices,
+        std::shared_ptr<Config> config,
+        std::vector<std::shared_ptr<Device>>& foundDevices)
 {
     foundDevices.clear();
 
@@ -314,10 +260,11 @@ void Data::getAllDevicesOfConfig(const std::vector<Device*>& devices, Config *co
     }
 }
 
-std::vector<Config*> Data::getAllDependenciesToInstall(Config *config)
+std::vector<std::shared_ptr<Config>> Data::getAllDependenciesToInstall(
+        std::shared_ptr<Config> config)
 {
-    std::vector<Config*> depends;
-    std::vector<Config*> installedConfigs;
+    std::vector<std::shared_ptr<Config>> depends;
+    std::vector<std::shared_ptr<Config>> installedConfigs;
 
     // Get the right configs
     if (config->type_ == "USB")
@@ -335,14 +282,15 @@ std::vector<Config*> Data::getAllDependenciesToInstall(Config *config)
     return depends;
 }
 
-void Data::getAllDependenciesToInstall(Config *config,
-        std::vector<Config*>& installedConfigs, std::vector<Config*> *dependencies)
+void Data::getAllDependenciesToInstall(std::shared_ptr<Config> config,
+        std::vector<std::shared_ptr<Config>>& installedConfigs,
+        std::vector<std::shared_ptr<Config>> *dependencies)
 {
     for (auto configDependency = config->dependencies_.begin();
             configDependency != config->dependencies_.end(); configDependency++)
     {
         auto found = std::find_if(installedConfigs.begin(), installedConfigs.end(),
-                [configDependency](const Config* rhs)->bool
+                [configDependency](const std::shared_ptr<Config> rhs)->bool
                 {
                     return (*configDependency == rhs->name_);
                 });
@@ -354,7 +302,7 @@ void Data::getAllDependenciesToInstall(Config *config,
         else
         {
             found = std::find_if(dependencies->begin(), dependencies->end(),
-                    [configDependency](const Config* rhs)->bool
+                    [configDependency](const std::shared_ptr<Config> rhs)->bool
                     {
                         return (*configDependency == rhs->name_);
                     });
@@ -366,14 +314,14 @@ void Data::getAllDependenciesToInstall(Config *config,
             else
             {
                 // Add to vector and check for further subdepends...
-                Config *dependconfig = getDatabaseConfig((*configDependency), config->type_);
+                std::shared_ptr<Config> dependconfig = getDatabaseConfig((*configDependency), config->type_);
                 if (dependconfig == nullptr)
                 {
                     continue;
                 }
                 else
                 {
-                    dependencies->push_back(dependconfig);
+                    dependencies->push_back(std::shared_ptr<Config>{dependconfig});
                     getAllDependenciesToInstall(dependconfig, installedConfigs, dependencies);
                 }
             }
@@ -381,10 +329,10 @@ void Data::getAllDependenciesToInstall(Config *config,
     }
 }
 
-Config* Data::getDatabaseConfig(const std::string configName,
+std::shared_ptr<Config> Data::getDatabaseConfig(const std::string configName,
         const std::string configType)
 {
-    std::vector<Config*> allConfigs;
+    std::vector<std::shared_ptr<Config>> allConfigs;
 
     // Get the right configs
     if (configType == "USB")
@@ -408,11 +356,11 @@ Config* Data::getDatabaseConfig(const std::string configName,
     return nullptr;
 }
 
-std::vector<Config*> Data::getAllLocalConflicts(Config *config)
+std::vector<std::shared_ptr<Config>> Data::getAllLocalConflicts(std::shared_ptr<Config> config)
 {
-    std::vector<Config*> conflicts;
-    std::vector<Config*> dependencies = getAllDependenciesToInstall(config);
-    std::vector<Config*> installedConfigs;
+    std::vector<std::shared_ptr<Config>> conflicts;
+    std::vector<std::shared_ptr<Config>> dependencies = getAllDependenciesToInstall(config);
+    std::vector<std::shared_ptr<Config>> installedConfigs;
 
     // Get the right configs
     if (config->type_ == "USB")
@@ -424,7 +372,7 @@ std::vector<Config*> Data::getAllLocalConflicts(Config *config)
         installedConfigs = installedPCIConfigs;
     }
 
-    dependencies.push_back(config);
+    dependencies.push_back(std::shared_ptr<Config>{config});
 
     for (auto dependency = dependencies.begin();
             dependency != dependencies.end(); dependency++)
@@ -460,7 +408,7 @@ std::vector<Config*> Data::getAllLocalConflicts(Config *config)
                     }
                     else
                     {
-                        conflicts.push_back((*installedConfig));
+                        conflicts.push_back(std::shared_ptr<Config>{*installedConfig});
                         break;
                     }
                 }
@@ -471,10 +419,10 @@ std::vector<Config*> Data::getAllLocalConflicts(Config *config)
     return conflicts;
 }
 
-std::vector<Config*> Data::getAllLocalRequirements(Config *config)
+std::vector<std::shared_ptr<Config>> Data::getAllLocalRequirements(std::shared_ptr<Config> config)
 {
-    std::vector<Config*> requirements;
-    std::vector<Config*> installedConfigs;
+    std::vector<std::shared_ptr<Config>> requirements;
+    std::vector<std::shared_ptr<Config>> installedConfigs;
 
     // Get the right configs
     if (config->type_ == "USB")
@@ -513,7 +461,7 @@ std::vector<Config*> Data::getAllLocalRequirements(Config *config)
 
                 if (!found)
                 {
-                    requirements.push_back((*installedConfig));
+                    requirements.push_back(std::shared_ptr<Config>{*installedConfig});
                     break;
                 }
             }
@@ -526,7 +474,7 @@ std::vector<Config*> Data::getAllLocalRequirements(Config *config)
 void Data::fillDevices(std::string type)
 {
     hw_item hw;
-    std::vector<Device*>* devices;
+    std::vector<std::shared_ptr<Device>>* devices;
 
     if (type == "USB")
     {
@@ -559,7 +507,7 @@ void Data::fillDevices(std::string type)
         device->deviceName_ = from_CharArray(hd->device.name);
         device->sysfsBusID_ = from_CharArray(hd->sysfs_bus_id);
         device->sysfsID_ = from_CharArray(hd->sysfs_id);
-        devices->push_back(device);
+        devices->push_back(std::shared_ptr<Device>{device});
     }
 
     hd_free_hd_list(beginningOfhd);
@@ -570,7 +518,7 @@ void Data::fillDevices(std::string type)
 void Data::fillAllConfigs(std::string type)
 {
     std::vector<std::string> configPaths;
-    std::vector<Config*>* configs;
+    std::vector<std::shared_ptr<Config>>* configs;
 
     if (type == "USB")
     {
@@ -590,16 +538,16 @@ void Data::fillAllConfigs(std::string type)
 
         if (config->readConfigFile((*configPath)))
         {
-            configs->push_back(config);
+            configs->push_back(std::shared_ptr<Config>{config});
         }
         else
         {
-            invalidConfigs.push_back(config);
+            invalidConfigs.push_back(std::shared_ptr<Config>{config});
         }
     }
 }
 
-bool Data::fillConfig(Config *config, std::string configPath, std::string type)
+bool Data::fillConfig(std::shared_ptr<Config> config, std::string configPath, std::string type)
 {
     config->type_ = type;
     config->priority_ = 0;
@@ -711,20 +659,6 @@ void Data::updateConfigData()
     {
         (*USBDevice)->availableConfigs_.clear();
     }
-
-    // Clear installed config vectors
-    for (auto& PCIConfig : allPCIConfigs)
-    {
-        delete PCIConfig;
-        PCIConfig = nullptr;
-    }
-
-    for (auto& USBConfig : allUSBConfigs)
-    {
-        delete USBConfig;
-        USBConfig = nullptr;
-    }
-
     allPCIConfigs.clear();
     allUSBConfigs.clear();
 
@@ -739,7 +673,8 @@ void Data::updateConfigData()
     updateInstalledConfigData();
 }
 
-void Data::setMatchingConfigs(const std::vector<Device*>& devices, std::vector<Config*>& configs,
+void Data::setMatchingConfigs(const std::vector<std::shared_ptr<Device>>& devices,
+        std::vector<std::shared_ptr<Config>>& configs,
         bool setAsInstalled)
 {
     for (auto config = configs.begin(); config != configs.end();
@@ -749,9 +684,10 @@ void Data::setMatchingConfigs(const std::vector<Device*>& devices, std::vector<C
     }
 }
 
-void Data::setMatchingConfig(Config* config, const std::vector<Device*>& devices, bool setAsInstalled)
+void Data::setMatchingConfig(std::shared_ptr<Config> config, const std::vector<std::shared_ptr<Device>>& devices,
+        bool setAsInstalled)
 {
-    std::vector<Device*> foundDevices;
+    std::vector<std::shared_ptr<Device>> foundDevices;
 
     getAllDevicesOfConfig(devices, config, foundDevices);
 
@@ -770,7 +706,7 @@ void Data::setMatchingConfig(Config* config, const std::vector<Device*>& devices
     }
 }
 
-void Data::addConfigSorted(std::vector<Config*>& configs, Config* config)
+void Data::addConfigSorted(std::vector<std::shared_ptr<Config>>& configs, std::shared_ptr<Config> config)
 {
     for (auto iterator = configs.begin();
             iterator != configs.end(); iterator++)
@@ -786,12 +722,12 @@ void Data::addConfigSorted(std::vector<Config*>& configs, Config* config)
     {
         if (config->priority_ > (*iterator)->priority_)
         {
-            configs.insert(iterator, config);
+            configs.insert(iterator, std::shared_ptr<Config>(config));
             return;
         }
     }
 
-    configs.push_back(config);
+    configs.push_back(std::shared_ptr<Config>(config));
 }
 
 Vita::string Data::from_Hex(std::uint16_t hexnum, int fill)

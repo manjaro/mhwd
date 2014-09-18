@@ -36,20 +36,20 @@ public:
     int launch(int argc, char *argv[]);
 
 private:
-    bool performTransaction(Config* config, MHWD::TRANSACTIONTYPE type);
+    bool performTransaction(std::shared_ptr<Config> config, MHWD::TRANSACTIONTYPE type);
     bool isUserRoot() const;
     std::string checkEnvironment();
 
     void printDeviceDetails(std::string type, FILE *f = stdout);
 
-    Config* getInstalledConfig(const std::string& configName, const std::string& configType);
-    Config* getDatabaseConfig(const std::string& configName, const std::string configType);
-    Config* getAvailableConfig(const std::string& configName, const std::string configType);
+    std::shared_ptr<Config> getInstalledConfig(const std::string& configName, const std::string& configType);
+    std::shared_ptr<Config> getDatabaseConfig(const std::string& configName, const std::string configType);
+    std::shared_ptr<Config> getAvailableConfig(const std::string& configName, const std::string configType);
 
     std::vector<Config*> getAllLocalRequirements(Config *config);
 
     MHWD::ARGUMENTS arguments_;
-    Config* config_;
+    std::shared_ptr<Config> config_;
     Data data_;
     Printer printer_;
 
@@ -65,9 +65,9 @@ private:
     bool createDir(const std::string path, const mode_t mode =
             S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IROTH | S_IXGRP | S_IXOTH);
 
-    MHWD::STATUS installConfig(Config *config);
+    MHWD::STATUS installConfig(std::shared_ptr<Config> config);
     MHWD::STATUS uninstallConfig(Config *config);
-    bool runScript(Config *config, MHWD::TRANSACTIONTYPE operationType);
+    bool runScript(std::shared_ptr<Config> config, MHWD::TRANSACTIONTYPE operationType);
 };
 
 #endif /* MHWD_HPP_ */

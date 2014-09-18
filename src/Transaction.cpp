@@ -7,7 +7,7 @@
 
 #include "Transaction.hpp"
 
-Transaction::Transaction(Data data, Config* config, MHWD::TRANSACTIONTYPE type,
+Transaction::Transaction(Data data, std::shared_ptr<Config> config, MHWD::TRANSACTIONTYPE type,
         bool allowReinstallation = false)
         :  config_(config), type_(type),
            dependencyConfigs_(data.getAllDependenciesToInstall(config)),

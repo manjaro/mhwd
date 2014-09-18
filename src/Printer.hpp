@@ -26,13 +26,13 @@ public:
     void printWarning(std::string warningMsg) const;
     void printMessage(MHWD::MESSAGETYPE type, std::string str) const;
     void printHelp() const;
-    void listDevices(const std::vector<Device*>& devices, std::string typeOfDevice) const;
-    void listConfigs(const std::vector<Config*>& configs,
+    void listDevices(const std::vector<std::shared_ptr<Device>>& devices, std::string typeOfDevice) const;
+    void listConfigs(const std::vector<std::shared_ptr<Config>>& configs,
             std::string beg, std::string empty = "") const;
     void printAvailableConfigs(const std::string& deviceType,
-            const std::vector<Device*>& devices) const;
+            const std::vector<std::shared_ptr<Device>>& devices) const;
     void printInstalledConfigs(const std::string& deviceType,
-            const std::vector<Config*>& installedConfigs) const;
+            const std::vector<std::shared_ptr<Config>>& installedConfigs) const;
     void printConfigDetails(const Config& config) const;
 private:
     void printLine() const;

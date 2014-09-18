@@ -95,7 +95,7 @@ void Printer::printHelp() const
             << "  --pmroot <path>\t\t\tset package manager root\n" << std::endl;
 }
 
-void Printer::listDevices(const std::vector<Device*>& devices, std::string type) const
+void Printer::listDevices(const std::vector<std::shared_ptr<Device>>& devices, std::string type) const
 {
     if (devices.empty())
     {
@@ -125,7 +125,7 @@ void Printer::listDevices(const std::vector<Device*>& devices, std::string type)
     }
 }
 
-void Printer::listConfigs(const std::vector<Config*>& configs, std::string beg,
+void Printer::listConfigs(const std::vector<std::shared_ptr<Config>>& configs, std::string beg,
         std::string empty) const
 {
     if (configs.empty())
@@ -156,7 +156,7 @@ void Printer::listConfigs(const std::vector<Config*>& configs, std::string beg,
 }
 
 void Printer::printAvailableConfigs(const std::string& deviceType,
-        const std::vector<Device*>& devices) const
+        const std::vector<std::shared_ptr<Device>>& devices) const
 {
     bool configFound = false;
 
@@ -206,7 +206,7 @@ void Printer::printAvailableConfigs(const std::string& deviceType,
 }
 
 void Printer::printInstalledConfigs(const std::string& deviceType,
-        const std::vector<Config*>& installedConfigs) const
+        const std::vector<std::shared_ptr<Config>>& installedConfigs) const
 {
     if (installedConfigs.empty())
     {
