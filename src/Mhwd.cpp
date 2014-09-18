@@ -164,19 +164,19 @@ std::string Mhwd::checkEnvironment()
     std::string retValue = "";
 
     // Check if required directories exists. Otherwise return missing directory...
-    if (!checkExist(MHWD_USB_CONFIG_DIR))
+    if (!dirExists(MHWD_USB_CONFIG_DIR))
     {
         retValue = MHWD_USB_CONFIG_DIR;
     }
-    if (!checkExist(MHWD_PCI_CONFIG_DIR))
+    if (!dirExists(MHWD_PCI_CONFIG_DIR))
     {
         retValue = MHWD_PCI_CONFIG_DIR;
     }
-    if (!checkExist(MHWD_USB_DATABASE_DIR))
+    if (!dirExists(MHWD_USB_DATABASE_DIR))
     {
         retValue = MHWD_USB_DATABASE_DIR;
     }
-    if (!checkExist(MHWD_PCI_DATABASE_DIR))
+    if (!dirExists(MHWD_PCI_DATABASE_DIR))
     {
         retValue = MHWD_PCI_DATABASE_DIR;
     }
@@ -431,37 +431,40 @@ bool Mhwd::copyDirectory(const std::string source, const std::string destination
     {
         return false;
     }
-
-    while ((dir = readdir(d)) != nullptr)
+    else
     {
-        std::string filename = std::string(dir->d_name);
-        std::string sourcepath = source + "/" + filename;
-        std::string destinationpath = destination + "/" + filename;
-
-        if (filename == "." || filename == ".." || filename == "")
+        while ((dir = readdir(d)) != nullptr)
         {
-            continue;
-        }
+            std::string filename = std::string(dir->d_name);
+            std::string sourcepath = source + "/" + filename;
+            std::string destinationpath = destination + "/" + filename;
 
-        lstat(sourcepath.c_str(), &filestatus);
-
-        if (S_ISREG(filestatus.st_mode))
-        {
-            if (!copyFile(sourcepath, destinationpath))
+            if (filename == "." || filename == ".." || filename == "")
             {
-                success = false;
+                continue;
+            }
+            else
+            {
+                lstat(sourcepath.c_str(), &filestatus);
+
+                if (S_ISREG(filestatus.st_mode))
+                {
+                    if (!copyFile(sourcepath, destinationpath))
+                    {
+                        success = false;
+                    }
+                }
+                else if (S_ISDIR(filestatus.st_mode))
+                {
+                    if (!copyDirectory(sourcepath, destinationpath))
+                    {
+                        success = false;
+                    }
+                }
             }
         }
-        else if (S_ISDIR(filestatus.st_mode))
-        {
-            if (!copyDirectory(sourcepath, destinationpath))
-            {
-                success = false;
-            }
-        }
+        closedir(d);
     }
-
-    closedir(d);
     return success;
 }
 
@@ -472,11 +475,9 @@ bool Mhwd::copyFile(const std::string source, const std::string destination, con
     if (src.is_open() && dst.is_open())
     {
         dst << src.rdbuf();
-
         mode_t process_mask = umask(0);
         chmod(destination.c_str(), mode);
         umask(process_mask);
-
         return true;
     }
     else
@@ -527,19 +528,17 @@ bool Mhwd::removeDirectory(const std::string directory)
                 }
             }
         }
-
         closedir(d);
 
         if (rmdir(directory.c_str()) != 0)
         {
             success = false;
         }
-
         return success;
     }
 }
 
-bool Mhwd::checkExist(const std::string path)
+bool Mhwd::dirExists(const std::string path)
 {
     struct stat filestatus;
     if (stat(path.c_str(), &filestatus) != 0)
