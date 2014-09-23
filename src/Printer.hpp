@@ -18,9 +18,6 @@
 class Printer
 {
 public:
-    Printer();
-    ~Printer();
-
     void printStatus(std::string statusMsg) const;
     void printError(std::string errorMsg) const;
     void printWarning(std::string warningMsg) const;

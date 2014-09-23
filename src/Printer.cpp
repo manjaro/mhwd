@@ -12,14 +12,6 @@
 
 #include "Printer.hpp"
 
-Printer::Printer()
-{
-}
-
-Printer::~Printer()
-{
-}
-
 void Printer::printStatus(std::string statusMsg) const
 {
     std::cout << CONSOLE_MESSAGE_COLOR << "> "
