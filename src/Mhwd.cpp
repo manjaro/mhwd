@@ -197,10 +197,8 @@ void Mhwd::printDeviceDetails(std::string type, FILE *f)
         hw = hw_pci;
     }
 
-    hd_data_t *hd_data;
-    hd_t *hd;
-    hd_data = new hd_data_t();
-    hd = hd_list(hd_data, hw, 1, nullptr);
+    hd_data_t *hd_data = new hd_data_t();
+    hd_t *hd = hd_list(hd_data, hw, 1, nullptr);
     hd_t *beginningOfhd = hd;
 
     for (; hd; hd = hd->next)

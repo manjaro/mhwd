@@ -489,9 +489,7 @@ void Data::fillDevices(std::string type)
 
     // Get the hardware devices
     hd_data_t *hd_data = new hd_data_t();
-
-    hd_t *hd;
-    hd = hd_list(hd_data, hw, 1, nullptr);
+    hd_t *hd = hd_list(hd_data, hw, 1, nullptr);
     hd_t *beginningOfhd = hd;
 
     Device *device;
