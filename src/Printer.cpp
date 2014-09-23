@@ -112,7 +112,7 @@ void Printer::listDevices(const std::vector<std::shared_ptr<Device>>& devices, s
                 << std::setw(8) << "DEVICE"
                 << std::setw(10) << "CONFIGS" << std::endl;
         printLine();
-        for (auto device : devices)
+        for (auto&& device : devices)
         {
             std::cout << std::setw(30) << device->className_
                     << std::setw(15) << device->sysfsBusID_
@@ -144,7 +144,7 @@ void Printer::listConfigs(const std::vector<std::shared_ptr<Config>>& configs, s
                 << std::setw(20) << "FREEDRIVER"
                 << std::setw(15) << "TYPE" << std::endl;
         printLine();
-        for (auto config : configs)
+        for (auto&& config : configs)
         {
             std::cout << std::setw(22) << config->name_
                     << std::setw(22) << config->version_
@@ -160,7 +160,7 @@ void Printer::printAvailableConfigs(const std::string& deviceType,
 {
     bool configFound = false;
 
-    for (auto device : devices)
+    for (auto&& device : devices)
     {
         if (device->availableConfigs_.empty() && device->installedConfigs_.empty())
         {
@@ -181,7 +181,7 @@ void Printer::printAvailableConfigs(const std::string& deviceType,
             if (!device->installedConfigs_.empty())
             {
                 std::cout << "  > INSTALLED:" << std::endl;
-                for (auto installedConfig : device->installedConfigs_)
+                for (auto&& installedConfig : device->installedConfigs_)
                 {
                     printConfigDetails(*installedConfig);
                 }
@@ -190,7 +190,7 @@ void Printer::printAvailableConfigs(const std::string& deviceType,
             if (!device->availableConfigs_.empty())
             {
                 std::cout << "  > AVAILABLE:" << std::endl;
-                for (auto availableConfig : device->availableConfigs_)
+                for (auto&& availableConfig : device->availableConfigs_)
                 {
                     printConfigDetails(*availableConfig);
                 }
@@ -214,7 +214,7 @@ void Printer::printInstalledConfigs(const std::string& deviceType,
     }
     else
     {
-        for (auto config : installedConfigs)
+        for (auto&& config : installedConfigs)
         {
             printConfigDetails(*config);
         }
@@ -230,25 +230,25 @@ void Printer::printConfigDetails(const Config& config) const
     std::string classids;
     std::string vendorids;
 
-    for (auto hwd : config.hwdIDs_)
+    for (auto&& hwd : config.hwdIDs_)
     {
-        for (auto vendorID : hwd.vendorIDs)
+        for (auto&& vendorID : hwd.vendorIDs)
         {
             vendorids += vendorID + " ";
         }
 
-        for (auto classID : hwd.classIDs)
+        for (auto&& classID : hwd.classIDs)
         {
             classids += classID + " ";
         }
     }
 
-    for (auto dependency : config.dependencies_)
+    for (auto&& dependency : config.dependencies_)
     {
         dependencies += dependency + " ";
     }
 
-    for (auto conflict : config.conflicts_)
+    for (auto&& conflict : config.conflicts_)
     {
         conflicts += conflict + " ";
     }

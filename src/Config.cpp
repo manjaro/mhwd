@@ -184,7 +184,7 @@ bool Config::readConfigFile(std::string configPath)
     }
 
     // Append * to all empty vectors
-    for (auto hwdID = hwdIDs_.begin();
+    for (auto&& hwdID = hwdIDs_.begin();
             hwdID != hwdIDs_.end(); hwdID++)
     {
         if ((*hwdID).classIDs.empty())
@@ -216,7 +216,7 @@ std::vector<std::string> Config::splitValue(Vita::string str, Vita::string onlyE
     std::vector<Vita::string> work = str.toLower().explode(" ");
     std::vector<std::string> final;
 
-    for (auto iterator = work.begin(); iterator != work.end();
+    for (auto&& iterator = work.begin(); iterator != work.end();
             iterator++)
     {
         if (*iterator != "" && onlyEnding.empty())

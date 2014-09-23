@@ -38,13 +38,13 @@ Data::~Data()
 void Data::updateInstalledConfigData()
 {
     // Clear config vectors in each device element
-    for (auto PCIDevice = PCIDevices.begin();
+    for (auto&& PCIDevice = PCIDevices.begin();
             PCIDevice != PCIDevices.end(); PCIDevice++)
     {
         (*PCIDevice)->installedConfigs_.clear();
     }
 
-    for (auto USBDevice = USBDevices.begin();
+    for (auto&& USBDevice = USBDevices.begin();
             USBDevice != USBDevices.end(); USBDevice++)
     {
         (*USBDevice)->installedConfigs_.clear();
@@ -77,7 +77,7 @@ void Data::fillInstalledConfigs(std::string type)
         configPaths = getRecursiveDirectoryFileList(MHWD_PCI_DATABASE_DIR, MHWD_CONFIG_NAME);
     }
 
-    for (auto configPath = configPaths.begin();
+    for (auto&& configPath = configPaths.begin();
             configPath != configPaths.end(); ++configPath)
     {
         Config *config = new Config((*configPath), type);
@@ -115,17 +115,17 @@ void Data::getAllDevicesOfConfig(const std::vector<std::shared_ptr<Device>>& dev
 {
     foundDevices.clear();
 
-    for (auto hwdID = config->hwdIDs_.begin();
+    for (auto&& hwdID = config->hwdIDs_.begin();
             hwdID != config->hwdIDs_.end(); ++hwdID)
     {
         bool foundDevice = false;
         // Check all devices
-        for (auto i_device = devices.begin(); i_device != devices.end();
+        for (auto&& i_device = devices.begin(); i_device != devices.end();
                 ++i_device)
         {
             bool found = false;
             // Check class ids
-            for (auto classID = hwdID->classIDs.begin();
+            for (auto&& classID = hwdID->classIDs.begin();
                     classID != hwdID->classIDs.end(); ++classID)
             {
                 if (*classID == "*" || *classID == (*i_device)->classID_)
@@ -144,7 +144,7 @@ void Data::getAllDevicesOfConfig(const std::vector<std::shared_ptr<Device>>& dev
                 // Check blacklisted class ids
                 found = false;
 
-                for (auto blacklistedClassID =
+                for (auto&& blacklistedClassID =
                         (*hwdID).blacklistedClassIDs.begin();
                         blacklistedClassID != (*hwdID).blacklistedClassIDs.end();
                         ++blacklistedClassID)
@@ -165,7 +165,7 @@ void Data::getAllDevicesOfConfig(const std::vector<std::shared_ptr<Device>>& dev
                     // Check vendor ids
                     found = false;
 
-                    for (auto vendorID = hwdID->vendorIDs.begin();
+                    for (auto&& vendorID = hwdID->vendorIDs.begin();
                             vendorID != hwdID->vendorIDs.end(); ++vendorID)
                     {
                         if (*vendorID == "*" || *vendorID == (*i_device)->vendorID_)
@@ -184,7 +184,7 @@ void Data::getAllDevicesOfConfig(const std::vector<std::shared_ptr<Device>>& dev
                         // Check blacklisted vendor ids
                         found = false;
 
-                        for (auto blacklistedVendorID =
+                        for (auto&& blacklistedVendorID =
                                 hwdID->blacklistedVendorIDs.begin();
                                 blacklistedVendorID != hwdID->blacklistedVendorIDs.end();
                                 ++blacklistedVendorID)
@@ -205,7 +205,7 @@ void Data::getAllDevicesOfConfig(const std::vector<std::shared_ptr<Device>>& dev
                             // Check device ids
                             found = false;
 
-                            for (auto deviceID = hwdID->deviceIDs.begin();
+                            for (auto&& deviceID = hwdID->deviceIDs.begin();
                                     deviceID != hwdID->deviceIDs.end(); ++deviceID)
                             {
                                 if (*deviceID == "*" || *deviceID == (*i_device)->deviceID_)
@@ -224,7 +224,7 @@ void Data::getAllDevicesOfConfig(const std::vector<std::shared_ptr<Device>>& dev
                                 // Check blacklisted device ids
                                 found = false;
 
-                                for (auto blacklistedDeviceID =
+                                for (auto&& blacklistedDeviceID =
                                         hwdID->blacklistedDeviceIDs.begin();
                                         blacklistedDeviceID != hwdID->blacklistedDeviceIDs.end();
                                         ++blacklistedDeviceID)
@@ -286,7 +286,7 @@ void Data::getAllDependenciesToInstall(std::shared_ptr<Config> config,
         std::vector<std::shared_ptr<Config>>& installedConfigs,
         std::vector<std::shared_ptr<Config>> *dependencies)
 {
-    for (auto configDependency = config->dependencies_.begin();
+    for (auto&& configDependency = config->dependencies_.begin();
             configDependency != config->dependencies_.end(); configDependency++)
     {
         auto found = std::find_if(installedConfigs.begin(), installedConfigs.end(),
@@ -344,7 +344,7 @@ std::shared_ptr<Config> Data::getDatabaseConfig(const std::string configName,
         allConfigs = allPCIConfigs;
     }
 
-    for (auto config = allConfigs.begin(); config != allConfigs.end();
+    for (auto&& config = allConfigs.begin(); config != allConfigs.end();
             config++)
     {
         if (configName == (*config)->name_)
@@ -374,14 +374,14 @@ std::vector<std::shared_ptr<Config>> Data::getAllLocalConflicts(std::shared_ptr<
 
     dependencies.push_back(std::shared_ptr<Config>{config});
 
-    for (auto dependency = dependencies.begin();
+    for (auto&& dependency = dependencies.begin();
             dependency != dependencies.end(); dependency++)
     {
-        for (auto dependencyConflict =
+        for (auto&& dependencyConflict =
                 (*dependency)->conflicts_.begin();
                 dependencyConflict != (*dependency)->conflicts_.end(); dependencyConflict++)
         {
-            for (auto installedConfig = installedConfigs.begin();
+            for (auto&& installedConfig = installedConfigs.begin();
                     installedConfig != installedConfigs.end(); installedConfig++)
             {
                 if ((*dependencyConflict) != (*installedConfig)->name_)
@@ -392,7 +392,7 @@ std::vector<std::shared_ptr<Config>> Data::getAllLocalConflicts(std::shared_ptr<
                 {
                     // Check if already in vector
                     bool found = false;
-                    for (auto conflict = conflicts.begin();
+                    for (auto&& conflict = conflicts.begin();
                             conflict != conflicts.end(); conflict++)
                     {
                         if ((*conflict)->name_ == (*dependencyConflict))
@@ -435,10 +435,10 @@ std::vector<std::shared_ptr<Config>> Data::getAllLocalRequirements(std::shared_p
     }
 
     // Check if this config is required by another installed config
-    for (auto installedConfig = installedConfigs.begin();
+    for (auto&& installedConfig = installedConfigs.begin();
             installedConfig != installedConfigs.end(); installedConfig++)
     {
-        for (auto dependency = (*installedConfig)->dependencies_.begin();
+        for (auto&& dependency = (*installedConfig)->dependencies_.begin();
                 dependency != (*installedConfig)->dependencies_.end(); dependency++)
         {
             if ((*dependency) != config->name_)
@@ -449,7 +449,7 @@ std::vector<std::shared_ptr<Config>> Data::getAllLocalRequirements(std::shared_p
             {
                 // Check if already in vector
                 bool found = false;
-                for (auto requirement = requirements.begin();
+                for (auto&& requirement = requirements.begin();
                         requirement != requirements.end(); requirement++)
                 {
                     if ((*requirement)->name_ == (*installedConfig)->name_)
@@ -531,7 +531,7 @@ void Data::fillAllConfigs(std::string type)
         configPaths = getRecursiveDirectoryFileList(MHWD_PCI_CONFIG_DIR, MHWD_CONFIG_NAME);
     }
 
-    for (auto configPath = configPaths.begin();
+    for (auto&& configPath = configPaths.begin();
             configPath != configPaths.end(); ++configPath)
     {
         Config *config = new Config((*configPath), type);
@@ -598,7 +598,7 @@ std::vector<std::string> Data::getRecursiveDirectoryFileList(const std::string d
                     std::vector<std::string> templist = getRecursiveDirectoryFileList(filepath,
                             onlyFilename);
 
-                    for (auto iterator = templist.begin();
+                    for (auto&& iterator = templist.begin();
                             iterator != templist.end(); iterator++)
                     {
                         list.push_back((*iterator));
@@ -628,7 +628,7 @@ std::vector<std::string> Data::splitValue(Vita::string str, Vita::string onlyEnd
     std::vector<Vita::string> work = str.toLower().explode(" ");
     std::vector<std::string> final;
 
-    for (auto iterator = work.begin(); iterator != work.end();
+    for (auto&& iterator = work.begin(); iterator != work.end();
             iterator++)
     {
         if (*iterator != "" && onlyEnding.empty())
@@ -648,13 +648,13 @@ std::vector<std::string> Data::splitValue(Vita::string str, Vita::string onlyEnd
 void Data::updateConfigData()
 {
     // Clear config vectors in each device element
-    for (auto PCIDevice = PCIDevices.begin();
+    for (auto&& PCIDevice = PCIDevices.begin();
             PCIDevice != PCIDevices.end(); PCIDevice++)
     {
         (*PCIDevice)->availableConfigs_.clear();
     }
 
-    for (auto USBDevice = USBDevices.begin();
+    for (auto&& USBDevice = USBDevices.begin();
             USBDevice != USBDevices.end(); USBDevice++)
     {
         (*USBDevice)->availableConfigs_.clear();
@@ -677,7 +677,7 @@ void Data::setMatchingConfigs(const std::vector<std::shared_ptr<Device>>& device
         std::vector<std::shared_ptr<Config>>& configs,
         bool setAsInstalled)
 {
-    for (auto config = configs.begin(); config != configs.end();
+    for (auto&& config = configs.begin(); config != configs.end();
             ++config)
     {
         setMatchingConfig((*config), devices, setAsInstalled);
@@ -692,7 +692,7 @@ void Data::setMatchingConfig(std::shared_ptr<Config> config, const std::vector<s
     getAllDevicesOfConfig(devices, config, foundDevices);
 
     // Set config to all matching devices
-    for (auto foundDevice = foundDevices.begin();
+    for (auto&& foundDevice = foundDevices.begin();
             foundDevice != foundDevices.end(); ++foundDevice)
     {
         if (setAsInstalled)
@@ -708,7 +708,7 @@ void Data::setMatchingConfig(std::shared_ptr<Config> config, const std::vector<s
 
 void Data::addConfigSorted(std::vector<std::shared_ptr<Config>>& configs, std::shared_ptr<Config> config)
 {
-    for (auto iterator = configs.begin();
+    for (auto&& iterator = configs.begin();
             iterator != configs.end(); iterator++)
     {
         if (config->name_ == (*iterator)->name_)
@@ -717,7 +717,7 @@ void Data::addConfigSorted(std::vector<std::shared_ptr<Config>>& configs, std::s
         }
     }
 
-    for (auto iterator = configs.begin(); iterator != configs.end();
+    for (auto&& iterator = configs.begin(); iterator != configs.end();
             iterator++)
     {
         if (config->priority_ > (*iterator)->priority_)

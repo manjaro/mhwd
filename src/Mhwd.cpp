@@ -52,7 +52,7 @@ bool Mhwd::performTransaction(std::shared_ptr<Config> config, MHWD::TRANSACTIONT
         {
             std::string conflicts;
 
-            for (auto conflictedConfig : transaction.conflictedConfigs_)
+            for (auto&& conflictedConfig : transaction.conflictedConfigs_)
             {
                 conflicts += " " + conflictedConfig->name_;
             }
@@ -67,7 +67,7 @@ bool Mhwd::performTransaction(std::shared_ptr<Config> config, MHWD::TRANSACTIONT
         {
             std::string dependencies;
 
-            for (auto dependencyConfig : transaction.dependencyConfigs_)
+            for (auto&& dependencyConfig : transaction.dependencyConfigs_)
             {
                 dependencies += " " + dependencyConfig->name_;
             }
@@ -99,7 +99,7 @@ bool Mhwd::performTransaction(std::shared_ptr<Config> config, MHWD::TRANSACTIONT
         {
             std::string requirements;
 
-            for (auto requirement : transaction.configsRequirements_)
+            for (auto&& requirement : transaction.configsRequirements_)
             {
                 requirements += " " + requirement->name_;
             }
@@ -228,7 +228,7 @@ std::shared_ptr<Config> Mhwd::getInstalledConfig(const std::string& configName,
         installedConfigs = &data_.installedPCIConfigs;
     }
 
-    for (auto installedConfig = installedConfigs->begin();
+    for (auto&& installedConfig = installedConfigs->begin();
             installedConfig != installedConfigs->end(); installedConfig++)
     {
         if (configName == (*installedConfig)->name_)
@@ -255,7 +255,7 @@ std::shared_ptr<Config> Mhwd::getDatabaseConfig(const std::string& configName,
         allConfigs = &data_.allPCIConfigs;
     }
 
-    for (auto iterator = allConfigs->begin();
+    for (auto&& iterator = allConfigs->begin();
             iterator != allConfigs->end(); iterator++)
     {
         if (configName == (*iterator)->name_)
@@ -282,7 +282,7 @@ std::shared_ptr<Config> Mhwd::getAvailableConfig(const std::string& configName,
         devices = &data_.PCIDevices;
     }
 
-    for (auto device = devices->begin(); device != devices->end();
+    for (auto&& device = devices->begin(); device != devices->end();
             device++)
     {
         if ((*device)->availableConfigs_.empty())
@@ -291,7 +291,7 @@ std::shared_ptr<Config> Mhwd::getAvailableConfig(const std::string& configName,
         }
         else
         {
-            for (auto availableConfig = (*device)->availableConfigs_.begin();
+            for (auto&& availableConfig = (*device)->availableConfigs_.begin();
                     availableConfig != (*device)->availableConfigs_.end(); availableConfig++)
             {
                 if (configName == (*availableConfig)->name_)
@@ -356,7 +356,7 @@ MHWD::STATUS Mhwd::performTransaction(Transaction *transaction)
             else
             {
                 // Install all dependencies first
-                for (auto dependencyConfig = transaction->dependencyConfigs_.end() - 1;
+                for (auto&& dependencyConfig = transaction->dependencyConfigs_.end() - 1;
                         dependencyConfig != transaction->dependencyConfigs_.begin() - 1;
                         --dependencyConfig)
                 {
@@ -650,13 +650,13 @@ bool Mhwd::runScript(std::shared_ptr<Config> config, MHWD::TRANSACTIONTYPE opera
     std::vector<std::shared_ptr<Device>> devices;
     data_.getAllDevicesOfConfig(config, foundDevices);
 
-    for (auto iterator = foundDevices.begin();
+    for (auto&& iterator = foundDevices.begin();
             iterator != foundDevices.end(); iterator++)
     {
         bool found = false;
 
         // Check if already in list
-        for (auto dev = devices.begin(); dev != devices.end(); dev++)
+        for (auto&& dev = devices.begin(); dev != devices.end(); dev++)
         {
             if ((*iterator)->sysfsBusID_ == (*dev)->sysfsBusID_
                     && (*iterator)->sysfsID_ == (*dev)->sysfsID_)
@@ -672,7 +672,7 @@ bool Mhwd::runScript(std::shared_ptr<Config> config, MHWD::TRANSACTIONTYPE opera
         }
     }
 
-    for (auto dev = devices.begin(); dev != devices.end(); dev++)
+    for (auto&& dev = devices.begin(); dev != devices.end(); dev++)
     {
         Vita::string busID = (*dev)->sysfsBusID_;
 
@@ -950,7 +950,7 @@ int Mhwd::launch(int argc, char *argv[])
                 name = Vita::string(argv[nArg]).toLower();
             }
 
-            for (auto config : configs)
+            for (auto&& config : configs)
             {
                 if (config == name)
                 {
@@ -1009,7 +1009,7 @@ int Mhwd::launch(int argc, char *argv[])
     }
 
     // Check for invalid configs
-    for (auto invalidConfig : data_.invalidConfigs)
+    for (auto&& invalidConfig : data_.invalidConfigs)
     {
         printer_.printWarning("config '" + invalidConfig->configPath_ + "' is invalid!");
     }
@@ -1061,7 +1061,7 @@ int Mhwd::launch(int argc, char *argv[])
         }
         else
         {
-            for (auto PCIDevice : data_.PCIDevices)
+            for (auto&& PCIDevice : data_.PCIDevices)
             {
                 printer_.listConfigs(PCIDevice->availableConfigs_,
                         PCIDevice->sysfsBusID_ + " (" + PCIDevice->classID_ + ":"
@@ -1080,7 +1080,7 @@ int Mhwd::launch(int argc, char *argv[])
 
         else
         {
-            for (auto device : data_.USBDevices)
+            for (auto&& device : data_.USBDevices)
             {
                 printer_.listConfigs(device->availableConfigs_,
                         device->sysfsBusID_ + " (" + device->classID_ + ":" + device->vendorID_ + ":"
@@ -1132,7 +1132,7 @@ int Mhwd::launch(int argc, char *argv[])
             installedConfigs = &data_.installedPCIConfigs;
         }
 
-        for (auto device : *devices)
+        for (auto&& device : *devices)
         {
             if (device->classID_ != autoConfigureClassID)
             {
@@ -1143,7 +1143,7 @@ int Mhwd::launch(int argc, char *argv[])
                 founddevice = true;
                 std::shared_ptr<Config> config;
 
-                for (auto availableConfig : device->availableConfigs_)
+                for (auto&& availableConfig : device->availableConfigs_)
                 {
                     if (!autoConfigureNonFreeDriver && !(availableConfig->freedriver_))
                     {
@@ -1169,7 +1169,7 @@ int Mhwd::launch(int argc, char *argv[])
                 {
                     // Check if already in list
                     bool found = false;
-                    for (auto iter = configs.begin();
+                    for (auto&& iter = configs.begin();
                             iter != configs.end(); iter++)
                     {
                         if ((*iter) == config->name_)
@@ -1183,7 +1183,7 @@ int Mhwd::launch(int argc, char *argv[])
                     bool skip = false;
                     if (!(arguments_ & MHWD::ARGUMENTS::FORCE))
                     {
-                        for (auto iter = installedConfigs->begin();
+                        for (auto&& iter = installedConfigs->begin();
                                 iter != installedConfigs->end(); iter++)
                         {
                             if ((*iter)->name_ == config->name_)
@@ -1237,7 +1237,7 @@ int Mhwd::launch(int argc, char *argv[])
     {
         if (isUserRoot())
         {
-            for (auto configName = configs.begin();
+            for (auto&& configName = configs.begin();
                     configName != configs.end(); configName++)
             {
                 if (arguments_ & MHWD::ARGUMENTS::CUSTOMINSTALL)
