@@ -241,24 +241,14 @@ void Printer::printConfigDetails(const Config& config) const
         conflicts += conflict + " ";
     }
 
-    if (dependencies.empty())
-    {
-        dependencies = "-";
-    }
-
-    if (conflicts.empty())
-    {
-        conflicts = "-";
-    }
-
     std::cout << "   NAME:\t" << config.name_
             << "\n   ATTACHED:\t" << config.type_
             << "\n   VERSION:\t" << config.version_
             << "\n   INFO:\t" << (config.info_.empty() ? "-" : config.info_)
             << "\n   PRIORITY:\t" << config.priority_
             << "\n   FREEDRIVER:\t" << std::boolalpha << config.freedriver_
-            << "\n   DEPENDS:\t" << dependencies
-            << "\n   CONFLICTS:\t" << conflicts
+            << "\n   DEPENDS:\t" << (dependencies.empty() ? "-" : dependencies)
+            << "\n   CONFLICTS:\t" << (conflicts.empty() ? "-" : conflicts)
             << "\n   CLASSIDS:\t" << classids
             << "\n   VENDORIDS:\t" << vendorids << std::endl;
 }
