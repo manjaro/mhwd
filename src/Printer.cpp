@@ -216,12 +216,8 @@ void Printer::printInstalledConfigs(const std::string& deviceType,
 
 void Printer::printConfigDetails(const Config& config) const
 {
-    std::string dependencies;
-    std::string conflicts;
-    std::string info;
     std::string classids;
     std::string vendorids;
-
     for (auto&& hwd : config.hwdIDs_)
     {
         for (auto&& vendorID : hwd.vendorIDs)
@@ -234,12 +230,12 @@ void Printer::printConfigDetails(const Config& config) const
             classids += classID + " ";
         }
     }
-
+    std::string dependencies;
     for (auto&& dependency : config.dependencies_)
     {
         dependencies += dependency + " ";
     }
-
+    std::string conflicts;
     for (auto&& conflict : config.conflicts_)
     {
         conflicts += conflict + " ";
@@ -255,16 +251,10 @@ void Printer::printConfigDetails(const Config& config) const
         conflicts = "-";
     }
 
-    info = config.info_;
-    if (info.empty())
-    {
-        info = "-";
-    }
-
     std::cout << "   NAME:\t" << config.name_
             << "\n   ATTACHED:\t" << config.type_
             << "\n   VERSION:\t" << config.version_
-            << "\n   INFO:\t" << info
+            << "\n   INFO:\t" << (config.info_.empty() ? "-" : config.info_)
             << "\n   PRIORITY:\t" << config.priority_
             << "\n   FREEDRIVER:\t" << std::boolalpha << config.freedriver_
             << "\n   DEPENDS:\t" << dependencies
