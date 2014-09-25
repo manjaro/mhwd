@@ -1147,7 +1147,6 @@ int Mhwd::launch(int argc, char *argv[])
     // Auto configuration
     if (arguments_ & MHWD::ARGUMENTS::AUTOCONFIGURE)
     {
-        bool founddevice = false;
         std::vector<std::shared_ptr<Device>> *devices;
         std::vector<std::shared_ptr<Config>> *installedConfigs;
 
@@ -1161,7 +1160,7 @@ int Mhwd::launch(int argc, char *argv[])
             devices = &data_.PCIDevices;
             installedConfigs = &data_.installedPCIConfigs;
         }
-
+        bool foundDevice = false;
         for (auto&& device : *devices)
         {
             if (device->classID_ != autoConfigureClassID)
@@ -1170,16 +1169,12 @@ int Mhwd::launch(int argc, char *argv[])
             }
             else
             {
-                founddevice = true;
+                foundDevice = true;
                 std::shared_ptr<Config> config;
 
                 for (auto&& availableConfig : device->availableConfigs_)
                 {
-                    if (!autoConfigureNonFreeDriver && !(availableConfig->freedriver_))
-                    {
-                        continue;
-                    }
-                    else
+                    if (autoConfigureNonFreeDriver || availableConfig->freedriver_)
                     {
                         config = availableConfig;
                         break;
@@ -1252,7 +1247,7 @@ int Mhwd::launch(int argc, char *argv[])
             }
         }
 
-        if (!founddevice)
+        if (!foundDevice)
         {
             printer_.printWarning("No device of class " + autoConfigureClassID + " found!");
         }
