@@ -25,7 +25,7 @@ public:
     void printHelp() const;
     void listDevices(const std::vector<std::shared_ptr<Device>>& devices, std::string typeOfDevice) const;
     void listConfigs(const std::vector<std::shared_ptr<Config>>& configs,
-            std::string beg, std::string empty = "") const;
+            std::string header) const;
     void printAvailableConfigs(const std::string& deviceType,
             const std::vector<std::shared_ptr<Device>>& devices) const;
     void printInstalledConfigs(const std::string& deviceType,

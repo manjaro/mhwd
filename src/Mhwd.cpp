@@ -1017,11 +1017,25 @@ int Mhwd::launch(int argc, char *argv[])
     // List all configs
     if ((arguments_ & MHWD::ARGUMENTS::LISTALL) && (arguments_ & MHWD::ARGUMENTS::SHOWPCI))
     {
-        printer_.listConfigs(data_.allPCIConfigs, "All PCI configs:", "No PCI configs found!");
+        if (!data_.allPCIConfigs.empty())
+        {
+            printer_.listConfigs(data_.allPCIConfigs, "All PCI configs:");
+        }
+        else
+        {
+            printer_.printWarning("No PCI configs found!");
+        }
     }
     if ((arguments_ & MHWD::ARGUMENTS::LISTALL) && (arguments_ & MHWD::ARGUMENTS::SHOWUSB))
     {
-        printer_.listConfigs(data_.allUSBConfigs, "All USB configs:", "No USB configs found!");
+        if (!data_.allUSBConfigs.empty())
+        {
+            printer_.listConfigs(data_.allUSBConfigs, "All USB configs:");
+        }
+        else
+        {
+            printer_.printWarning("No USB configs found!");
+        }
     }
 
     // List installed configs
@@ -1033,8 +1047,14 @@ int Mhwd::launch(int argc, char *argv[])
         }
         else
         {
-            printer_.listConfigs(data_.installedPCIConfigs, "Installed PCI configs:",
-                    "No installed PCI configs!");
+            if (!data_.installedPCIConfigs.empty())
+            {
+                printer_.listConfigs(data_.installedPCIConfigs, "Installed PCI configs:");
+            }
+            else
+            {
+                printer_.printWarning("No installed PCI configs!");
+            }
         }
     }
     if ((arguments_ & MHWD::ARGUMENTS::LISTINSTALLED) && (arguments_ & MHWD::ARGUMENTS::SHOWUSB))
@@ -1045,8 +1065,14 @@ int Mhwd::launch(int argc, char *argv[])
         }
         else
         {
-            printer_.listConfigs(data_.installedUSBConfigs, "Installed USB configs:",
-                    "No installed USB configs!");
+            if (data_.installedUSBConfigs.empty())
+            {
+                printer_.listConfigs(data_.installedUSBConfigs, "Installed USB configs:");
+            }
+            else
+            {
+                printer_.printWarning("No installed USB configs!");
+            }
         }
     }
 
@@ -1061,10 +1087,13 @@ int Mhwd::launch(int argc, char *argv[])
         {
             for (auto&& PCIDevice : data_.PCIDevices)
             {
-                printer_.listConfigs(PCIDevice->availableConfigs_,
-                        PCIDevice->sysfsBusID_ + " (" + PCIDevice->classID_ + ":"
-                                + PCIDevice->vendorID_ + ":" + PCIDevice->deviceID_ + ") "
-                                + PCIDevice->className_ + " " + PCIDevice->vendorName_ + ":");
+                if (!PCIDevice->availableConfigs_.empty())
+                {
+                    printer_.listConfigs(PCIDevice->availableConfigs_,
+                            PCIDevice->sysfsBusID_ + " (" + PCIDevice->classID_ + ":"
+                                    + PCIDevice->vendorID_ + ":" + PCIDevice->deviceID_ + ") "
+                                    + PCIDevice->className_ + " " + PCIDevice->vendorName_ + ":");
+                }
             }
         }
     }
@@ -1080,10 +1109,13 @@ int Mhwd::launch(int argc, char *argv[])
         {
             for (auto&& device : data_.USBDevices)
             {
-                printer_.listConfigs(device->availableConfigs_,
-                        device->sysfsBusID_ + " (" + device->classID_ + ":" + device->vendorID_ + ":"
-                                + device->deviceID_ + ") " + device->className_ + " "
-                                + device->vendorName_ + ":");
+                if (!device->availableConfigs_.empty())
+                {
+                    printer_.listConfigs(device->availableConfigs_,
+                            device->sysfsBusID_ + " (" + device->classID_ + ":" + device->vendorID_ + ":"
+                                    + device->deviceID_ + ") " + device->className_ + " "
+                                    + device->vendorName_ + ":");
+                }
             }
         }
     }

@@ -117,34 +117,23 @@ void Printer::listDevices(const std::vector<std::shared_ptr<Device>>& devices, s
     }
 }
 
-void Printer::listConfigs(const std::vector<std::shared_ptr<Config>>& configs, std::string beg,
-        std::string empty) const
+void Printer::listConfigs(const std::vector<std::shared_ptr<Config>>& configs, std::string header) const
 {
-    if (configs.empty())
+    printStatus(header);
+    printLine();
+    std::cout << std::setw(22) << "NAME"
+            << std::setw(22) << "VERSION"
+            << std::setw(20) << "FREEDRIVER"
+            << std::setw(15) << "TYPE" << std::endl;
+    printLine();
+    for (auto&& config : configs)
     {
-        if (!empty.empty())
-        {
-            printWarning(empty);
-        }
+        std::cout << std::setw(22) << config->name_
+                << std::setw(22) << config->version_
+                << std::setw(20) << std::boolalpha << config->freedriver_
+                << std::setw(15) << config->type_ << std::endl;
     }
-    else
-    {
-        printStatus(beg);
-        printLine();
-        std::cout << std::setw(22) << "NAME"
-                << std::setw(22) << "VERSION"
-                << std::setw(20) << "FREEDRIVER"
-                << std::setw(15) << "TYPE" << std::endl;
-        printLine();
-        for (auto&& config : configs)
-        {
-            std::cout << std::setw(22) << config->name_
-                    << std::setw(22) << config->version_
-                    << std::setw(20) << std::boolalpha << config->freedriver_
-                    << std::setw(15) << config->type_ << std::endl;
-        }
-        std::cout << std::endl << std::endl;
-    }
+    std::cout << std::endl << std::endl;
 }
 
 void Printer::printAvailableConfigs(const std::string& deviceType,
