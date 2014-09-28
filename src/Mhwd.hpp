@@ -55,8 +55,6 @@ private:
 
     MHWD::STATUS performTransaction(Transaction *transaction);
 
-    int hexToInt(std::string hex);
-
     bool copyDirectory(const std::string source, const std::string destination);
     bool copyFile(const std::string source, const std::string destination, const mode_t mode =
             S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IROTH);

@@ -388,11 +388,6 @@ MHWD::STATUS Mhwd::performTransaction(Transaction *transaction)
     }
 }
 
-int Mhwd::hexToInt(std::string hex)
-{
-    return std::stoi(hex, nullptr, 16);
-}
-
 bool Mhwd::copyDirectory(const std::string source, const std::string destination)
 {
     struct stat filestatus;
@@ -682,9 +677,9 @@ bool Mhwd::runScript(std::shared_ptr<Config> config, MHWD::TRANSACTIONTYPE opera
             if (size >= 3)
             {
                 // Convert to int to remove leading 0
-                busID = Vita::string::toStr<int>(hexToInt(split[size - 3]));
-                busID += ":" + Vita::string::toStr<int>(hexToInt(split[size - 2]));
-                busID += ":" + Vita::string::toStr<int>(hexToInt(split[size - 1]));
+                busID = Vita::string::toStr<int>(std::stoi(split[size - 3], nullptr, 16));
+                busID += ":" + Vita::string::toStr<int>(std::stoi(split[size - 2], nullptr, 16));
+                busID += ":" + Vita::string::toStr<int>(std::stoi(split[size - 1], nullptr, 16));
             }
         }
 
