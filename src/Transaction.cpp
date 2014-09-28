@@ -8,12 +8,12 @@
 #include "Transaction.hpp"
 
 Transaction::Transaction(Data data, std::shared_ptr<Config> config, MHWD::TRANSACTIONTYPE type,
-        bool allowReinstallation = false)
+        bool allowReinstallation)
         :  config_(config), type_(type),
            dependencyConfigs_(data.getAllDependenciesToInstall(config)),
            conflictedConfigs_(data.getAllLocalConflicts(config)),
            configsRequirements_(data.getAllLocalRequirements(config)),
-           data_(data), allowedToReinstall_(allowReinstallation)
+           allowedToReinstall_(allowReinstallation)
 {
 }
 

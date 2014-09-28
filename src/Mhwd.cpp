@@ -34,15 +34,8 @@ Mhwd::~Mhwd()
 
 bool Mhwd::performTransaction(std::shared_ptr<Config> config, MHWD::TRANSACTIONTYPE type)
 {
-//  Transaction transaction (data_, config, type,
-//          (arguments_ & MHWD::ARGUMENTS::FORCE));
-    Transaction transaction;
-    transaction.config_ = config;
-    transaction.allowedToReinstall_ = (arguments_ & MHWD::ARGUMENTS::FORCE);
-    transaction.type_ = type;
-    transaction.dependencyConfigs_ = data_.getAllDependenciesToInstall(config);
-    transaction.conflictedConfigs_ = data_.getAllLocalConflicts(config);
-    transaction.configsRequirements_ = data_.getAllLocalRequirements(config);
+    Transaction transaction (data_, config, type,
+            (arguments_ & MHWD::ARGUMENTS::FORCE));
 
     // Print things to do
     if (type == MHWD::TRANSACTIONTYPE::INSTALL)
@@ -191,7 +184,6 @@ std::string Mhwd::checkEnvironment()
 void Mhwd::printDeviceDetails(std::string type, FILE *f)
 {
     hw_item hw;
-
     if (type == "USB")
     {
         hw = hw_usb;

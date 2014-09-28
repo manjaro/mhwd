@@ -27,8 +27,7 @@ public:
     std::vector<std::shared_ptr<Config>> conflictedConfigs_;
     std::vector<std::shared_ptr<Config>> configsRequirements_;
 
-    Data data_;
-    bool allowedToReinstall_;
+    bool allowedToReinstall_ = false;
 };
 
 #endif /* TRANSACTION_HPP_ */
