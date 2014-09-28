@@ -36,6 +36,11 @@ public:
     int launch(int argc, char *argv[]);
 
 private:
+    MHWD::ARGUMENTS arguments_;
+    std::shared_ptr<Config> config_;
+    Data data_;
+    Printer printer_;
+
     bool performTransaction(std::shared_ptr<Config> config, MHWD::TRANSACTIONTYPE type);
     bool isUserRoot() const;
     std::string checkEnvironment();
@@ -48,12 +53,8 @@ private:
 
     std::vector<Config*> getAllLocalRequirements(Config *config);
 
-    MHWD::ARGUMENTS arguments_;
-    std::shared_ptr<Config> config_;
-    Data data_;
-    Printer printer_;
-
-    MHWD::STATUS performTransaction(Transaction *transaction);
+    MHWD::STATUS performTransaction(const Transaction& transaction);
+    bool proceedWithInstall() const;
 
     bool copyDirectory(const std::string source, const std::string destination);
     bool copyFile(const std::string source, const std::string destination, const mode_t mode =

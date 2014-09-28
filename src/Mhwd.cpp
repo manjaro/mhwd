@@ -74,22 +74,7 @@ bool Mhwd::performTransaction(std::shared_ptr<Config> config, MHWD::TRANSACTIONT
 
             printer_.printStatus("Dependencies to install:" + dependencies +
                     "\nProceed with installation? [Y/n]");
-
-            std::string input;
-            std::getline(std::cin, input);
-
-            if (input.length() == 1 && (input[0] == 'y' || input[0] == 'Y'))
-            {
-                return true;
-            }
-            else if (input.length() == 0)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return proceedWithInstall();
         }
     }
     else if (type == MHWD::TRANSACTIONTYPE::REMOVE)
@@ -110,7 +95,7 @@ bool Mhwd::performTransaction(std::shared_ptr<Config> config, MHWD::TRANSACTIONT
         }
     }
 
-    MHWD::STATUS status = performTransaction(&transaction);
+    MHWD::STATUS status = performTransaction(transaction);
 
     if (status == MHWD::STATUS::ERROR_ALREADY_INSTALLED)
     {
@@ -147,6 +132,25 @@ bool Mhwd::performTransaction(std::shared_ptr<Config> config, MHWD::TRANSACTIONT
     data_.updateInstalledConfigData();
 
     return (status == MHWD::STATUS::SUCCESS);
+}
+
+bool Mhwd::proceedWithInstall() const
+{
+    std::string input;
+    std::getline(std::cin, input);
+
+    if (input.length() == 1 && (input[0] == 'y' || input[0] == 'Y'))
+    {
+        return true;
+    }
+    else if (input.length() == 0)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 bool Mhwd::isUserRoot() const
@@ -303,15 +307,15 @@ std::shared_ptr<Config> Mhwd::getAvailableConfig(const std::string& configName,
     return nullptr;
 }
 
-MHWD::STATUS Mhwd::performTransaction(Transaction *transaction)
+MHWD::STATUS Mhwd::performTransaction(const Transaction& transaction)
 {
-    if ((transaction->type_ == MHWD::TRANSACTIONTYPE::INSTALL) &&
-            !transaction->conflictedConfigs_.empty())
+    if ((transaction.type_ == MHWD::TRANSACTIONTYPE::INSTALL) &&
+            !transaction.conflictedConfigs_.empty())
     {
         return MHWD::STATUS::ERROR_CONFLICTS;
     }
-    else if ((transaction->type_ == MHWD::TRANSACTIONTYPE::REMOVE)
-            && !transaction->configsRequirements_.empty())
+    else if ((transaction.type_ == MHWD::TRANSACTIONTYPE::REMOVE)
+            && !transaction.configsRequirements_.empty())
     {
         return MHWD::STATUS::ERROR_REQUIREMENTS;
     }
@@ -319,12 +323,12 @@ MHWD::STATUS Mhwd::performTransaction(Transaction *transaction)
     {
 
         // Check if already installed
-        std::shared_ptr<Config> installedConfig{getInstalledConfig(transaction->config_->name_,
-                transaction->config_->type_)};
+        std::shared_ptr<Config> installedConfig{getInstalledConfig(transaction.config_->name_,
+                transaction.config_->type_)};
         MHWD::STATUS status = MHWD::STATUS::SUCCESS;
 
-        if ((transaction->type_ == MHWD::TRANSACTIONTYPE::REMOVE)
-                || (installedConfig != nullptr && transaction->isAllowedToReinstall()))
+        if ((transaction.type_ == MHWD::TRANSACTIONTYPE::REMOVE)
+                || (installedConfig != nullptr && transaction.isAllowedToReinstall()))
         {
             if (installedConfig == nullptr)
             {
@@ -344,18 +348,18 @@ MHWD::STATUS Mhwd::performTransaction(Transaction *transaction)
             }
         }
 
-        if (transaction->type_ == MHWD::TRANSACTIONTYPE::INSTALL)
+        if (transaction.type_ == MHWD::TRANSACTIONTYPE::INSTALL)
         {
             // Check if already installed but not allowed to reinstall
-            if ((installedConfig != nullptr) && !transaction->isAllowedToReinstall())
+            if ((installedConfig != nullptr) && !transaction.isAllowedToReinstall())
             {
                 return MHWD::STATUS::ERROR_ALREADY_INSTALLED;
             }
             else
             {
                 // Install all dependencies first
-                for (auto&& dependencyConfig = transaction->dependencyConfigs_.end() - 1;
-                        dependencyConfig != transaction->dependencyConfigs_.begin() - 1;
+                for (auto&& dependencyConfig = transaction.dependencyConfigs_.end() - 1;
+                        dependencyConfig != transaction.dependencyConfigs_.begin() - 1;
                         --dependencyConfig)
                 {
                     printer_.printMessage(MHWD::MESSAGETYPE::INSTALLDEPENDENCY_START,
@@ -371,15 +375,15 @@ MHWD::STATUS Mhwd::performTransaction(Transaction *transaction)
                     }
                 }
 
-                printer_.printMessage(MHWD::MESSAGETYPE::INSTALL_START, transaction->config_->name_);
-                if ((status = installConfig(transaction->config_)) != MHWD::STATUS::SUCCESS)
+                printer_.printMessage(MHWD::MESSAGETYPE::INSTALL_START, transaction.config_->name_);
+                if ((status = installConfig(transaction.config_)) != MHWD::STATUS::SUCCESS)
                 {
                     return status;
                 }
                 else
                 {
                     printer_.printMessage(MHWD::MESSAGETYPE::INSTALL_END,
-                            transaction->config_->name_);
+                            transaction.config_->name_);
                 }
             }
         }
