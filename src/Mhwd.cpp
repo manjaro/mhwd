@@ -193,18 +193,17 @@ void Mhwd::printDeviceDetails(std::string type, FILE *f)
         hw = hw_pci;
     }
 
-    hd_data_t *hd_data = new hd_data_t();
-    hd_t *hd = hd_list(hd_data, hw, 1, nullptr);
+    std::unique_ptr<hd_data_t> hd_data{new hd_data_t()};
+    hd_t *hd = hd_list(hd_data.get(), hw, 1, nullptr);
     hd_t *beginningOfhd = hd;
 
     for (; hd; hd = hd->next)
     {
-        hd_dump_entry(hd_data, hd, f);
+        hd_dump_entry(hd_data.get(), hd, f);
     }
 
     hd_free_hd_list(beginningOfhd);
-    hd_free_hd_data(hd_data);
-    delete hd_data;
+    hd_free_hd_data(hd_data.get());
 }
 
 std::shared_ptr<Config> Mhwd::getInstalledConfig(const std::string& configName,
@@ -295,7 +294,6 @@ std::shared_ptr<Config> Mhwd::getAvailableConfig(const std::string& configName,
             }
         }
     }
-
     return nullptr;
 }
 
@@ -313,7 +311,6 @@ MHWD::STATUS Mhwd::performTransaction(const Transaction& transaction)
     }
     else
     {
-
         // Check if already installed
         std::shared_ptr<Config> installedConfig{getInstalledConfig(transaction.config_->name_,
                 transaction.config_->type_)};
@@ -379,7 +376,6 @@ MHWD::STATUS Mhwd::performTransaction(const Transaction& transaction)
                 }
             }
         }
-
         return status;
     }
 }
@@ -411,8 +407,6 @@ bool Mhwd::copyDirectory(const std::string source, const std::string destination
             return false;
         }
     }
-
-    bool success = true;
     struct dirent *dir;
     DIR *d = opendir(source.c_str());
 
@@ -422,6 +416,7 @@ bool Mhwd::copyDirectory(const std::string source, const std::string destination
     }
     else
     {
+        bool success = true;
         while ((dir = readdir(d)) != nullptr)
         {
             std::string filename = std::string(dir->d_name);
@@ -453,8 +448,8 @@ bool Mhwd::copyDirectory(const std::string source, const std::string destination
             }
         }
         closedir(d);
+        return success;
     }
-    return success;
 }
 
 bool Mhwd::copyFile(const std::string source, const std::string destination, const mode_t mode)
@@ -552,8 +547,6 @@ bool Mhwd::createDir(const std::string path, const mode_t mode)
 MHWD::STATUS Mhwd::installConfig(std::shared_ptr<Config> config)
 {
     std::string databaseDir;
-
-    // Get the right configs
     if (config->type_ == "USB")
     {
         databaseDir = MHWD_USB_DATABASE_DIR;
@@ -563,7 +556,6 @@ MHWD::STATUS Mhwd::installConfig(std::shared_ptr<Config> config)
         databaseDir = MHWD_PCI_DATABASE_DIR;
     }
 
-    // Run script
     if (!runScript(config, MHWD::TRANSACTIONTYPE::INSTALL))
     {
         return MHWD::STATUS::ERROR_SCRIPT_FAILED;
@@ -581,7 +573,7 @@ MHWD::STATUS Mhwd::installConfig(std::shared_ptr<Config> config)
 
 MHWD::STATUS Mhwd::uninstallConfig(Config *config)
 {
-    std::shared_ptr<Config> installedConfig = getInstalledConfig(config->name_, config->type_);
+    std::shared_ptr<Config> installedConfig{getInstalledConfig(config->name_, config->type_)};
 
     // Check if installed
     if (installedConfig == nullptr)
@@ -592,23 +584,25 @@ MHWD::STATUS Mhwd::uninstallConfig(Config *config)
     {
         return MHWD::STATUS::ERROR_NO_MATCH_LOCAL_CONFIG;
     }
-
-    // TODO: Should we check for local requirements here?
-
-    // Run script
-    if (!runScript(installedConfig, MHWD::TRANSACTIONTYPE::REMOVE))
+    else
     {
-        return MHWD::STATUS::ERROR_SCRIPT_FAILED;
+        // TODO: Should we check for local requirements here?
+
+        // Run script
+        if (!runScript(installedConfig, MHWD::TRANSACTIONTYPE::REMOVE))
+        {
+            return MHWD::STATUS::ERROR_SCRIPT_FAILED;
+        }
+
+        if (!removeDirectory(installedConfig->basePath_))
+        {
+            return MHWD::STATUS::ERROR_SET_DATABASE;
+        }
+
+        // Installed config vectors have to be updated manual with updateInstalledConfigData(Data*)
+
+        return MHWD::STATUS::SUCCESS;
     }
-
-    if (!removeDirectory(installedConfig->basePath_))
-    {
-        return MHWD::STATUS::ERROR_SET_DATABASE;
-    }
-
-    // Installed config vectors have to be updated manual with updateInstalledConfigData(Data*)
-
-    return MHWD::STATUS::SUCCESS;
 }
 
 bool Mhwd::runScript(std::shared_ptr<Config> config, MHWD::TRANSACTIONTYPE operationType)
@@ -1272,17 +1266,19 @@ int Mhwd::launch(int argc, char *argv[])
                         printer_.printError("custom config '" + filepath + "' is invalid!");
                         return 1;
                     }
-
-                    config_ .reset(new Config(filepath, operationType));
-                    if (!data_.fillConfig(config_, filepath, operationType))
+                    else
                     {
-                        printer_.printError("failed to read custom config '" + filepath + "'!");
-                        return 1;
-                    }
+                        config_ .reset(new Config(filepath, operationType));
+                        if (!data_.fillConfig(config_, filepath, operationType))
+                        {
+                            printer_.printError("failed to read custom config '" + filepath + "'!");
+                            return 1;
+                        }
 
-                    else if (!performTransaction(config_, MHWD::TRANSACTIONTYPE::INSTALL))
-                    {
-                        return 1;
+                        else if (!performTransaction(config_, MHWD::TRANSACTIONTYPE::INSTALL))
+                        {
+                            return 1;
+                        }
                     }
                 }
                 else if (arguments_ & MHWD::ARGUMENTS::INSTALL)
