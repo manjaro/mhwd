@@ -1050,7 +1050,7 @@ int Mhwd::launch(int argc, char *argv[])
         }
         else
         {
-            if (data_.installedUSBConfigs.empty())
+            if (!data_.installedUSBConfigs.empty())
             {
                 printer_.listConfigs(data_.installedUSBConfigs, "Installed USB configs:");
             }
