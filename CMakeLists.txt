@@ -7,7 +7,7 @@ set(CMAKE_INSTALL_PREFIX "/usr/")
 set(CMAKE_C_COMPILER clang)
 set(CMAKE_CXX_COMPILER clang++)
 
-add_definitions(-std=c++11 -O0 -g -Wall -Wextra -Wunreachable-code -Werror)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O2 -Wall -Wextra -Wunreachable-code -Werror")
 
 add_subdirectory(libmhwd)
 add_subdirectory(src)
