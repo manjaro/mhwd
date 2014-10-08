@@ -662,7 +662,7 @@ bool Mhwd::runScript(std::shared_ptr<Config> config, MHWD::TRANSACTIONTYPE opera
         if (config->type_ == "PCI")
         {
             std::vector<Vita::string> split = Vita::string(busID).replace(".", ":").explode(":");
-            const int size = split.size();
+            const unsigned int size = split.size();
 
             if (size >= 3)
             {
