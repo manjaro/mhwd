@@ -7,6 +7,10 @@ set(CMAKE_INSTALL_PREFIX "/usr/")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O2 -Wall -Wextra -Werror")
 
+if("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wunreachable-code")
+endif()
+
 add_subdirectory(libmhwd)
 add_subdirectory(src)
 add_subdirectory(scripts)
