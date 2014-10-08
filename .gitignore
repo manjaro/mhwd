@@ -9,3 +9,4 @@ Makefile
 *.o
 *settings
 *project
+bin/*
