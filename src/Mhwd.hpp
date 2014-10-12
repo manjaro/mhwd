@@ -54,7 +54,7 @@ private:
     std::vector<Config*> getAllLocalRequirements(Config *config);
 
     MHWD::STATUS performTransaction(const Transaction& transaction);
-    bool proceedWithInstall() const;
+    bool proceedWithInstallation() const;
 
     bool copyDirectory(const std::string source, const std::string destination);
     bool copyFile(const std::string source, const std::string destination, const mode_t mode =

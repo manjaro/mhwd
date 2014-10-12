@@ -67,7 +67,7 @@ bool Mhwd::performTransaction(std::shared_ptr<Config> config, MHWD::TRANSACTIONT
 
             printer_.printStatus("Dependencies to install:" + dependencies +
                     "\nProceed with installation? [Y/n]");
-            return proceedWithInstall();
+            return proceedWithInstallation();
         }
     }
     else if (type == MHWD::TRANSACTIONTYPE::REMOVE)
@@ -127,7 +127,7 @@ bool Mhwd::performTransaction(std::shared_ptr<Config> config, MHWD::TRANSACTIONT
     return (status == MHWD::STATUS::SUCCESS);
 }
 
-bool Mhwd::proceedWithInstall() const
+bool Mhwd::proceedWithInstallation() const
 {
     std::string input;
     std::getline(std::cin, input);
@@ -419,9 +419,9 @@ bool Mhwd::copyDirectory(const std::string source, const std::string destination
         bool success = true;
         while ((dir = readdir(d)) != nullptr)
         {
-            std::string filename = std::string(dir->d_name);
-            std::string sourcepath = source + "/" + filename;
-            std::string destinationpath = destination + "/" + filename;
+            std::string filename {dir->d_name};
+            std::string sourcepath {source + "/" + filename};
+            std::string destinationpath {destination + "/" + filename};
 
             if (filename == "." || filename == ".." || filename == "")
             {
