@@ -420,8 +420,8 @@ bool Mhwd::copyDirectory(const std::string source, const std::string destination
         while ((dir = readdir(d)) != nullptr)
         {
             std::string filename {dir->d_name};
-            std::string sourcepath {source + "/" + filename};
-            std::string destinationpath {destination + "/" + filename};
+            std::string sourcePath {source + "/" + filename};
+            std::string destinationPath {destination + "/" + filename};
 
             if (filename == "." || filename == ".." || filename == "")
             {
@@ -429,18 +429,18 @@ bool Mhwd::copyDirectory(const std::string source, const std::string destination
             }
             else
             {
-                lstat(sourcepath.c_str(), &filestatus);
+                lstat(sourcePath.c_str(), &filestatus);
 
                 if (S_ISREG(filestatus.st_mode))
                 {
-                    if (!copyFile(sourcepath, destinationpath))
+                    if (!copyFile(sourcePath, destinationPath))
                     {
                         success = false;
                     }
                 }
                 else if (S_ISDIR(filestatus.st_mode))
                 {
-                    if (!copyDirectory(sourcepath, destinationpath))
+                    if (!copyDirectory(sourcePath, destinationPath))
                     {
                         success = false;
                     }
@@ -541,7 +541,8 @@ bool Mhwd::createDir(const std::string path, const mode_t mode)
     int ret = mkdir(path.c_str(), mode);
     umask(process_mask);
 
-    return (ret == 0);
+    constexpr unsigned short SUCCESS = 0;
+    return (ret == SUCCESS);
 }
 
 MHWD::STATUS Mhwd::installConfig(std::shared_ptr<Config> config)
