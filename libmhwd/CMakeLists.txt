@@ -1,4 +1,4 @@
-include_directories(. vita)
+include_directories(. vita ${mhwd_SOURCE_DIR}/src)
 
 ###
 ### mhwd library

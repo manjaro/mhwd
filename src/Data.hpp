@@ -18,8 +18,8 @@
 
 #include "Config.hpp"
 #include "Device.hpp"
-#include "../libmhwd/const.h"
-#include "../libmhwd/vita/string.hpp"
+#include "const.h"
+#include "vita/string.hpp"
 
 class Data {
 public:

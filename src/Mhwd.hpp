@@ -20,7 +20,7 @@
 #include <vector>
 
 #include "Config.hpp"
-#include "../libmhwd/const.h"
+#include "const.h"
 #include "Data.hpp"
 #include "Device.hpp"
 #include "Enums.hpp"

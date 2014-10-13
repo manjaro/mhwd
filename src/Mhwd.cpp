@@ -1067,7 +1067,7 @@ int Mhwd::launch(int argc, char *argv[])
     {
         if (arguments_ & MHWD::ARGUMENTS::DETAIL)
         {
-            printer_.printAvailableConfigs("PCI", data_.PCIDevices);
+            printer_.printAvailableConfigsInDetail("PCI", data_.PCIDevices);
         }
         else
         {
@@ -1088,19 +1088,19 @@ int Mhwd::launch(int argc, char *argv[])
     {
         if (arguments_ & MHWD::ARGUMENTS::DETAIL)
         {
-            printer_.printAvailableConfigs("USB", data_.USBDevices);
+            printer_.printAvailableConfigsInDetail("USB", data_.USBDevices);
         }
 
         else
         {
-            for (auto&& device : data_.USBDevices)
+            for (auto&& USBdevice : data_.USBDevices)
             {
-                if (!device->availableConfigs_.empty())
+                if (!USBdevice->availableConfigs_.empty())
                 {
-                    printer_.listConfigs(device->availableConfigs_,
-                            device->sysfsBusID_ + " (" + device->classID_ + ":" + device->vendorID_ + ":"
-                                    + device->deviceID_ + ") " + device->className_ + " "
-                                    + device->vendorName_ + ":");
+                    printer_.listConfigs(USBdevice->availableConfigs_,
+                            USBdevice->sysfsBusID_ + " (" + USBdevice->classID_ + ":" + USBdevice->vendorID_ + ":"
+                                    + USBdevice->deviceID_ + ") " + USBdevice->className_ + " "
+                                    + USBdevice->vendorName_ + ":");
                 }
             }
         }

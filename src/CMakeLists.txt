@@ -1,4 +1,4 @@
-include_directories(. ../libmhwd ../libmhwd/vita)
+include_directories(. ${mhwd_SOURCE_DIR}/libmhwd)
 
 ###
 ### mhwd binary

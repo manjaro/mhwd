@@ -12,7 +12,7 @@
 #include <vector>
 
 #include "Enums.hpp"
-#include "../libmhwd/vita/string.hpp"
+#include "vita/string.hpp"
 
 struct Config
 {

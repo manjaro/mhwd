@@ -17,7 +17,7 @@
 class Transaction
 {
 public:
-    Transaction() {}
+    Transaction() = delete;
     Transaction(Data data, std::shared_ptr<Config> config, MHWD::TRANSACTIONTYPE type, bool allowReinstallation);
 
     bool isAllowedToReinstall() const;

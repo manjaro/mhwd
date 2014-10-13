@@ -136,7 +136,7 @@ void Printer::listConfigs(const std::vector<std::shared_ptr<Config>>& configs, s
     std::cout << std::endl << std::endl;
 }
 
-void Printer::printAvailableConfigs(const std::string& deviceType,
+void Printer::printAvailableConfigsInDetail(const std::string& deviceType,
         const std::vector<std::shared_ptr<Device>>& devices) const
 {
     bool configFound = false;
