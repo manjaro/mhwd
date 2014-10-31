@@ -26,13 +26,6 @@ Data::Data()
 
 Data::~Data()
 {
-    PCIDevices.clear();
-    USBDevices.clear();
-    installedPCIConfigs.clear();
-    installedUSBConfigs.clear();
-    allUSBConfigs.clear();
-    allPCIConfigs.clear();
-    invalidConfigs.clear();
 }
 
 void Data::updateInstalledConfigData()
