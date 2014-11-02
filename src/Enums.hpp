@@ -11,22 +11,6 @@
 namespace MHWD
 {
 
-struct Arguments
-{
-    bool SHOWPCI = false;
-    bool SHOWUSB = false;
-    bool INSTALL = false;
-    bool REMOVE = false;
-    bool DETAIL = false;
-    bool FORCE = false;
-    bool LISTALL = false;
-    bool LISTINSTALLED = false;
-    bool LISTAVAILABLE = false;
-    bool LISTHARDWARE = false;
-    bool CUSTOMINSTALL = false;
-    bool AUTOCONFIGURE = false;
-};
-
 enum class STATUS
 {
     SUCCESS,

@@ -36,7 +36,21 @@ public:
     int launch(int argc, char *argv[]);
 
 private:
-    MHWD::Arguments arguments_;
+    struct Arguments
+    {
+        bool SHOWPCI = false;
+        bool SHOWUSB = false;
+        bool INSTALL = false;
+        bool REMOVE = false;
+        bool DETAIL = false;
+        bool FORCE = false;
+        bool LISTALL = false;
+        bool LISTINSTALLED = false;
+        bool LISTAVAILABLE = false;
+        bool LISTHARDWARE = false;
+        bool CUSTOMINSTALL = false;
+        bool AUTOCONFIGURE = false;
+    } arguments_;
     std::shared_ptr<Config> config_;
     Data data_;
     Printer printer_;
