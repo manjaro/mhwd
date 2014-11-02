@@ -24,7 +24,7 @@
 #include "Mhwd.hpp"
 #include "vita/string.hpp"
 
-Mhwd::Mhwd() : arguments_(MHWD::ARGUMENTS::NONE), data_(), printer_()
+Mhwd::Mhwd() : arguments_(), data_(), printer_()
 {
 }
 
@@ -35,7 +35,7 @@ Mhwd::~Mhwd()
 bool Mhwd::performTransaction(std::shared_ptr<Config> config, MHWD::TRANSACTIONTYPE type)
 {
     Transaction transaction (data_, config, type,
-            (arguments_ & MHWD::ARGUMENTS::FORCE));
+            arguments_.FORCE);
 
     // Print things to do
     if (type == MHWD::TRANSACTIONTYPE::INSTALL)
@@ -721,11 +721,7 @@ int Mhwd::launch(int argc, char *argv[])
 
     if (argc <= 1)
     {
-        arguments_ = MHWD::ARGUMENTS::LISTAVAILABLE;
-    }
-    else
-    {
-        arguments_ = MHWD::ARGUMENTS::NONE;
+        arguments_.LISTAVAILABLE = true;
     }
 
     // Get command line arguments_
@@ -740,35 +736,35 @@ int Mhwd::launch(int argc, char *argv[])
         }
         else if (option == "-f" || option == "--force")
         {
-            arguments_ = static_cast<MHWD::ARGUMENTS>(arguments_ | MHWD::ARGUMENTS::FORCE);
+            arguments_.FORCE = true;
         }
         else if (option == "-d" || option == "--detail")
         {
-            arguments_ = static_cast<MHWD::ARGUMENTS>(arguments_ | MHWD::ARGUMENTS::DETAIL);
+            arguments_.DETAIL = true;
         }
         else if (option == "-la" || option == "--listall")
         {
-            arguments_ = static_cast<MHWD::ARGUMENTS>(arguments_ | MHWD::ARGUMENTS::LISTALL);
+            arguments_.LISTALL = true;
         }
         else if (option == "-li" || option == "--listinstalled")
         {
-            arguments_ = static_cast<MHWD::ARGUMENTS>(arguments_ | MHWD::ARGUMENTS::LISTINSTALLED);
+            arguments_.LISTINSTALLED = true;
         }
         else if (option == "-l" || option == "--list")
         {
-            arguments_ = static_cast<MHWD::ARGUMENTS>(arguments_ | MHWD::ARGUMENTS::LISTAVAILABLE);
+            arguments_.LISTAVAILABLE = true;
         }
         else if (option == "-lh" || option == "--listhardware")
         {
-            arguments_ = static_cast<MHWD::ARGUMENTS>(arguments_ | MHWD::ARGUMENTS::LISTHARDWARE);
+            arguments_.LISTHARDWARE = true;
         }
         else if (option == "--pci")
         {
-            arguments_ = static_cast<MHWD::ARGUMENTS>(arguments_ | MHWD::ARGUMENTS::SHOWPCI);
+            arguments_.SHOWPCI = true;
         }
         else if (option == "--usb")
         {
-            arguments_ = static_cast<MHWD::ARGUMENTS>(arguments_ | MHWD::ARGUMENTS::SHOWUSB);
+            arguments_.SHOWUSB = true;
         }
         else if (option == "-a" || option == "--auto")
         {
@@ -804,8 +800,7 @@ int Mhwd::launch(int argc, char *argv[])
                 }
 
                 autoConfigureClassID = Vita::string(argv[++nArg]).toLower().trim();
-                arguments_ = static_cast<MHWD::ARGUMENTS>(arguments_ |
-                        MHWD::ARGUMENTS::AUTOCONFIGURE);
+                arguments_.AUTOCONFIGURE = true;
             }
         }
         else if (strcmp(argv[nArg], "-ic") == 0 || strcmp(argv[nArg], "--installcustom") == 0)
@@ -829,8 +824,7 @@ int Mhwd::launch(int argc, char *argv[])
                     operationType = "PCI";
                 }
 
-                arguments_ = static_cast<MHWD::ARGUMENTS>(arguments_ | MHWD::ARGUMENTS::INSTALL
-                        | MHWD::ARGUMENTS::CUSTOMINSTALL);
+                arguments_.CUSTOMINSTALL = true;
             }
         }
         else if (strcmp(argv[nArg], "-i") == 0 || strcmp(argv[nArg], "--install") == 0)
@@ -854,7 +848,7 @@ int Mhwd::launch(int argc, char *argv[])
                     operationType = "PCI";
                 }
 
-                arguments_ = static_cast<MHWD::ARGUMENTS>(arguments_ | MHWD::ARGUMENTS::INSTALL);
+                arguments_.INSTALL = true;
             }
         }
         else if (strcmp(argv[nArg], "-r") == 0 || strcmp(argv[nArg], "--remove") == 0)
@@ -877,7 +871,7 @@ int Mhwd::launch(int argc, char *argv[])
                     operationType = "PCI";
                 }
 
-                arguments_ = static_cast<MHWD::ARGUMENTS>(arguments_ | MHWD::ARGUMENTS::REMOVE);
+                arguments_.REMOVE = true;
             }
         }
         else if (strcmp(argv[nArg], "--pmcachedir") == 0)
@@ -919,13 +913,12 @@ int Mhwd::launch(int argc, char *argv[])
                 data_.environment.PMRootPath = Vita::string(argv[++nArg]).trim("\"").trim();
             }
         }
-        else if (((arguments_ & MHWD::ARGUMENTS::INSTALL))
-                || (arguments_ & MHWD::ARGUMENTS::REMOVE))
+        else if (arguments_.INSTALL || arguments_.REMOVE)
         {
             bool found = false;
             std::string name;
 
-            if (arguments_ & MHWD::ARGUMENTS::CUSTOMINSTALL)
+            if (arguments_.CUSTOMINSTALL)
             {
                 name = std::string{argv[nArg]};
             }
@@ -957,31 +950,28 @@ int Mhwd::launch(int argc, char *argv[])
     }
 
     // Check if arguments_ are right
-    if (((arguments_ & MHWD::ARGUMENTS::INSTALL)) && (arguments_ & MHWD::ARGUMENTS::REMOVE))
+    if (arguments_.INSTALL && arguments_.REMOVE)
     {
-        printer_.printError("install and remove options can be used only seperate!\n");
+        printer_.printError("install and remove options can only be used separately!\n");
         printer_.printHelp();
         return 1;
     }
-    else if ((((arguments_ & MHWD::ARGUMENTS::INSTALL)) || (arguments_ & MHWD::ARGUMENTS::REMOVE))
-            && (arguments_ & MHWD::ARGUMENTS::AUTOCONFIGURE))
+    else if ((arguments_.INSTALL || arguments_.REMOVE) && arguments_.AUTOCONFIGURE)
     {
         printer_.printError("auto option can't be combined with install and remove options!\n");
         printer_.printHelp();
         return 1;
     }
-    else if (((arguments_ & MHWD::ARGUMENTS::REMOVE) || (arguments_ & MHWD::ARGUMENTS::INSTALL))
-            && configs.empty())
+    else if ((arguments_.REMOVE || arguments_.INSTALL) && configs.empty())
     {
         printer_.printError("nothing to do?!\n");
         printer_.printHelp();
         return 1;
     }
-    else if (!((arguments_ & MHWD::ARGUMENTS::SHOWPCI)) &&
-            !((arguments_ & MHWD::ARGUMENTS::SHOWUSB)))
+    else if (!arguments_.SHOWPCI && !arguments_ .SHOWUSB)
     {
-        arguments_ = static_cast<MHWD::ARGUMENTS>(arguments_ | MHWD::ARGUMENTS::SHOWUSB
-                | MHWD::ARGUMENTS::SHOWPCI);
+        arguments_.SHOWUSB = true;
+        arguments_.SHOWPCI = true;
     }
 
     // Check environment
@@ -1001,7 +991,7 @@ int Mhwd::launch(int argc, char *argv[])
     // > Perform operations:
 
     // List all configs
-    if ((arguments_ & MHWD::ARGUMENTS::LISTALL) && (arguments_ & MHWD::ARGUMENTS::SHOWPCI))
+    if (arguments_.LISTALL && arguments_.SHOWPCI)
     {
         if (!data_.allPCIConfigs.empty())
         {
@@ -1012,7 +1002,7 @@ int Mhwd::launch(int argc, char *argv[])
             printer_.printWarning("No PCI configs found!");
         }
     }
-    if ((arguments_ & MHWD::ARGUMENTS::LISTALL) && (arguments_ & MHWD::ARGUMENTS::SHOWUSB))
+    if (arguments_.LISTALL && arguments_.SHOWUSB)
     {
         if (!data_.allUSBConfigs.empty())
         {
@@ -1025,9 +1015,9 @@ int Mhwd::launch(int argc, char *argv[])
     }
 
     // List installed configs
-    if ((arguments_ & MHWD::ARGUMENTS::LISTINSTALLED) && (arguments_ & MHWD::ARGUMENTS::SHOWPCI))
+    if (arguments_.LISTINSTALLED && arguments_.SHOWPCI)
     {
-        if (arguments_ & MHWD::ARGUMENTS::DETAIL)
+        if (arguments_.DETAIL)
         {
             printer_.printInstalledConfigs("PCI", data_.installedPCIConfigs);
         }
@@ -1043,9 +1033,9 @@ int Mhwd::launch(int argc, char *argv[])
             }
         }
     }
-    if ((arguments_ & MHWD::ARGUMENTS::LISTINSTALLED) && (arguments_ & MHWD::ARGUMENTS::SHOWUSB))
+    if (arguments_.LISTINSTALLED && arguments_.SHOWUSB)
     {
-        if (arguments_ & MHWD::ARGUMENTS::DETAIL)
+        if (arguments_.DETAIL)
         {
             printer_.printInstalledConfigs("USB", data_.installedUSBConfigs);
         }
@@ -1063,9 +1053,9 @@ int Mhwd::launch(int argc, char *argv[])
     }
 
     // List available configs
-    if ((arguments_ & MHWD::ARGUMENTS::LISTAVAILABLE) && ((arguments_ & MHWD::ARGUMENTS::SHOWPCI)))
+    if (arguments_.LISTAVAILABLE && arguments_.SHOWPCI)
     {
-        if (arguments_ & MHWD::ARGUMENTS::DETAIL)
+        if (arguments_.DETAIL)
         {
             printer_.printAvailableConfigsInDetail("PCI", data_.PCIDevices);
         }
@@ -1084,9 +1074,9 @@ int Mhwd::launch(int argc, char *argv[])
         }
     }
 
-    if ((arguments_ & MHWD::ARGUMENTS::LISTAVAILABLE) && (arguments_ & MHWD::ARGUMENTS::SHOWUSB))
+    if (arguments_.LISTAVAILABLE && arguments_.SHOWUSB)
     {
-        if (arguments_ & MHWD::ARGUMENTS::DETAIL)
+        if (arguments_.DETAIL)
         {
             printer_.printAvailableConfigsInDetail("USB", data_.USBDevices);
         }
@@ -1107,9 +1097,9 @@ int Mhwd::launch(int argc, char *argv[])
     }
 
     // List hardware information
-    if ((arguments_ & MHWD::ARGUMENTS::LISTHARDWARE) && (arguments_ & MHWD::ARGUMENTS::SHOWPCI))
+    if (arguments_.LISTHARDWARE && arguments_.SHOWPCI)
     {
-        if (arguments_ & MHWD::ARGUMENTS::DETAIL)
+        if (arguments_.DETAIL)
         {
             printDeviceDetails("PCI");
         }
@@ -1118,9 +1108,9 @@ int Mhwd::launch(int argc, char *argv[])
             printer_.listDevices(data_.PCIDevices, "PCI");
         }
     }
-    if ((arguments_ & MHWD::ARGUMENTS::LISTHARDWARE) && (arguments_ & MHWD::ARGUMENTS::SHOWUSB))
+    if (arguments_.LISTHARDWARE && arguments_.SHOWUSB)
     {
-        if (arguments_ & MHWD::ARGUMENTS::DETAIL)
+        if (arguments_.DETAIL)
         {
             printDeviceDetails("USB");
         }
@@ -1131,7 +1121,7 @@ int Mhwd::launch(int argc, char *argv[])
     }
 
     // Auto configuration
-    if (arguments_ & MHWD::ARGUMENTS::AUTOCONFIGURE)
+    if (arguments_.AUTOCONFIGURE)
     {
         std::vector<std::shared_ptr<Device>> *devices;
         std::vector<std::shared_ptr<Config>> *installedConfigs;
@@ -1192,7 +1182,7 @@ int Mhwd::launch(int argc, char *argv[])
 
                     // If force is not set then skip found config
                     bool skip = false;
-                    if (!(arguments_ & MHWD::ARGUMENTS::FORCE))
+                    if (!(arguments_.FORCE))
                     {
                         for (auto&& iter = installedConfigs->begin();
                                 iter != installedConfigs->end(); iter++)
@@ -1239,19 +1229,19 @@ int Mhwd::launch(int argc, char *argv[])
         }
         else if (!configs.empty())
         {
-            arguments_ = static_cast<MHWD::ARGUMENTS>(arguments_ | MHWD::ARGUMENTS::INSTALL);
+            arguments_.INSTALL = true;
         }
     }
 
     // Transaction
-    if ((arguments_ & MHWD::ARGUMENTS::INSTALL) || (arguments_ & MHWD::ARGUMENTS::REMOVE))
+    if (arguments_.INSTALL || arguments_.REMOVE)
     {
         if (isUserRoot())
         {
             for (auto&& configName = configs.begin();
                     configName != configs.end(); configName++)
             {
-                if (arguments_ & MHWD::ARGUMENTS::CUSTOMINSTALL)
+                if (arguments_.CUSTOMINSTALL)
                 {
                     // Custom install -> get configs
                     struct stat filestatus;
@@ -1282,7 +1272,7 @@ int Mhwd::launch(int argc, char *argv[])
                         }
                     }
                 }
-                else if (arguments_ & MHWD::ARGUMENTS::INSTALL)
+                else if (arguments_.INSTALL)
                 {
                     config_ = getAvailableConfig((*configName), operationType);
                     if (config_ == nullptr)
@@ -1305,7 +1295,7 @@ int Mhwd::launch(int argc, char *argv[])
                         return 1;
                     }
                 }
-                else if (arguments_ & MHWD::ARGUMENTS::REMOVE)
+                else if (arguments_.REMOVE)
                 {
                     config_ = getInstalledConfig((*configName), operationType);
 

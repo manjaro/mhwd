@@ -10,21 +10,21 @@
 
 namespace MHWD
 {
-enum ARGUMENTS
+
+struct Arguments
 {
-    NONE = 0x0000,
-    SHOWPCI = 0x0001,
-    SHOWUSB = 0x0002,
-    INSTALL = 0x004,
-    REMOVE = 0x0008,
-    DETAIL = 0x0010,
-    FORCE = 0x0020,
-    LISTALL = 0x0040,
-    LISTINSTALLED = 0x0080,
-    LISTAVAILABLE = 0x0100,
-    LISTHARDWARE = 0x0200,
-    CUSTOMINSTALL = 0x0400,
-    AUTOCONFIGURE = 0x0800
+    bool SHOWPCI = false;
+    bool SHOWUSB = false;
+    bool INSTALL = false;
+    bool REMOVE = false;
+    bool DETAIL = false;
+    bool FORCE = false;
+    bool LISTALL = false;
+    bool LISTINSTALLED = false;
+    bool LISTAVAILABLE = false;
+    bool LISTHARDWARE = false;
+    bool CUSTOMINSTALL = false;
+    bool AUTOCONFIGURE = false;
 };
 
 enum class STATUS

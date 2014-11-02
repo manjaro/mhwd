@@ -36,7 +36,7 @@ public:
     int launch(int argc, char *argv[]);
 
 private:
-    MHWD::ARGUMENTS arguments_;
+    MHWD::Arguments arguments_;
     std::shared_ptr<Config> config_;
     Data data_;
     Printer printer_;
