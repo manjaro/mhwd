@@ -66,7 +66,7 @@ private:
     void setMatchingConfig(std::shared_ptr<Config> config, const std::vector<std::shared_ptr<Device>>& devices,
             bool setAsInstalled);
     void addConfigSorted(std::vector<std::shared_ptr<Config>>& configs, std::shared_ptr<Config> config);
-    std::vector<std::string> getRecursiveDirectoryFileList(const std::string directoryPath,
+    std::vector<std::string> getRecursiveDirectoryFileList(const std::string& directoryPath,
             std::string onlyFilename = "");
 
     Vita::string getRightConfigPath(Vita::string str, Vita::string baseConfigPath);

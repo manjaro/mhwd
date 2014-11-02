@@ -56,10 +56,9 @@ bool Config::readConfigFile(std::string configPath)
         value = parts.back().trim("\"").trim();
 
         // Read in extern file
-        if (value.size() > 1 && value.substr(0, 1) == ">")
+        if ((value.size() > 1) && (">" == value.substr(0, 1)))
         {
-            std::ifstream file(getRightConfigPath(value.substr(1), basePath_).c_str(),
-                    std::ios::in);
+            std::ifstream file(getRightConfigPath(value.substr(1), basePath_).c_str());
             if (!file.is_open())
             {
                 return false;
@@ -70,10 +69,10 @@ bool Config::readConfigFile(std::string configPath)
 
             while (!file.eof())
             {
-                getline(file, line);
+                std::getline(file, line);
 
-                size_t pos = line.find_first_of('#');
-                if (pos != std::string::npos)
+                std::size_t pos = line.find_first_of('#');
+                if (std::string::npos != pos)
                 {
                     line.erase(pos);
                 }
@@ -219,12 +218,12 @@ std::vector<std::string> Config::splitValue(Vita::string str, Vita::string onlyE
     for (auto&& iterator = work.begin(); iterator != work.end();
             iterator++)
     {
-        if (*iterator != "" && onlyEnding.empty())
+        if (("" != *iterator) && onlyEnding.empty())
         {
             final.push_back(*iterator);
         }
-        else if (*iterator != "" && Vita::string(*iterator).explode(".").back() == onlyEnding
-                && (*iterator).size() > 5)
+        else if (("" != *iterator) && (Vita::string(*iterator).explode(".").back() == onlyEnding)
+                && ((*iterator).size() > 5))
         {
             final.push_back(Vita::string(*iterator).substr(0, (*iterator).size() - 5));
         }
@@ -237,7 +236,7 @@ Vita::string Config::getRightConfigPath(Vita::string str, Vita::string baseConfi
 {
     str = str.trim();
 
-    if (str.size() <= 0 || str.substr(0, 1) == "/")
+    if ((str.size() <= 0) || ("/" == str.substr(0, 1)))
     {
         return str;
     }

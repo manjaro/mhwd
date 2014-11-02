@@ -59,7 +59,7 @@ void Data::fillInstalledConfigs(std::string type)
     std::vector<std::string> configPaths;
     std::vector<std::shared_ptr<Config>>* configs;
 
-    if (type == "USB")
+    if ("USB" == type)
     {
         configs = &installedUSBConfigs;
         configPaths = getRecursiveDirectoryFileList(MHWD_USB_DATABASE_DIR, MHWD_CONFIG_NAME);
@@ -90,7 +90,7 @@ void Data::getAllDevicesOfConfig(std::shared_ptr<Config> config, std::vector<std
 {
     std::vector<std::shared_ptr<Device>> devices;
 
-    if (config->type_ == "USB")
+    if ("USB" == config->type_)
     {
         devices = USBDevices;
     }
@@ -161,7 +161,7 @@ void Data::getAllDevicesOfConfig(const std::vector<std::shared_ptr<Device>>& dev
                     for (auto&& vendorID = hwdID->vendorIDs.begin();
                             vendorID != hwdID->vendorIDs.end(); ++vendorID)
                     {
-                        if (*vendorID == "*" || *vendorID == (*i_device)->vendorID_)
+                        if (("*" == *vendorID) || (*vendorID == (*i_device)->vendorID_))
                         {
                             found = true;
                             break;
@@ -201,7 +201,7 @@ void Data::getAllDevicesOfConfig(const std::vector<std::shared_ptr<Device>>& dev
                             for (auto&& deviceID = hwdID->deviceIDs.begin();
                                     deviceID != hwdID->deviceIDs.end(); ++deviceID)
                             {
-                                if (*deviceID == "*" || *deviceID == (*i_device)->deviceID_)
+                                if (("*" == *deviceID) || (*deviceID == (*i_device)->deviceID_))
                                 {
                                     found = true;
                                     break;
@@ -260,7 +260,7 @@ std::vector<std::shared_ptr<Config>> Data::getAllDependenciesToInstall(
     std::vector<std::shared_ptr<Config>> installedConfigs;
 
     // Get the right configs
-    if (config->type_ == "USB")
+    if ("USB" == config->type_)
     {
         installedConfigs = installedUSBConfigs;
     }
@@ -307,8 +307,9 @@ void Data::getAllDependenciesToInstall(std::shared_ptr<Config> config,
             else
             {
                 // Add to vector and check for further subdepends...
-                std::shared_ptr<Config> dependconfig = getDatabaseConfig((*configDependency), config->type_);
-                if (dependconfig == nullptr)
+                std::shared_ptr<Config> dependconfig {
+                	getDatabaseConfig((*configDependency), config->type_)};
+                if (nullptr == dependconfig)
                 {
                     continue;
                 }
@@ -328,7 +329,7 @@ std::shared_ptr<Config> Data::getDatabaseConfig(const std::string configName,
     std::vector<std::shared_ptr<Config>> allConfigs;
 
     // Get the right configs
-    if (configType == "USB")
+    if ("USB" == configType)
     {
         allConfigs = allUSBConfigs;
     }
@@ -356,7 +357,7 @@ std::vector<std::shared_ptr<Config>> Data::getAllLocalConflicts(std::shared_ptr<
     std::vector<std::shared_ptr<Config>> installedConfigs;
 
     // Get the right configs
-    if (config->type_ == "USB")
+    if ("USB" == config->type_)
     {
         installedConfigs = installedUSBConfigs;
     }
@@ -418,7 +419,7 @@ std::vector<std::shared_ptr<Config>> Data::getAllLocalRequirements(std::shared_p
     std::vector<std::shared_ptr<Config>> installedConfigs;
 
     // Get the right configs
-    if (config->type_ == "USB")
+    if ("USB" == config->type_)
     {
         installedConfigs = installedUSBConfigs;
     }
@@ -469,7 +470,7 @@ void Data::fillDevices(std::string type)
     hw_item hw;
     std::vector<std::shared_ptr<Device>>* devices;
 
-    if (type == "USB")
+    if ("USB" == type)
     {
         hw = hw_usb;
         devices = &USBDevices;
@@ -511,7 +512,7 @@ void Data::fillAllConfigs(std::string type)
     std::vector<std::string> configPaths;
     std::vector<std::shared_ptr<Config>>* configs;
 
-    if (type == "USB")
+    if ("USB" == type)
     {
         configs = &allUSBConfigs;
         configPaths = getRecursiveDirectoryFileList(MHWD_USB_CONFIG_DIR, MHWD_CONFIG_NAME);
@@ -556,7 +557,7 @@ bool Data::fillConfig(std::shared_ptr<Config> config, std::string configPath, st
     return config->readConfigFile(config->configPath_);
 }
 
-std::vector<std::string> Data::getRecursiveDirectoryFileList(const std::string directoryPath,
+std::vector<std::string> Data::getRecursiveDirectoryFileList(const std::string& directoryPath,
         std::string onlyFilename)
 {
     std::vector<std::string> list;
@@ -565,12 +566,12 @@ std::vector<std::string> Data::getRecursiveDirectoryFileList(const std::string d
 
     if (d)
     {
-        while ((dir = readdir(d)) != nullptr)
+        while (nullptr != (dir = readdir(d)))
         {
-            std::string filename = std::string(dir->d_name);
+            std::string filename = dir->d_name;
             std::string filepath = directoryPath + "/" + filename;
 
-            if (filename == "." || filename == ".." || filename == "")
+            if (("." == filename) || (".." == filename) || ("" == filename))
             {
                 continue;
             }
@@ -622,12 +623,12 @@ std::vector<std::string> Data::splitValue(Vita::string str, Vita::string onlyEnd
     for (auto&& iterator = work.begin(); iterator != work.end();
             iterator++)
     {
-        if (*iterator != "" && onlyEnding.empty())
+        if (("" != *iterator) && onlyEnding.empty())
         {
             final.push_back(*iterator);
         }
-        else if (*iterator != "" && Vita::string(*iterator).explode(".").back() == onlyEnding
-                && (*iterator).size() > 5)
+        else if (("" != *iterator) && (Vita::string(*iterator).explode(".").back() == onlyEnding)
+                && ((*iterator).size() > 5))
         {
             final.push_back(Vita::string(*iterator).substr(0, (*iterator).size() - 5));
         }
@@ -665,8 +666,7 @@ void Data::updateConfigData()
 }
 
 void Data::setMatchingConfigs(const std::vector<std::shared_ptr<Device>>& devices,
-        std::vector<std::shared_ptr<Config>>& configs,
-        bool setAsInstalled)
+        std::vector<std::shared_ptr<Config>>& configs, bool setAsInstalled)
 {
     for (auto&& config = configs.begin(); config != configs.end();
             ++config)
@@ -675,8 +675,8 @@ void Data::setMatchingConfigs(const std::vector<std::shared_ptr<Device>>& device
     }
 }
 
-void Data::setMatchingConfig(std::shared_ptr<Config> config, const std::vector<std::shared_ptr<Device>>& devices,
-        bool setAsInstalled)
+void Data::setMatchingConfig(std::shared_ptr<Config> config,
+		const std::vector<std::shared_ptr<Device>>& devices, bool setAsInstalled)
 {
     std::vector<std::shared_ptr<Device>> foundDevices;
 
@@ -697,7 +697,8 @@ void Data::setMatchingConfig(std::shared_ptr<Config> config, const std::vector<s
     }
 }
 
-void Data::addConfigSorted(std::vector<std::shared_ptr<Config>>& configs, std::shared_ptr<Config> config)
+void Data::addConfigSorted(std::vector<std::shared_ptr<Config>>& configs,
+		std::shared_ptr<Config> config)
 {
     for (auto&& iterator = configs.begin();
             iterator != configs.end(); iterator++)
@@ -730,7 +731,7 @@ Vita::string Data::from_Hex(std::uint16_t hexnum, int fill)
 
 Vita::string Data::from_CharArray(char* c)
 {
-    if (c == nullptr)
+    if (nullptr == c)
     {
         return "";
     }

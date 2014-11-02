@@ -32,13 +32,13 @@ Mhwd::~Mhwd()
 {
 }
 
-bool Mhwd::performTransaction(std::shared_ptr<Config> config, MHWD::TRANSACTIONTYPE type)
+bool Mhwd::performTransaction(std::shared_ptr<Config> config, MHWD::TRANSACTIONTYPE transactionType)
 {
-    Transaction transaction (data_, config, type,
+    Transaction transaction (data_, config, transactionType,
             arguments_.FORCE);
 
     // Print things to do
-    if (type == MHWD::TRANSACTIONTYPE::INSTALL)
+    if (MHWD::TRANSACTIONTYPE::INSTALL == transactionType)
     {
         // Print conflicts
         if (!transaction.conflictedConfigs_.empty())
@@ -67,10 +67,12 @@ bool Mhwd::performTransaction(std::shared_ptr<Config> config, MHWD::TRANSACTIONT
 
             printer_.printStatus("Dependencies to install:" + dependencies +
                     "\nProceed with installation? [Y/n]");
-            return proceedWithInstallation();
+            std::string input;
+            std::getline(std::cin, input);
+            return proceedWithInstallation(input);
         }
     }
-    else if (type == MHWD::TRANSACTIONTYPE::REMOVE)
+    else if (MHWD::TRANSACTIONTYPE::REMOVE == transactionType)
     {
         // Print requirements
         if (!transaction.configsRequirements_.empty())
@@ -90,33 +92,33 @@ bool Mhwd::performTransaction(std::shared_ptr<Config> config, MHWD::TRANSACTIONT
 
     MHWD::STATUS status = performTransaction(transaction);
 
-    if (status == MHWD::STATUS::ERROR_ALREADY_INSTALLED)
+    if (MHWD::STATUS::ERROR_ALREADY_INSTALLED == status)
     {
         printer_.printWarning(
                 "a version of config '" + config->name_
                         + "' is already installed!\nUse -f/--force to force installation...");
     }
-    else if (status == MHWD::STATUS::ERROR_CONFLICTS)
+    else if (MHWD::STATUS::ERROR_CONFLICTS == status)
     {
         printer_.printError("config '" + config->name_ + "' conflicts with installed config(s)!");
     }
-    else if (status == MHWD::STATUS::ERROR_NOT_INSTALLED)
+    else if (MHWD::STATUS::ERROR_NOT_INSTALLED == status)
     {
         printer_.printError("config '" + config->name_ + "' is not installed!");
     }
-    else if (status == MHWD::STATUS::ERROR_NO_MATCH_LOCAL_CONFIG)
+    else if (MHWD::STATUS::ERROR_NO_MATCH_LOCAL_CONFIG == status)
     {
         printer_.printError("passed config does not match with installed config!");
     }
-    else if (status == MHWD::STATUS::ERROR_REQUIREMENTS)
+    else if (MHWD::STATUS::ERROR_REQUIREMENTS == status)
     {
         printer_.printError("config '" + config->name_ + "' is required by installed config(s)!");
     }
-    else if (status == MHWD::STATUS::ERROR_SCRIPT_FAILED)
+    else if (MHWD::STATUS::ERROR_SCRIPT_FAILED == status)
     {
         printer_.printError("script failed!");
     }
-    else if (status == MHWD::STATUS::ERROR_SET_DATABASE)
+    else if (MHWD::STATUS::ERROR_SET_DATABASE == status)
     {
         printer_.printError("failed to set database!");
     }
@@ -124,19 +126,16 @@ bool Mhwd::performTransaction(std::shared_ptr<Config> config, MHWD::TRANSACTIONT
     // Update mhwd data object
     data_.updateInstalledConfigData();
 
-    return (status == MHWD::STATUS::SUCCESS);
+    return (MHWD::STATUS::SUCCESS == status);
 }
 
-bool Mhwd::proceedWithInstallation() const
+bool Mhwd::proceedWithInstallation(const std::string& input) const
 {
-    std::string input;
-    std::getline(std::cin, input);
-
-    if (input.length() == 1 && (input[0] == 'y' || input[0] == 'Y'))
+    if (1 == input.length() && (('y' == input[0]) || ('Y' == input[0])))
     {
         return true;
     }
-    else if (input.length() == 0)
+    else if (0 == input.length())
     {
         return true;
     }
@@ -149,7 +148,7 @@ bool Mhwd::proceedWithInstallation() const
 bool Mhwd::isUserRoot() const
 {
     constexpr unsigned short ROOT_UID = 0;
-    if (getuid() != ROOT_UID)
+    if (ROOT_UID != getuid())
     {
         return false;
     }
@@ -184,7 +183,7 @@ std::string Mhwd::checkEnvironment()
 void Mhwd::printDeviceDetails(std::string type, FILE *f)
 {
     hw_item hw;
-    if (type == "USB")
+    if ("USB" == type)
     {
         hw = hw_usb;
     }
@@ -212,7 +211,7 @@ std::shared_ptr<Config> Mhwd::getInstalledConfig(const std::string& configName,
     std::vector<std::shared_ptr<Config>>* installedConfigs;
 
     // Get the right configs
-    if (configType == "USB")
+    if ("USB" == configType)
     {
         installedConfigs = &data_.installedUSBConfigs;
     }
@@ -234,12 +233,12 @@ std::shared_ptr<Config> Mhwd::getInstalledConfig(const std::string& configName,
 }
 
 std::shared_ptr<Config> Mhwd::getDatabaseConfig(const std::string& configName,
-        const std::string configType)
+        const std::string& configType)
 {
     std::vector<std::shared_ptr<Config>>* allConfigs;
 
     // Get the right configs
-    if (configType == "USB")
+    if ("USB" == configType)
     {
         allConfigs = &data_.allUSBConfigs;
     }
@@ -261,12 +260,12 @@ std::shared_ptr<Config> Mhwd::getDatabaseConfig(const std::string& configName,
 }
 
 std::shared_ptr<Config> Mhwd::getAvailableConfig(const std::string& configName,
-        const std::string configType)
+        const std::string& configType)
 {
     std::vector<std::shared_ptr<Device>> *devices;
 
     // Get the right devices
-    if (configType == "USB")
+    if ("USB" == configType)
     {
         devices = &data_.USBDevices;
     }
@@ -299,12 +298,12 @@ std::shared_ptr<Config> Mhwd::getAvailableConfig(const std::string& configName,
 
 MHWD::STATUS Mhwd::performTransaction(const Transaction& transaction)
 {
-    if ((transaction.type_ == MHWD::TRANSACTIONTYPE::INSTALL) &&
+    if ((MHWD::TRANSACTIONTYPE::INSTALL == transaction.type_) &&
             !transaction.conflictedConfigs_.empty())
     {
         return MHWD::STATUS::ERROR_CONFLICTS;
     }
-    else if ((transaction.type_ == MHWD::TRANSACTIONTYPE::REMOVE)
+    else if ((MHWD::TRANSACTIONTYPE::REMOVE == transaction.type_)
             && !transaction.configsRequirements_.empty())
     {
         return MHWD::STATUS::ERROR_REQUIREMENTS;
@@ -316,7 +315,7 @@ MHWD::STATUS Mhwd::performTransaction(const Transaction& transaction)
                 transaction.config_->type_)};
         MHWD::STATUS status = MHWD::STATUS::SUCCESS;
 
-        if ((transaction.type_ == MHWD::TRANSACTIONTYPE::REMOVE)
+        if ((MHWD::TRANSACTIONTYPE::REMOVE == transaction.type_)
                 || (installedConfig != nullptr && transaction.isAllowedToReinstall()))
         {
             if (installedConfig == nullptr)
@@ -337,7 +336,7 @@ MHWD::STATUS Mhwd::performTransaction(const Transaction& transaction)
             }
         }
 
-        if (transaction.type_ == MHWD::TRANSACTIONTYPE::INSTALL)
+        if (MHWD::TRANSACTIONTYPE::INSTALL == transaction.type_)
         {
             // Check if already installed but not allowed to reinstall
             if ((installedConfig != nullptr) && !transaction.isAllowedToReinstall())
@@ -380,11 +379,11 @@ MHWD::STATUS Mhwd::performTransaction(const Transaction& transaction)
     }
 }
 
-bool Mhwd::copyDirectory(const std::string source, const std::string destination)
+bool Mhwd::copyDirectory(const std::string& source, const std::string& destination)
 {
     struct stat filestatus;
 
-    if (lstat(destination.c_str(), &filestatus) != 0)
+    if (0 != lstat(destination.c_str(), &filestatus))
     {
         if (!createDir(destination))
         {
@@ -423,7 +422,7 @@ bool Mhwd::copyDirectory(const std::string source, const std::string destination
             std::string sourcePath {source + "/" + filename};
             std::string destinationPath {destination + "/" + filename};
 
-            if (filename == "." || filename == ".." || filename == "")
+            if (("." == filename) || (".." == filename) || ("" == filename))
             {
                 continue;
             }
@@ -452,7 +451,7 @@ bool Mhwd::copyDirectory(const std::string source, const std::string destination
     }
 }
 
-bool Mhwd::copyFile(const std::string source, const std::string destination, const mode_t mode)
+bool Mhwd::copyFile(const std::string& source, const std::string destination, const mode_t mode)
 {
     std::ifstream src(source, std::ios::binary);
     std::ofstream dst(destination, std::ios::binary);
@@ -470,7 +469,7 @@ bool Mhwd::copyFile(const std::string source, const std::string destination, con
     }
 }
 
-bool Mhwd::removeDirectory(const std::string directory)
+bool Mhwd::removeDirectory(const std::string& directory)
 {
     DIR *d = opendir(directory.c_str());
 
@@ -487,7 +486,7 @@ bool Mhwd::removeDirectory(const std::string directory)
             std::string filename = std::string(dir->d_name);
             std::string filepath = directory + "/" + filename;
 
-            if (filename == "." || filename == ".." || filename == "")
+            if (("." == filename) || (".." == filename) || ("" == filename))
             {
                 continue;
             }
@@ -498,7 +497,7 @@ bool Mhwd::removeDirectory(const std::string directory)
 
                 if (S_ISREG(filestatus.st_mode))
                 {
-                    if (unlink(filepath.c_str()) != 0)
+                    if (0 != unlink(filepath.c_str()))
                     {
                         success = false;
                     }
@@ -514,7 +513,7 @@ bool Mhwd::removeDirectory(const std::string directory)
         }
         closedir(d);
 
-        if (rmdir(directory.c_str()) != 0)
+        if (0 != rmdir(directory.c_str()))
         {
             success = false;
         }
@@ -522,10 +521,10 @@ bool Mhwd::removeDirectory(const std::string directory)
     }
 }
 
-bool Mhwd::dirExists(const std::string path)
+bool Mhwd::dirExists(const std::string& path)
 {
     struct stat filestatus;
-    if (stat(path.c_str(), &filestatus) != 0)
+    if (0 != stat(path.c_str(), &filestatus))
     {
         return false;
     }
@@ -535,7 +534,7 @@ bool Mhwd::dirExists(const std::string path)
     }
 }
 
-bool Mhwd::createDir(const std::string path, const mode_t mode)
+bool Mhwd::createDir(const std::string& path, const mode_t mode)
 {
     mode_t process_mask = umask(0);
     int ret = mkdir(path.c_str(), mode);
@@ -548,7 +547,7 @@ bool Mhwd::createDir(const std::string path, const mode_t mode)
 MHWD::STATUS Mhwd::installConfig(std::shared_ptr<Config> config)
 {
     std::string databaseDir;
-    if (config->type_ == "USB")
+    if ("USB" == config->type_)
     {
         databaseDir = MHWD_USB_DATABASE_DIR;
     }
@@ -577,7 +576,7 @@ MHWD::STATUS Mhwd::uninstallConfig(Config *config)
     std::shared_ptr<Config> installedConfig{getInstalledConfig(config->name_, config->type_)};
 
     // Check if installed
-    if (installedConfig == nullptr)
+    if (nullptr == installedConfig)
     {
         return MHWD::STATUS::ERROR_NOT_INSTALLED;
     }
@@ -610,7 +609,7 @@ bool Mhwd::runScript(std::shared_ptr<Config> config, MHWD::TRANSACTIONTYPE opera
 {
     std::string cmd = "exec " + std::string(MHWD_SCRIPT_PATH);
 
-    if (operationType == MHWD::TRANSACTIONTYPE::REMOVE)
+    if (MHWD::TRANSACTIONTYPE::REMOVE == operationType)
     {
         cmd += " --remove";
     }
@@ -660,7 +659,7 @@ bool Mhwd::runScript(std::shared_ptr<Config> config, MHWD::TRANSACTIONTYPE opera
     {
         Vita::string busID = (*dev)->sysfsBusID_;
 
-        if (config->type_ == "PCI")
+        if ("PCI" == config->type_)
         {
             std::vector<Vita::string> split = Vita::string(busID).replace(".", ":").explode(":");
             const unsigned int size = split.size();
@@ -703,7 +702,7 @@ bool Mhwd::runScript(std::shared_ptr<Config> config, MHWD::TRANSACTIONTYPE opera
         else
         {
             // Only one database sync is required
-            if (operationType == MHWD::TRANSACTIONTYPE::INSTALL)
+            if (MHWD::TRANSACTIONTYPE::INSTALL == operationType)
             {
                 data_.environment.syncPackageManagerDatabase = false;
             }
@@ -1088,9 +1087,9 @@ int Mhwd::launch(int argc, char *argv[])
                 if (!USBdevice->availableConfigs_.empty())
                 {
                     printer_.listConfigs(USBdevice->availableConfigs_,
-                            USBdevice->sysfsBusID_ + " (" + USBdevice->classID_ + ":" + USBdevice->vendorID_ + ":"
-                                    + USBdevice->deviceID_ + ") " + USBdevice->className_ + " "
-                                    + USBdevice->vendorName_ + ":");
+                            USBdevice->sysfsBusID_ + " (" + USBdevice->classID_ + ":" +
+							USBdevice->vendorID_ + ":" + USBdevice->deviceID_ + ") "
+							+ USBdevice->className_ + " " + USBdevice->vendorName_ + ":");
                 }
             }
         }
@@ -1126,7 +1125,7 @@ int Mhwd::launch(int argc, char *argv[])
         std::vector<std::shared_ptr<Device>> *devices;
         std::vector<std::shared_ptr<Config>> *installedConfigs;
 
-        if (operationType == "USB")
+        if ("USB" == operationType)
         {
             devices = &data_.USBDevices;
             installedConfigs = &data_.installedUSBConfigs;
@@ -1247,7 +1246,7 @@ int Mhwd::launch(int argc, char *argv[])
                     struct stat filestatus;
                     std::string filepath = (*configName) + "/MHWDCONFIG";
 
-                    if (stat(filepath.c_str(), &filestatus) != 0)
+                    if (0 != stat(filepath.c_str(), &filestatus))
                     {
                         printer_.printError("custom config '" + filepath + "' does not exist!");
                         return 1;
@@ -1299,7 +1298,7 @@ int Mhwd::launch(int argc, char *argv[])
                 {
                     config_ = getInstalledConfig((*configName), operationType);
 
-                    if (config_ == nullptr)
+                    if (nullptr == config_)
                     {
                         printer_.printError("config '" + (*configName) + "' is not installed!");
                         return 1;

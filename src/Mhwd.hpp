@@ -62,20 +62,20 @@ private:
     void printDeviceDetails(std::string type, FILE *f = stdout);
 
     std::shared_ptr<Config> getInstalledConfig(const std::string& configName, const std::string& configType);
-    std::shared_ptr<Config> getDatabaseConfig(const std::string& configName, const std::string configType);
-    std::shared_ptr<Config> getAvailableConfig(const std::string& configName, const std::string configType);
+    std::shared_ptr<Config> getDatabaseConfig(const std::string& configName, const std::string& configType);
+    std::shared_ptr<Config> getAvailableConfig(const std::string& configName, const std::string& configType);
 
     std::vector<Config*> getAllLocalRequirements(Config *config);
 
     MHWD::STATUS performTransaction(const Transaction& transaction);
-    bool proceedWithInstallation() const;
+    bool proceedWithInstallation(const std::string& input) const;
 
-    bool copyDirectory(const std::string source, const std::string destination);
-    bool copyFile(const std::string source, const std::string destination, const mode_t mode =
+    bool copyDirectory(const std::string& source, const std::string& destination);
+    bool copyFile(const std::string& source, const std::string destination, const mode_t mode =
             S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IROTH);
-    bool removeDirectory(const std::string directory);
-    bool dirExists(const std::string path);
-    bool createDir(const std::string path, const mode_t mode =
+    bool removeDirectory(const std::string& directory);
+    bool dirExists(const std::string& path);
+    bool createDir(const std::string& path, const mode_t mode =
             S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IROTH | S_IXGRP | S_IXOTH);
 
     MHWD::STATUS installConfig(std::shared_ptr<Config> config);
