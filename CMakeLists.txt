@@ -1,10 +1,16 @@
 cmake_minimum_required (VERSION 2.6) 
 project(mhwd)
 
-SET(CMAKE_INSTALL_PREFIX "/usr/")
+set(EXECUTABLE_OUTPUT_PATH ${mhwd_SOURCE_DIR}/bin)
 
-add_definitions(-Wall)
+set(CMAKE_INSTALL_PREFIX "/usr/")
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O2 -Wall -Wextra -Werror")
+
+if("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wunreachable-code")
+endif()
 
 add_subdirectory(libmhwd)
-add_subdirectory(mhwd)
+add_subdirectory(src)
 add_subdirectory(scripts)

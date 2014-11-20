@@ -1,14 +1,27 @@
-include_directories(. ../libmhwd ../libmhwd/vita)
+include_directories(. ${mhwd_SOURCE_DIR}/libmhwd)
 
 ###
 ### mhwd binary
 ###
 
 set( HEADERS
+	Config.hpp
+	Data.hpp
+	Device.hpp
+	Enums.hpp
+	Mhwd.hpp
+	Printer.hpp
+	Transaction.hpp
 )
 
 set( SOURCES
-    mhwd.cpp
+    Config.cpp
+    Data.cpp
+    Device.cpp
+    main.cpp
+    Mhwd.cpp
+    Printer.cpp
+    Transaction.cpp
 )
 
 set( LIBS mhwd)
