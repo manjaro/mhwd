@@ -763,113 +763,112 @@ int Mhwd::launch(int argc, char *argv[])
         {
             arguments_.SHOWUSB = true;
         }
-        else if (("-a" == option)|| ("--auto" == option))
+        else if (("-a" == option) || ("--auto" == option))
         {
-            ++nArg;
-            if (nArg + 2 >= argc
-                    || (strcmp(argv[nArg], "pci") != 0 && strcmp(argv[nArg], "usb") != 0)
-                    || (strcmp(argv[nArg + 1], "free") != 0
-                            && strcmp(argv[nArg + 1], "nonfree") != 0))
+            if (nArg + 3 < argc)
+            {
+            	std::string deviceType {argv[nArg + 1]};
+            	std::string driverType {argv[nArg + 2]};
+            	std::string classID {argv[nArg + 3]};
+            	if ((("pci" != deviceType) && ("usb" != deviceType)) ||
+            		(("free" != driverType) && ("nonfree" != driverType)))
+            	{
+                    printer_.printError("invalid use of option: -a/--auto\n qwe");
+                    printer_.printHelp();
+                    return 1;
+            	}
+            	else
+            	{
+            		operationType = Vita::string{deviceType}.toUpper();
+
+            		autoConfigureNonFreeDriver = ("nonfree" == driverType);
+
+                    autoConfigureClassID = Vita::string(classID).toLower().trim();
+                    arguments_.AUTOCONFIGURE = true;
+                    nArg += 3;
+            	}
+            }
+            else
             {
                 printer_.printError("invalid use of option: -a/--auto\n");
                 printer_.printHelp();
                 return 1;
             }
-            else
-            {
-                if (strcmp(argv[nArg], "usb") == 0)
-                {
-                    operationType = "USB";
-                }
-                else
-                {
-                    operationType = "PCI";
-                }
-
-                ++nArg;
-                if (strcmp(argv[nArg], "nonfree") == 0)
-                {
-                    autoConfigureNonFreeDriver = true;
-                }
-                else
-                {
-                    autoConfigureNonFreeDriver = false;
-                }
-
-                autoConfigureClassID = Vita::string(argv[++nArg]).toLower().trim();
-                arguments_.AUTOCONFIGURE = true;
-            }
         }
         else if (("-ic" == option) || ("--installcustom" == option))
         {
-            ++nArg;
-            if ((nArg >= argc) || ((strcmp(argv[nArg], "pci") != 0) &&
-                    (strcmp(argv[nArg], "usb") != 0)))
-            {
+        	if ((nArg + 1) < argc)
+        	{
+        		std::string deviceType {argv[nArg + 1]};
+        		if (("pci" != deviceType) && ("usb" != deviceType))
+        		{
+                    printer_.printError("invalid use of option: -ic/--installcustom\n");
+                    printer_.printHelp();
+                    return 1;
+        		}
+        		else
+        		{
+        			operationType = Vita::string{deviceType}.toUpper();
+        			arguments_.CUSTOMINSTALL = true;
+        			++nArg;
+        		}
+        	}
+        	else
+        	{
                 printer_.printError("invalid use of option: -ic/--installcustom\n");
                 printer_.printHelp();
                 return 1;
-            }
-            else
-            {
-                if (strcmp(argv[nArg], "usb") == 0)
-                {
-                    operationType = "USB";
-                }
-                else
-                {
-                    operationType = "PCI";
-                }
-
-                arguments_.CUSTOMINSTALL = true;
-            }
+        	}
         }
-        else if (("-i" == option) || strcmp(argv[nArg], "--install") == 0)
+        else if (("-i" == option) || ("--install" == option))
         {
-            ++nArg;
-            if (nArg >= argc || (strcmp(argv[nArg], "pci") != 0 &&
-                    strcmp(argv[nArg], "usb") != 0))
-            {
+        	if ((nArg + 1) < argc)
+        	{
+        		std::string deviceType {argv[nArg + 1]};
+        		if (("pci" != deviceType) && ("usb" != deviceType))
+        		{
+                    printer_.printError("invalid use of option: -i/--install\n");
+                    printer_.printHelp();
+                    return 1;
+        		}
+        		else
+        		{
+        			operationType = Vita::string{deviceType}.toUpper();
+        			arguments_.INSTALL = true;
+        			++nArg;
+        		}
+        	}
+        	else
+        	{
                 printer_.printError("invalid use of option: -i/--install\n");
                 printer_.printHelp();
                 return 1;
-            }
-            else
-            {
-                if (strcmp(argv[nArg], "usb") == 0)
-                {
-                    operationType = "USB";
-                }
-                else
-                {
-                    operationType = "PCI";
-                }
-
-                arguments_.INSTALL = true;
-            }
+        	}
         }
         else if (("-r" == option) || ("--remove" == option))
         {
-            ++nArg;
-            if (nArg >= argc || (strcmp(argv[nArg], "pci") != 0 && strcmp(argv[nArg], "usb") != 0))
-            {
+        	if ((nArg + 1) < argc)
+        	{
+        		std::string deviceType {argv[nArg + 1]};
+        		if (("pci" != deviceType) && ("usb" != deviceType))
+        		{
+                    printer_.printError("invalid use of option: -r/--remove\n");
+                    printer_.printHelp();
+                    return 1;
+        		}
+        		else
+        		{
+        			operationType = Vita::string{deviceType}.toUpper();
+        			arguments_.REMOVE = true;
+        			++nArg;
+        		}
+        	}
+        	else
+        	{
                 printer_.printError("invalid use of option: -r/--remove\n");
                 printer_.printHelp();
                 return 1;
-            }
-            else
-            {
-                if (strcmp(argv[nArg], "usb") == 0)
-                {
-                    operationType = "USB";
-                }
-                else
-                {
-                    operationType = "PCI";
-                }
-
-                arguments_.REMOVE = true;
-            }
+        	}
         }
         else if ("--pmcachedir" == option)
         {
