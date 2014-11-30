@@ -1255,7 +1255,7 @@ int Mhwd::launch(int argc, char *argv[])
                     }
                     else
                     {
-                        config_ .reset(new Config(filepath, operationType));
+                        config_.reset(new Config(filepath, operationType));
                         if (!data_.fillConfig(config_, filepath, operationType))
                         {
                             printer_.printError("failed to read custom config '" + filepath + "'!");
