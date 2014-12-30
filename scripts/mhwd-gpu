@@ -8,7 +8,7 @@ CHECKCONFIG="false"
 SETGL=""
 SETXORGCONF=""
 ARCH=$(uname -m)
-MODULES_LOAD="/etc/conf.d/modules"
+MODULES_LOAD="/etc/modules-load.d"
 
 # lib32 config true/false
 MHWD64CONF="/etc/mhwd-x86_64.conf"
