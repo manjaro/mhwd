@@ -18,7 +18,8 @@ class Transaction
 {
 public:
     Transaction() = delete;
-    Transaction(Data data, std::shared_ptr<Config> config, MHWD::TRANSACTIONTYPE type, bool allowReinstallation);
+    Transaction(Data data, std::shared_ptr<Config> config, MHWD::TRANSACTIONTYPE type,
+    		bool allowReinstallation);
 
     bool isAllowedToReinstall() const;
     std::shared_ptr<Config> config_;
@@ -27,6 +28,7 @@ public:
     std::vector<std::shared_ptr<Config>> conflictedConfigs_;
     std::vector<std::shared_ptr<Config>> configsRequirements_;
 
+private:
     bool allowedToReinstall_ = false;
 };
 

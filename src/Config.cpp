@@ -24,7 +24,7 @@ Config::Config(std::string configPath, std::string type)
 
 bool Config::readConfigFile(std::string configPath)
 {
-    std::ifstream file(configPath.c_str(), std::ios::in);
+    std::ifstream file(configPath.c_str());
 
     if (!file.is_open())
     {
@@ -216,7 +216,7 @@ std::vector<std::string> Config::splitValue(Vita::string str, Vita::string onlyE
     std::vector<std::string> final;
 
     for (auto&& iterator = work.begin(); iterator != work.end();
-            iterator++)
+            ++iterator)
     {
         if (("" != *iterator) && onlyEnding.empty())
         {
