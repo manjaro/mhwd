@@ -32,13 +32,13 @@ void Data::updateInstalledConfigData()
 {
     // Clear config vectors in each device element
     for (auto&& PCIDevice = PCIDevices.begin();
-            PCIDevice != PCIDevices.end(); PCIDevice++)
+            PCIDevice != PCIDevices.end(); ++PCIDevice)
     {
         (*PCIDevice)->installedConfigs_.clear();
     }
 
     for (auto&& USBDevice = USBDevices.begin();
-            USBDevice != USBDevices.end(); USBDevice++)
+            USBDevice != USBDevices.end(); ++USBDevice)
     {
         (*USBDevice)->installedConfigs_.clear();
     }
@@ -280,7 +280,7 @@ void Data::getAllDependenciesToInstall(std::shared_ptr<Config> config,
         std::vector<std::shared_ptr<Config>> *dependencies)
 {
     for (auto&& configDependency = config->dependencies_.begin();
-            configDependency != config->dependencies_.end(); configDependency++)
+            configDependency != config->dependencies_.end(); ++configDependency)
     {
         auto found = std::find_if(installedConfigs.begin(), installedConfigs.end(),
                 [configDependency](const std::shared_ptr<Config> rhs)->bool
@@ -339,7 +339,7 @@ std::shared_ptr<Config> Data::getDatabaseConfig(const std::string configName,
     }
 
     for (auto&& config = allConfigs.begin(); config != allConfigs.end();
-            config++)
+            ++config)
     {
         if (configName == (*config)->name_)
         {
@@ -369,14 +369,13 @@ std::vector<std::shared_ptr<Config>> Data::getAllLocalConflicts(std::shared_ptr<
     dependencies.push_back(std::shared_ptr<Config>{config});
 
     for (auto&& dependency = dependencies.begin();
-            dependency != dependencies.end(); dependency++)
+            dependency != dependencies.end(); ++dependency)
     {
-        for (auto&& dependencyConflict =
-                (*dependency)->conflicts_.begin();
-                dependencyConflict != (*dependency)->conflicts_.end(); dependencyConflict++)
+        for (auto&& dependencyConflict = (*dependency)->conflicts_.begin();
+                dependencyConflict != (*dependency)->conflicts_.end(); ++dependencyConflict)
         {
             for (auto&& installedConfig = installedConfigs.begin();
-                    installedConfig != installedConfigs.end(); installedConfig++)
+                    installedConfig != installedConfigs.end(); ++installedConfig)
             {
                 if ((*dependencyConflict) != (*installedConfig)->name_)
                 {
@@ -387,7 +386,7 @@ std::vector<std::shared_ptr<Config>> Data::getAllLocalConflicts(std::shared_ptr<
                     // Check if already in vector
                     bool found = false;
                     for (auto&& conflict = conflicts.begin();
-                            conflict != conflicts.end(); conflict++)
+                            conflict != conflicts.end(); ++conflict)
                     {
                         if ((*conflict)->name_ == (*dependencyConflict))
                         {
@@ -430,7 +429,7 @@ std::vector<std::shared_ptr<Config>> Data::getAllLocalRequirements(std::shared_p
 
     // Check if this config is required by another installed config
     for (auto&& installedConfig = installedConfigs.begin();
-            installedConfig != installedConfigs.end(); installedConfig++)
+            installedConfig != installedConfigs.end(); ++installedConfig)
     {
         for (auto&& dependency = (*installedConfig)->dependencies_.begin();
                 dependency != (*installedConfig)->dependencies_.end(); dependency++)
@@ -444,7 +443,7 @@ std::vector<std::shared_ptr<Config>> Data::getAllLocalRequirements(std::shared_p
                 // Check if already in vector
                 bool found = false;
                 for (auto&& requirement = requirements.begin();
-                        requirement != requirements.end(); requirement++)
+                        requirement != requirements.end(); ++requirement)
                 {
                     if ((*requirement)->name_ == (*installedConfig)->name_)
                     {

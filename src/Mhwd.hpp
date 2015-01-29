@@ -32,28 +32,29 @@ class Mhwd
 {
 public:
     Mhwd();
-    ~Mhwd();
+    ~Mhwd() = default;
     int launch(int argc, char *argv[]);
 
 private:
     struct Arguments
     {
-        bool SHOWPCI = false;
-        bool SHOWUSB = false;
+        bool SHOW_PCI = false;
+        bool SHOW_USB = false;
         bool INSTALL = false;
         bool REMOVE = false;
         bool DETAIL = false;
         bool FORCE = false;
-        bool LISTALL = false;
-        bool LISTINSTALLED = false;
-        bool LISTAVAILABLE = false;
-        bool LISTHARDWARE = false;
-        bool CUSTOMINSTALL = false;
+        bool LIST_ALL = false;
+        bool LIST_INSTALLED = false;
+        bool LIST_AVAILABLE = false;
+        bool LIST_HARDWARE = false;
+        bool CUSTOM_INSTALL = false;
         bool AUTOCONFIGURE = false;
     } arguments_;
     std::shared_ptr<Config> config_;
     Data data_;
     Printer printer_;
+    std::vector<std::string> configs_;
 
     bool performTransaction(std::shared_ptr<Config> config, MHWD::TRANSACTIONTYPE type);
     bool isUserRoot() const;
@@ -81,6 +82,9 @@ private:
     MHWD::STATUS installConfig(std::shared_ptr<Config> config);
     MHWD::STATUS uninstallConfig(Config *config);
     bool runScript(std::shared_ptr<Config> config, MHWD::TRANSACTIONTYPE operationType);
+	void tryToParseCmdLineOptions(int argc, char* argv[], bool& autoConfigureNonFreeDriver,
+			std::string& operationType, std::string& autoConfigureClassID);
+	bool optionsDontInterfereWithEachOther() const;
 };
 
 #endif /* MHWD_HPP_ */
