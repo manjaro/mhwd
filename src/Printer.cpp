@@ -175,16 +175,16 @@ void Printer::printAvailableConfigsInDetail(const std::string& deviceType,
             printLine();
             if (!device->installedConfigs_.empty())
             {
-                std::cout << "  > INSTALLED:" << std::endl;
+                std::cout << "  > INSTALLED:\n\n";
                 for (auto&& installedConfig : device->installedConfigs_)
                 {
                     printConfigDetails(*installedConfig);
                 }
-                std::cout << std::endl << std::endl;
+                std::cout << "\n\n";
             }
             if (!device->availableConfigs_.empty())
             {
-                std::cout << "  > AVAILABLE:" << std::endl;
+                std::cout << "  > AVAILABLE:\n\n";
                 for (auto&& availableConfig : device->availableConfigs_)
                 {
                     printConfigDetails(*availableConfig);
@@ -253,7 +253,7 @@ void Printer::printConfigDetails(const Config& config) const
             << "\n   DEPENDS:\t" << (dependencies.empty() ? "-" : dependencies)
             << "\n   CONFLICTS:\t" << (conflicts.empty() ? "-" : conflicts)
             << "\n   CLASSIDS:\t" << classids
-            << "\n   VENDORIDS:\t" << vendorids << std::endl;
+            << "\n   VENDORIDS:\t" << vendorids << "\n" << std::endl;
 }
 
 void Printer::printLine() const
