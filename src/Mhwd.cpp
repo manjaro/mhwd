@@ -667,7 +667,7 @@ bool Mhwd::runScript(std::shared_ptr<Config> config, MHWD::TRANSACTIONTYPE opera
         if ("PCI" == config->type_)
         {
             std::vector<Vita::string> split = Vita::string(busID).replace(".", ":").explode(":");
-            const unsigned int size = split.size();
+            const unsigned long size = split.size();
 
             if (size >= 3)
             {
@@ -1159,33 +1159,18 @@ int Mhwd::launch(int argc, char *argv[])
                 }
                 else
                 {
-                    // Check if already in list
-                    bool found = false;
-                    for (auto&& iter = configs_.begin();
-                            iter != configs_.end(); iter++)
-                    {
-                        if ((*iter) == config->name_)
-                        {
-                            found = true;
-                            break;
-                        }
-                    }
+                	bool alreadyInList = std::find(configs_.begin(), configs_.end(), config->name_) != configs_.end();
 
                     // If force is not set then skip found config
                     bool skip = false;
-                    if (!(arguments_.FORCE))
+                    if (!arguments_.FORCE)
                     {
-                        for (auto&& iter = installedConfigs->begin();
-                                iter != installedConfigs->end(); iter++)
-                        {
-                            if ((*iter)->name_ == config->name_)
-                            {
-                                skip = true;
-                                break;
-                            }
-                        }
+                    	skip = std::find_if(installedConfigs->begin(), installedConfigs->end(),
+                    			[&config](const std::shared_ptr<Config>& conf) -> bool {
+                    				return conf->name_ == config->name_;
+                    			})
+                    				!= installedConfigs->end();
                     }
-
                     // Print found config
                     if (skip)
                     {
@@ -1206,7 +1191,7 @@ int Mhwd::launch(int argc, char *argv[])
                                 device->deviceName_);
                     }
 
-                    if (!found && !skip)
+                    if (!alreadyInList && !skip)
                     {
                         configs_.push_back(config->name_);
                     }
