@@ -297,9 +297,8 @@ void Data::getAllDependenciesToInstall(std::shared_ptr<Config> config,
             configDependency != config->dependencies_.end(); ++configDependency)
     {
         auto found = std::find_if(installedConfigs.begin(), installedConfigs.end(),
-                [configDependency](const std::shared_ptr<Config> rhs)->bool
-                {
-                    return (*configDependency == rhs->name_);
+                [configDependency](const std::shared_ptr<Config>& rhs) -> bool {
+                    return (rhs->name_ == *configDependency);
                 });
 
         if (found != installedConfigs.end())
@@ -309,9 +308,8 @@ void Data::getAllDependenciesToInstall(std::shared_ptr<Config> config,
         else
         {
             found = std::find_if(dependencies->begin(), dependencies->end(),
-                    [configDependency](const std::shared_ptr<Config> rhs)->bool
-                    {
-                        return (*configDependency == rhs->name_);
+                    [configDependency](const std::shared_ptr<Config>& rhs) -> bool {
+                        return (rhs->name_ == *configDependency);
                     });
 
             if (found != dependencies->end())
@@ -329,7 +327,7 @@ void Data::getAllDependenciesToInstall(std::shared_ptr<Config> config,
                 }
                 else
                 {
-                    dependencies->push_back(std::shared_ptr<Config>{dependconfig});
+                    dependencies->emplace_back(dependconfig);
                     getAllDependenciesToInstall(dependconfig, installedConfigs, dependencies);
                 }
             }
@@ -380,7 +378,7 @@ std::vector<std::shared_ptr<Config>> Data::getAllLocalConflicts(std::shared_ptr<
         installedConfigs = installedPCIConfigs;
     }
 
-    dependencies.push_back(std::shared_ptr<Config>{config});
+    dependencies.emplace_back(config);
 
     for (auto&& dependency = dependencies.begin();
             dependency != dependencies.end(); ++dependency)
@@ -415,7 +413,7 @@ std::vector<std::shared_ptr<Config>> Data::getAllLocalConflicts(std::shared_ptr<
                     }
                     else
                     {
-                        conflicts.push_back(std::shared_ptr<Config>{*installedConfig});
+                        conflicts.emplace_back(*installedConfig);
                         break;
                     }
                 }
@@ -468,7 +466,7 @@ std::vector<std::shared_ptr<Config>> Data::getAllLocalRequirements(std::shared_p
 
                 if (!found)
                 {
-                    requirements.push_back(std::shared_ptr<Config>{*installedConfig});
+                    requirements.emplace_back(*installedConfig);
                     break;
                 }
             }
@@ -495,14 +493,14 @@ void Data::fillDevices(std::string type)
     }
 
     // Get the hardware devices
-    hd_data_t *hd_data = new hd_data_t();
-    hd_t *hd = hd_list(hd_data, hw, 1, nullptr);
+    std::unique_ptr<hd_data_t> hd_data{new hd_data_t()};
+    hd_t *hd = hd_list(hd_data.get(), hw, 1, nullptr);
     hd_t *beginningOfhd = hd;
 
-    Device *device;
+    std::unique_ptr<Device> device;
     for (; hd; hd = hd->next)
     {
-        device = new Device();
+        device.reset(new Device());
         device->type_ = type;
         device->classID_ = from_Hex(hd->base_class.id, 2) + from_Hex(hd->sub_class.id, 2).toLower();
         device->vendorID_ = from_Hex(hd->vendor.id, 4).toLower();
@@ -512,12 +510,11 @@ void Data::fillDevices(std::string type)
         device->deviceName_ = from_CharArray(hd->device.name);
         device->sysfsBusID_ = from_CharArray(hd->sysfs_bus_id);
         device->sysfsID_ = from_CharArray(hd->sysfs_id);
-        devices->push_back(std::shared_ptr<Device>{device});
+        devices->emplace_back(device.release());
     }
 
     hd_free_hd_list(beginningOfhd);
-    hd_free_hd_data(hd_data);
-    delete hd_data;
+    hd_free_hd_data(hd_data.get());
 }
 
 void Data::fillAllConfigs(std::string type)
@@ -539,15 +536,15 @@ void Data::fillAllConfigs(std::string type)
     for (auto&& configPath = configPaths.begin();
             configPath != configPaths.end(); ++configPath)
     {
-        Config *config = new Config((*configPath), type);
+        std::unique_ptr<Config> config{new Config((*configPath), type)};
 
         if (config->readConfigFile((*configPath)))
         {
-            configs->push_back(std::shared_ptr<Config>{config});
+            configs->emplace_back(config.release());
         }
         else
         {
-            invalidConfigs.push_back(std::shared_ptr<Config>{config});
+            invalidConfigs.emplace_back(config.release());
         }
     }
 }
@@ -563,8 +560,7 @@ bool Data::fillConfig(std::shared_ptr<Config> config, std::string configPath, st
     // Add new HardwareIDs group to vector if vector is empty
     if (config->hwdIDs_.empty())
     {
-        Config::HardwareID hwdID;
-        config->hwdIDs_.push_back(hwdID);
+        config->hwdIDs_.emplace_back();
     }
 
     return config->readConfigFile(config->configPath_);
@@ -575,8 +571,7 @@ std::vector<std::string> Data::getRecursiveDirectoryFileList(const std::string& 
 {
     std::vector<std::string> list;
     struct dirent *dir = nullptr;
-    DIR *d = opendir(directoryPath.c_str());
-
+    DIR* d = opendir(directoryPath.c_str());
     if (d)
     {
         while (nullptr != (dir = readdir(d)))
@@ -732,7 +727,7 @@ void Data::addConfigSorted(std::vector<std::shared_ptr<Config>>& configs,
         }
     }
 
-    configs.push_back(std::shared_ptr<Config>(config));
+    configs.emplace_back(config);
 }
 
 Vita::string Data::from_Hex(std::uint16_t hexnum, int fill)
