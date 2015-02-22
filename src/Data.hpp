@@ -88,7 +88,7 @@ private:
     void updateConfigData();
 
     Vita::string from_Hex(uint16_t hexnum, int fill);
-    Vita::string from_CharArray(char* c);
+    std::string from_CharArray(char* c);
 };
 
 #endif /* DATA_HPP_ */

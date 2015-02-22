@@ -736,12 +736,12 @@ Vita::string Data::from_Hex(std::uint16_t hexnum, int fill)
     return stream.str();
 }
 
-Vita::string Data::from_CharArray(char* c)
+std::string Data::from_CharArray(char* c)
 {
     if (nullptr == c)
     {
         return "";
     }
 
-    return Vita::string(c);
+    return std::string(c);
 }
