@@ -113,7 +113,7 @@ void Printer::listDevices(const std::vector<std::shared_ptr<Device>>& devices, s
                 << std::setw(8) << "DEVICE"
                 << std::setw(10) << "CONFIGS" << std::endl;
         printLine();
-        for (auto&& device : devices)
+        for (const auto& device : devices)
         {
             std::cout << std::setw(30) << device->className_
                     << std::setw(15) << device->sysfsBusID_
@@ -135,7 +135,7 @@ void Printer::listConfigs(const std::vector<std::shared_ptr<Config>>& configs, s
             << std::setw(20) << "FREEDRIVER"
             << std::setw(15) << "TYPE" << std::endl;
     printLine();
-    for (auto&& config : configs)
+    for (const auto& config : configs)
     {
         std::cout << std::setw(22) << config->name_
                 << std::setw(22) << config->version_
@@ -150,7 +150,7 @@ void Printer::printAvailableConfigsInDetail(const std::string& deviceType,
 {
     bool configFound = false;
 
-    for (auto&& device : devices)
+    for (const auto& device : devices)
     {
         if (device->availableConfigs_.empty() && device->installedConfigs_.empty())
         {
@@ -204,7 +204,7 @@ void Printer::printInstalledConfigs(const std::string& deviceType,
     }
     else
     {
-        for (auto&& config : installedConfigs)
+        for (const auto& config : installedConfigs)
         {
             printConfigDetails(*config);
         }
@@ -216,25 +216,25 @@ void Printer::printConfigDetails(const Config& config) const
 {
     std::string classids;
     std::string vendorids;
-    for (auto&& hwd : config.hwdIDs_)
+    for (const auto& hwd : config.hwdIDs_)
     {
-        for (auto&& vendorID : hwd.vendorIDs)
+        for (const auto& vendorID : hwd.vendorIDs)
         {
             vendorids += vendorID + " ";
         }
 
-        for (auto&& classID : hwd.classIDs)
+        for (const auto& classID : hwd.classIDs)
         {
             classids += classID + " ";
         }
     }
     std::string dependencies;
-    for (auto&& dependency : config.dependencies_)
+    for (const auto& dependency : config.dependencies_)
     {
         dependencies += dependency + " ";
     }
     std::string conflicts;
-    for (auto&& conflict : config.conflicts_)
+    for (const auto& conflict : config.conflicts_)
     {
         conflicts += conflict + " ";
     }
