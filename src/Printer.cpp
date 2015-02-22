@@ -46,38 +46,33 @@ void Printer::printWarning(std::string warningMsg) const
 
 void Printer::printMessage(MHWD::MESSAGETYPE type, std::string msg) const
 {
-    if (type == MHWD::MESSAGETYPE::CONSOLE_OUTPUT)
-    {
-        std::cout << CONSOLE_TEXT_OUTPUT_COLOR << msg << CONSOLE_COLOR_RESET;
-    }
-    else if (type == MHWD::MESSAGETYPE::INSTALLDEPENDENCY_START)
-    {
-        printStatus("Installing dependency " + msg + "...");
-    }
-    else if (type == MHWD::MESSAGETYPE::INSTALLDEPENDENCY_END)
-    {
-        printStatus("Successfully installed dependency " + msg);
-    }
-    else if (type == MHWD::MESSAGETYPE::INSTALL_START)
-    {
-        printStatus("Installing " + msg + "...");
-    }
-    else if (type == MHWD::MESSAGETYPE::INSTALL_END)
-    {
-        printStatus("Successfully installed " + msg);
-    }
-    else if (type == MHWD::MESSAGETYPE::REMOVE_START)
-    {
-        printStatus("Removing " + msg + "...");
-    }
-    else if (type == MHWD::MESSAGETYPE::REMOVE_END)
-    {
-        printStatus("Successfully removed " + msg);
-    }
-    else
-    {
-        printError("You shouldn't see this?! Unknown message type!");
-    }
+	switch(type)
+	{
+		case MHWD::MESSAGETYPE::CONSOLE_OUTPUT:
+			std::cout << CONSOLE_TEXT_OUTPUT_COLOR << msg << CONSOLE_COLOR_RESET;
+			break;
+		case MHWD::MESSAGETYPE::INSTALLDEPENDENCY_START:
+			printStatus("Installing dependency " + msg + "...");
+			break;
+		case MHWD::MESSAGETYPE::INSTALLDEPENDENCY_END:
+			printStatus("Successfully installed dependency " + msg);
+			break;
+		case MHWD::MESSAGETYPE::INSTALL_START:
+			printStatus("Installing " + msg + "...");
+			break;
+		case MHWD::MESSAGETYPE::INSTALL_END:
+			printStatus("Successfully installed " + msg);
+			break;
+		case MHWD::MESSAGETYPE::REMOVE_START:
+			printStatus("Removing " + msg + "...");
+			break;
+		case MHWD::MESSAGETYPE::REMOVE_END:
+			printStatus("Successfully removed " + msg);
+			break;
+		default:
+			printError("You shouldn't see this?! Unknown message type!");
+			break;
+	}
 }
 
 void Printer::printHelp() const
