@@ -495,25 +495,24 @@ void Data::fillDevices(std::string type)
     // Get the hardware devices
     std::unique_ptr<hd_data_t> hd_data{new hd_data_t()};
     hd_t *hd = hd_list(hd_data.get(), hw, 1, nullptr);
-    hd_t *beginningOfhd = hd;
 
     std::unique_ptr<Device> device;
-    for (; hd; hd = hd->next)
+    for (hd_t *hdIter = hd; hdIter; hdIter = hdIter->next)
     {
         device.reset(new Device());
         device->type_ = type;
-        device->classID_ = from_Hex(hd->base_class.id, 2) + from_Hex(hd->sub_class.id, 2).toLower();
-        device->vendorID_ = from_Hex(hd->vendor.id, 4).toLower();
-        device->deviceID_ = from_Hex(hd->device.id, 4).toLower();
-        device->className_ = from_CharArray(hd->base_class.name);
-        device->vendorName_ = from_CharArray(hd->vendor.name);
-        device->deviceName_ = from_CharArray(hd->device.name);
-        device->sysfsBusID_ = from_CharArray(hd->sysfs_bus_id);
-        device->sysfsID_ = from_CharArray(hd->sysfs_id);
+        device->classID_ = from_Hex(hdIter->base_class.id, 2) + from_Hex(hdIter->sub_class.id, 2).toLower();
+        device->vendorID_ = from_Hex(hdIter->vendor.id, 4).toLower();
+        device->deviceID_ = from_Hex(hdIter->device.id, 4).toLower();
+        device->className_ = from_CharArray(hdIter->base_class.name);
+        device->vendorName_ = from_CharArray(hdIter->vendor.name);
+        device->deviceName_ = from_CharArray(hdIter->device.name);
+        device->sysfsBusID_ = from_CharArray(hdIter->sysfs_bus_id);
+        device->sysfsID_ = from_CharArray(hdIter->sysfs_id);
         devices->emplace_back(device.release());
     }
 
-    hd_free_hd_list(beginningOfhd);
+    hd_free_hd_list(hd);
     hd_free_hd_data(hd_data.get());
 }
 

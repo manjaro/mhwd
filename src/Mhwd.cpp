@@ -203,14 +203,13 @@ void Mhwd::printDeviceDetails(std::string type, FILE *f)
 
     std::unique_ptr<hd_data_t> hd_data{new hd_data_t()};
     hd_t *hd = hd_list(hd_data.get(), hw, 1, nullptr);
-    hd_t *beginningOfhd = hd;
 
-    for (; hd; hd = hd->next)
+    for (hd_t* hdIter = hd; hdIter; hdIter = hdIter->next)
     {
-        hd_dump_entry(hd_data.get(), hd, f);
+        hd_dump_entry(hd_data.get(), hdIter, f);
     }
 
-    hd_free_hd_list(beginningOfhd);
+    hd_free_hd_list(hd);
     hd_free_hd_data(hd_data.get());
 }
 
