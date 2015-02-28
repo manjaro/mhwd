@@ -1,7 +1,10 @@
 /*
+ *  This file is part of the mhwd - Manjaro Hardware Detection project
+ *  
  *  mhwd - Manjaro Hardware Detection
  *  Roland Singer <roland@manjaro.org>
  *  Łukasz Matysiak <december0123@gmail.com>
+ * 	Filipe Marques <eagle.software3@gmail.com>
  *
  *  Copyright (C) 2007 Free Software Foundation, Inc.
  *
@@ -81,6 +84,7 @@ void Printer::printHelp() const
             << "  --pci\t\t\t\t\tlist only pci devices and driver configs\n"
             << "  --usb\t\t\t\t\tlist only usb devices and driver configs\n"
             << "  -h/--help\t\t\t\tshow help\n"
+			<< "  -v/--version\t\t\t\tshow version of mhwd\n"
             << "  -f/--force\t\t\t\tforce reinstallation\n"
             << "  -d/--detail\t\t\t\tshow detailed info for -l/-li/-lh\n"
             << "  -l/--list\t\t\t\tlist available configs for devices\n"
@@ -94,6 +98,16 @@ void Printer::printHelp() const
             << "  --pmcachedir <path>\t\t\tset package manager cache path\n"
             << "  --pmconfig <path>\t\t\tset package manager config\n"
             << "  --pmroot <path>\t\t\tset package manager root\n" << std::endl;
+}
+
+void Printer::printVersion(std::string version_mhwd, std::string year_copy) const
+{
+	std::cout << "Manjaro Hardware Detection version "<< version_mhwd <<"\n\n" 
+				<< "Copyright (C) "<< year_copy <<" Manjaro Linux Developers\n"
+				<< "This is free software licensed under GNU GPL v.3\n"
+				<< "There is NO warranty; not even for MERCHANTABILITY or \n"
+				<< "FITNESS FOR A PARTICULAR PURPOSE.\n" 
+				<< std::endl;
 }
 
 void Printer::listDevices(const std::vector<std::shared_ptr<Device>>& devices, std::string type) const

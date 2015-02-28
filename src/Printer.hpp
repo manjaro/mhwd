@@ -1,7 +1,10 @@
 /*
+ *  This file is part of the mhwd - Manjaro Hardware Detection project
+ *  
  *  mhwd - Manjaro Hardware Detection
  *  Roland Singer <roland@manjaro.org>
  *  Łukasz Matysiak <december0123@gmail.com>
+ * 	Filipe Marques <eagle.software3@gmail.com>
  *
  *  Copyright (C) 2007 Free Software Foundation, Inc.
  *
@@ -37,7 +40,8 @@ public:
     void printWarning(std::string warningMsg) const;
     void printMessage(MHWD::MESSAGETYPE type, std::string str) const;
     void printHelp() const;
-    void listDevices(const std::vector<std::shared_ptr<Device>>& devices, std::string typeOfDevice) const;
+    void printVersion(std::string version_mhwd, std::string year_copy) const;
+	void listDevices(const std::vector<std::shared_ptr<Device>>& devices, std::string typeOfDevice) const;
     void listConfigs(const std::vector<std::shared_ptr<Config>>& configs,
             std::string header) const;
     void printAvailableConfigsInDetail(const std::string& deviceType,
