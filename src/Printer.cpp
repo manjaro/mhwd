@@ -1,8 +1,25 @@
 /*
- * Printer.cpp
+ *  This file is part of the mhwd - Manjaro Hardware Detection project
+ *  
+ *  mhwd - Manjaro Hardware Detection
+ *  Roland Singer <roland@manjaro.org>
+ *  Łukasz Matysiak <december0123@gmail.com>
+ * 	Filipe Marques <eagle.software3@gmail.com>
  *
- *  Created on: 28 sie 2014
- *      Author: dec
+ *  Copyright (C) 2007 Free Software Foundation, Inc.
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <iomanip>
@@ -32,38 +49,33 @@ void Printer::printWarning(std::string warningMsg) const
 
 void Printer::printMessage(MHWD::MESSAGETYPE type, std::string msg) const
 {
-    if (type == MHWD::MESSAGETYPE::CONSOLE_OUTPUT)
-    {
-        std::cout << CONSOLE_TEXT_OUTPUT_COLOR << msg << CONSOLE_COLOR_RESET;
-    }
-    else if (type == MHWD::MESSAGETYPE::INSTALLDEPENDENCY_START)
-    {
-        printStatus("Installing dependency " + msg + "...");
-    }
-    else if (type == MHWD::MESSAGETYPE::INSTALLDEPENDENCY_END)
-    {
-        printStatus("Successfully installed dependency " + msg);
-    }
-    else if (type == MHWD::MESSAGETYPE::INSTALL_START)
-    {
-        printStatus("Installing " + msg + "...");
-    }
-    else if (type == MHWD::MESSAGETYPE::INSTALL_END)
-    {
-        printStatus("Successfully installed " + msg);
-    }
-    else if (type == MHWD::MESSAGETYPE::REMOVE_START)
-    {
-        printStatus("Removing " + msg + "...");
-    }
-    else if (type == MHWD::MESSAGETYPE::REMOVE_END)
-    {
-        printStatus("Successfully removed " + msg);
-    }
-    else
-    {
-        printError("You shouldn't see this?! Unknown message type!");
-    }
+	switch(type)
+	{
+		case MHWD::MESSAGETYPE::CONSOLE_OUTPUT:
+			std::cout << CONSOLE_TEXT_OUTPUT_COLOR << msg << CONSOLE_COLOR_RESET;
+			break;
+		case MHWD::MESSAGETYPE::INSTALLDEPENDENCY_START:
+			printStatus("Installing dependency " + msg + "...");
+			break;
+		case MHWD::MESSAGETYPE::INSTALLDEPENDENCY_END:
+			printStatus("Successfully installed dependency " + msg);
+			break;
+		case MHWD::MESSAGETYPE::INSTALL_START:
+			printStatus("Installing " + msg + "...");
+			break;
+		case MHWD::MESSAGETYPE::INSTALL_END:
+			printStatus("Successfully installed " + msg);
+			break;
+		case MHWD::MESSAGETYPE::REMOVE_START:
+			printStatus("Removing " + msg + "...");
+			break;
+		case MHWD::MESSAGETYPE::REMOVE_END:
+			printStatus("Successfully removed " + msg);
+			break;
+		default:
+			printError("You shouldn't see this?! Unknown message type!");
+			break;
+	}
 }
 
 void Printer::printHelp() const
@@ -72,6 +84,7 @@ void Printer::printHelp() const
             << "  --pci\t\t\t\t\tlist only pci devices and driver configs\n"
             << "  --usb\t\t\t\t\tlist only usb devices and driver configs\n"
             << "  -h/--help\t\t\t\tshow help\n"
+			<< "  -v/--version\t\t\t\tshow version of mhwd\n"
             << "  -f/--force\t\t\t\tforce reinstallation\n"
             << "  -d/--detail\t\t\t\tshow detailed info for -l/-li/-lh\n"
             << "  -l/--list\t\t\t\tlist available configs for devices\n"
@@ -85,6 +98,16 @@ void Printer::printHelp() const
             << "  --pmcachedir <path>\t\t\tset package manager cache path\n"
             << "  --pmconfig <path>\t\t\tset package manager config\n"
             << "  --pmroot <path>\t\t\tset package manager root\n" << std::endl;
+}
+
+void Printer::printVersion(std::string version_mhwd, std::string year_copy) const
+{
+	std::cout << "Manjaro Hardware Detection version "<< version_mhwd <<"\n\n" 
+				<< "Copyright (C) "<< year_copy <<" Manjaro Linux Developers\n"
+				<< "This is free software licensed under GNU GPL v.3\n"
+				<< "There is NO warranty; not even for MERCHANTABILITY or \n"
+				<< "FITNESS FOR A PARTICULAR PURPOSE.\n" 
+				<< std::endl;
 }
 
 void Printer::listDevices(const std::vector<std::shared_ptr<Device>>& devices, std::string type) const
@@ -104,7 +127,7 @@ void Printer::listDevices(const std::vector<std::shared_ptr<Device>>& devices, s
                 << std::setw(8) << "DEVICE"
                 << std::setw(10) << "CONFIGS" << std::endl;
         printLine();
-        for (auto&& device : devices)
+        for (const auto& device : devices)
         {
             std::cout << std::setw(30) << device->className_
                     << std::setw(15) << device->sysfsBusID_
@@ -126,7 +149,7 @@ void Printer::listConfigs(const std::vector<std::shared_ptr<Config>>& configs, s
             << std::setw(20) << "FREEDRIVER"
             << std::setw(15) << "TYPE" << std::endl;
     printLine();
-    for (auto&& config : configs)
+    for (const auto& config : configs)
     {
         std::cout << std::setw(22) << config->name_
                 << std::setw(22) << config->version_
@@ -141,7 +164,7 @@ void Printer::printAvailableConfigsInDetail(const std::string& deviceType,
 {
     bool configFound = false;
 
-    for (auto&& device : devices)
+    for (const auto& device : devices)
     {
         if (device->availableConfigs_.empty() && device->installedConfigs_.empty())
         {
@@ -161,16 +184,16 @@ void Printer::printAvailableConfigsInDetail(const std::string& deviceType,
             printLine();
             if (!device->installedConfigs_.empty())
             {
-                std::cout << "  > INSTALLED:" << std::endl;
+                std::cout << "  > INSTALLED:\n\n";
                 for (auto&& installedConfig : device->installedConfigs_)
                 {
                     printConfigDetails(*installedConfig);
                 }
-                std::cout << std::endl << std::endl;
+                std::cout << "\n\n";
             }
             if (!device->availableConfigs_.empty())
             {
-                std::cout << "  > AVAILABLE:" << std::endl;
+                std::cout << "  > AVAILABLE:\n\n";
                 for (auto&& availableConfig : device->availableConfigs_)
                 {
                     printConfigDetails(*availableConfig);
@@ -195,7 +218,7 @@ void Printer::printInstalledConfigs(const std::string& deviceType,
     }
     else
     {
-        for (auto&& config : installedConfigs)
+        for (const auto& config : installedConfigs)
         {
             printConfigDetails(*config);
         }
@@ -207,25 +230,25 @@ void Printer::printConfigDetails(const Config& config) const
 {
     std::string classids;
     std::string vendorids;
-    for (auto&& hwd : config.hwdIDs_)
+    for (const auto& hwd : config.hwdIDs_)
     {
-        for (auto&& vendorID : hwd.vendorIDs)
+        for (const auto& vendorID : hwd.vendorIDs)
         {
             vendorids += vendorID + " ";
         }
 
-        for (auto&& classID : hwd.classIDs)
+        for (const auto& classID : hwd.classIDs)
         {
             classids += classID + " ";
         }
     }
     std::string dependencies;
-    for (auto&& dependency : config.dependencies_)
+    for (const auto& dependency : config.dependencies_)
     {
         dependencies += dependency + " ";
     }
     std::string conflicts;
-    for (auto&& conflict : config.conflicts_)
+    for (const auto& conflict : config.conflicts_)
     {
         conflicts += conflict + " ";
     }
@@ -239,7 +262,7 @@ void Printer::printConfigDetails(const Config& config) const
             << "\n   DEPENDS:\t" << (dependencies.empty() ? "-" : dependencies)
             << "\n   CONFLICTS:\t" << (conflicts.empty() ? "-" : conflicts)
             << "\n   CLASSIDS:\t" << classids
-            << "\n   VENDORIDS:\t" << vendorids << std::endl;
+            << "\n   VENDORIDS:\t" << vendorids << "\n" << std::endl;
 }
 
 void Printer::printLine() const

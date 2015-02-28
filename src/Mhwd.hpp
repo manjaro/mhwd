@@ -1,8 +1,25 @@
 /*
- * Mhwd.hpp
+ *  This file is part of the mhwd - Manjaro Hardware Detection project
+ *  
+ *  mhwd - Manjaro Hardware Detection
+ *  Roland Singer <roland@manjaro.org>
+ *  Łukasz Matysiak <december0123@gmail.com>
+ * 	Filipe Marques <eagle.software3@gmail.com>
  *
- *  Created on: 26 sie 2014
- *      Author: dec
+ *  Copyright (C) 2007 Free Software Foundation, Inc.
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef MHWD_HPP_
@@ -32,29 +49,33 @@ class Mhwd
 {
 public:
     Mhwd();
-    ~Mhwd();
+    ~Mhwd() = default;
+	void set_version_mhwd(std::string version_of_software, std::string year_copyright);
     int launch(int argc, char *argv[]);
 
 private:
     struct Arguments
     {
-        bool SHOWPCI = false;
-        bool SHOWUSB = false;
+        bool SHOW_PCI = false;
+        bool SHOW_USB = false;
         bool INSTALL = false;
         bool REMOVE = false;
         bool DETAIL = false;
         bool FORCE = false;
-        bool LISTALL = false;
-        bool LISTINSTALLED = false;
-        bool LISTAVAILABLE = false;
-        bool LISTHARDWARE = false;
-        bool CUSTOMINSTALL = false;
+        bool LIST_ALL = false;
+        bool LIST_INSTALLED = false;
+        bool LIST_AVAILABLE = false;
+        bool LIST_HARDWARE = false;
+        bool CUSTOM_INSTALL = false;
         bool AUTOCONFIGURE = false;
     } arguments_;
     std::shared_ptr<Config> config_;
     Data data_;
     Printer printer_;
+    std::vector<std::string> configs_;
 
+	std::string version_, year_;
+	
     bool performTransaction(std::shared_ptr<Config> config, MHWD::TRANSACTIONTYPE type);
     bool isUserRoot() const;
     std::string checkEnvironment();
@@ -81,6 +102,9 @@ private:
     MHWD::STATUS installConfig(std::shared_ptr<Config> config);
     MHWD::STATUS uninstallConfig(Config *config);
     bool runScript(std::shared_ptr<Config> config, MHWD::TRANSACTIONTYPE operationType);
+	void tryToParseCmdLineOptions(int argc, char* argv[], bool& autoConfigureNonFreeDriver,
+			std::string& operationType, std::string& autoConfigureClassID);
+	bool optionsDontInterfereWithEachOther() const;
 };
 
 #endif /* MHWD_HPP_ */

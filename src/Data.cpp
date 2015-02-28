@@ -1,8 +1,25 @@
 /*
- * Data.cpp
+ *  This file is part of the mhwd - Manjaro Hardware Detection project
+ *  
+ *  mhwd - Manjaro Hardware Detection
+ *  Roland Singer <roland@manjaro.org>
+ *  Łukasz Matysiak <december0123@gmail.com>
+ * 	Filipe Marques <eagle.software3@gmail.com>
  *
- *  Created on: 28 sie 2014
- *      Author: dec
+ *  Copyright (C) 2007 Free Software Foundation, Inc.
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <dirent.h>
@@ -32,13 +49,13 @@ void Data::updateInstalledConfigData()
 {
     // Clear config vectors in each device element
     for (auto&& PCIDevice = PCIDevices.begin();
-            PCIDevice != PCIDevices.end(); PCIDevice++)
+            PCIDevice != PCIDevices.end(); ++PCIDevice)
     {
         (*PCIDevice)->installedConfigs_.clear();
     }
 
     for (auto&& USBDevice = USBDevices.begin();
-            USBDevice != USBDevices.end(); USBDevice++)
+            USBDevice != USBDevices.end(); ++USBDevice)
     {
         (*USBDevice)->installedConfigs_.clear();
     }
@@ -280,12 +297,11 @@ void Data::getAllDependenciesToInstall(std::shared_ptr<Config> config,
         std::vector<std::shared_ptr<Config>> *dependencies)
 {
     for (auto&& configDependency = config->dependencies_.begin();
-            configDependency != config->dependencies_.end(); configDependency++)
+            configDependency != config->dependencies_.end(); ++configDependency)
     {
         auto found = std::find_if(installedConfigs.begin(), installedConfigs.end(),
-                [configDependency](const std::shared_ptr<Config> rhs)->bool
-                {
-                    return (*configDependency == rhs->name_);
+                [configDependency](const std::shared_ptr<Config>& rhs) -> bool {
+                    return (rhs->name_ == *configDependency);
                 });
 
         if (found != installedConfigs.end())
@@ -295,9 +311,8 @@ void Data::getAllDependenciesToInstall(std::shared_ptr<Config> config,
         else
         {
             found = std::find_if(dependencies->begin(), dependencies->end(),
-                    [configDependency](const std::shared_ptr<Config> rhs)->bool
-                    {
-                        return (*configDependency == rhs->name_);
+                    [configDependency](const std::shared_ptr<Config>& rhs) -> bool {
+                        return (rhs->name_ == *configDependency);
                     });
 
             if (found != dependencies->end())
@@ -315,7 +330,7 @@ void Data::getAllDependenciesToInstall(std::shared_ptr<Config> config,
                 }
                 else
                 {
-                    dependencies->push_back(std::shared_ptr<Config>{dependconfig});
+                    dependencies->emplace_back(dependconfig);
                     getAllDependenciesToInstall(dependconfig, installedConfigs, dependencies);
                 }
             }
@@ -339,7 +354,7 @@ std::shared_ptr<Config> Data::getDatabaseConfig(const std::string configName,
     }
 
     for (auto&& config = allConfigs.begin(); config != allConfigs.end();
-            config++)
+            ++config)
     {
         if (configName == (*config)->name_)
         {
@@ -366,17 +381,16 @@ std::vector<std::shared_ptr<Config>> Data::getAllLocalConflicts(std::shared_ptr<
         installedConfigs = installedPCIConfigs;
     }
 
-    dependencies.push_back(std::shared_ptr<Config>{config});
+    dependencies.emplace_back(config);
 
     for (auto&& dependency = dependencies.begin();
-            dependency != dependencies.end(); dependency++)
+            dependency != dependencies.end(); ++dependency)
     {
-        for (auto&& dependencyConflict =
-                (*dependency)->conflicts_.begin();
-                dependencyConflict != (*dependency)->conflicts_.end(); dependencyConflict++)
+        for (auto&& dependencyConflict = (*dependency)->conflicts_.begin();
+                dependencyConflict != (*dependency)->conflicts_.end(); ++dependencyConflict)
         {
             for (auto&& installedConfig = installedConfigs.begin();
-                    installedConfig != installedConfigs.end(); installedConfig++)
+                    installedConfig != installedConfigs.end(); ++installedConfig)
             {
                 if ((*dependencyConflict) != (*installedConfig)->name_)
                 {
@@ -387,7 +401,7 @@ std::vector<std::shared_ptr<Config>> Data::getAllLocalConflicts(std::shared_ptr<
                     // Check if already in vector
                     bool found = false;
                     for (auto&& conflict = conflicts.begin();
-                            conflict != conflicts.end(); conflict++)
+                            conflict != conflicts.end(); ++conflict)
                     {
                         if ((*conflict)->name_ == (*dependencyConflict))
                         {
@@ -402,7 +416,7 @@ std::vector<std::shared_ptr<Config>> Data::getAllLocalConflicts(std::shared_ptr<
                     }
                     else
                     {
-                        conflicts.push_back(std::shared_ptr<Config>{*installedConfig});
+                        conflicts.emplace_back(*installedConfig);
                         break;
                     }
                 }
@@ -430,7 +444,7 @@ std::vector<std::shared_ptr<Config>> Data::getAllLocalRequirements(std::shared_p
 
     // Check if this config is required by another installed config
     for (auto&& installedConfig = installedConfigs.begin();
-            installedConfig != installedConfigs.end(); installedConfig++)
+            installedConfig != installedConfigs.end(); ++installedConfig)
     {
         for (auto&& dependency = (*installedConfig)->dependencies_.begin();
                 dependency != (*installedConfig)->dependencies_.end(); dependency++)
@@ -444,7 +458,7 @@ std::vector<std::shared_ptr<Config>> Data::getAllLocalRequirements(std::shared_p
                 // Check if already in vector
                 bool found = false;
                 for (auto&& requirement = requirements.begin();
-                        requirement != requirements.end(); requirement++)
+                        requirement != requirements.end(); ++requirement)
                 {
                     if ((*requirement)->name_ == (*installedConfig)->name_)
                     {
@@ -455,7 +469,7 @@ std::vector<std::shared_ptr<Config>> Data::getAllLocalRequirements(std::shared_p
 
                 if (!found)
                 {
-                    requirements.push_back(std::shared_ptr<Config>{*installedConfig});
+                    requirements.emplace_back(*installedConfig);
                     break;
                 }
             }
@@ -482,29 +496,27 @@ void Data::fillDevices(std::string type)
     }
 
     // Get the hardware devices
-    hd_data_t *hd_data = new hd_data_t();
-    hd_t *hd = hd_list(hd_data, hw, 1, nullptr);
-    hd_t *beginningOfhd = hd;
+    std::unique_ptr<hd_data_t> hd_data{new hd_data_t()};
+    hd_t *hd = hd_list(hd_data.get(), hw, 1, nullptr);
 
-    Device *device;
-    for (; hd; hd = hd->next)
+    std::unique_ptr<Device> device;
+    for (hd_t *hdIter = hd; hdIter; hdIter = hdIter->next)
     {
-        device = new Device();
+        device.reset(new Device());
         device->type_ = type;
-        device->classID_ = from_Hex(hd->base_class.id, 2) + from_Hex(hd->sub_class.id, 2).toLower();
-        device->vendorID_ = from_Hex(hd->vendor.id, 4).toLower();
-        device->deviceID_ = from_Hex(hd->device.id, 4).toLower();
-        device->className_ = from_CharArray(hd->base_class.name);
-        device->vendorName_ = from_CharArray(hd->vendor.name);
-        device->deviceName_ = from_CharArray(hd->device.name);
-        device->sysfsBusID_ = from_CharArray(hd->sysfs_bus_id);
-        device->sysfsID_ = from_CharArray(hd->sysfs_id);
-        devices->push_back(std::shared_ptr<Device>{device});
+        device->classID_ = from_Hex(hdIter->base_class.id, 2) + from_Hex(hdIter->sub_class.id, 2).toLower();
+        device->vendorID_ = from_Hex(hdIter->vendor.id, 4).toLower();
+        device->deviceID_ = from_Hex(hdIter->device.id, 4).toLower();
+        device->className_ = from_CharArray(hdIter->base_class.name);
+        device->vendorName_ = from_CharArray(hdIter->vendor.name);
+        device->deviceName_ = from_CharArray(hdIter->device.name);
+        device->sysfsBusID_ = from_CharArray(hdIter->sysfs_bus_id);
+        device->sysfsID_ = from_CharArray(hdIter->sysfs_id);
+        devices->emplace_back(device.release());
     }
 
-    hd_free_hd_list(beginningOfhd);
-    hd_free_hd_data(hd_data);
-    delete hd_data;
+    hd_free_hd_list(hd);
+    hd_free_hd_data(hd_data.get());
 }
 
 void Data::fillAllConfigs(std::string type)
@@ -526,15 +538,15 @@ void Data::fillAllConfigs(std::string type)
     for (auto&& configPath = configPaths.begin();
             configPath != configPaths.end(); ++configPath)
     {
-        Config *config = new Config((*configPath), type);
+        std::unique_ptr<Config> config{new Config((*configPath), type)};
 
         if (config->readConfigFile((*configPath)))
         {
-            configs->push_back(std::shared_ptr<Config>{config});
+            configs->emplace_back(config.release());
         }
         else
         {
-            invalidConfigs.push_back(std::shared_ptr<Config>{config});
+            invalidConfigs.emplace_back(config.release());
         }
     }
 }
@@ -550,8 +562,7 @@ bool Data::fillConfig(std::shared_ptr<Config> config, std::string configPath, st
     // Add new HardwareIDs group to vector if vector is empty
     if (config->hwdIDs_.empty())
     {
-        Config::HardwareID hwdID;
-        config->hwdIDs_.push_back(hwdID);
+        config->hwdIDs_.emplace_back();
     }
 
     return config->readConfigFile(config->configPath_);
@@ -562,8 +573,7 @@ std::vector<std::string> Data::getRecursiveDirectoryFileList(const std::string& 
 {
     std::vector<std::string> list;
     struct dirent *dir = nullptr;
-    DIR *d = opendir(directoryPath.c_str());
-
+    DIR* d = opendir(directoryPath.c_str());
     if (d)
     {
         while (nullptr != (dir = readdir(d)))
@@ -719,7 +729,7 @@ void Data::addConfigSorted(std::vector<std::shared_ptr<Config>>& configs,
         }
     }
 
-    configs.push_back(std::shared_ptr<Config>(config));
+    configs.emplace_back(config);
 }
 
 Vita::string Data::from_Hex(std::uint16_t hexnum, int fill)
@@ -729,12 +739,12 @@ Vita::string Data::from_Hex(std::uint16_t hexnum, int fill)
     return stream.str();
 }
 
-Vita::string Data::from_CharArray(char* c)
+std::string Data::from_CharArray(char* c)
 {
     if (nullptr == c)
     {
         return "";
     }
 
-    return Vita::string(c);
+    return std::string(c);
 }
