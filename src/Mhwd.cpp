@@ -718,10 +718,10 @@ bool Mhwd::runScript(std::shared_ptr<Config> config, MHWD::TRANSACTIONTYPE opera
     }
 }
 
-void Mhwd::set_version_mhwd(std::string version_of_software, std::string year_copyright)
+void Mhwd::setVersionMhwd(std::string versionOfSoftware, std::string yearCopyright)
 {
-	version_ = version_of_software;
-	year_ = year_copyright;
+	version_ = versionOfSoftware;
+	year_ = yearCopyright;
 }
 
 void Mhwd::tryToParseCmdLineOptions(int argc, char* argv[], bool& autoConfigureNonFreeDriver,

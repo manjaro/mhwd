@@ -100,10 +100,10 @@ void Printer::printHelp() const
             << "  --pmroot <path>\t\t\tset package manager root\n" << std::endl;
 }
 
-void Printer::printVersion(std::string version_mhwd, std::string year_copy) const
+void Printer::printVersion(std::string versionMhwd, std::string yearCopy) const
 {
-	std::cout << "Manjaro Hardware Detection version "<< version_mhwd <<"\n\n" 
-				<< "Copyright (C) "<< year_copy <<" Manjaro Linux Developers\n"
+	std::cout << "Manjaro Hardware Detection version "<< versionMhwd <<"\n\n" 
+				<< "Copyright (C) "<< yearCopy <<" Manjaro Linux Developers\n"
 				<< "This is free software licensed under GNU GPL v.3\n"
 				<< "There is NO warranty; not even for MERCHANTABILITY or \n"
 				<< "FITNESS FOR A PARTICULAR PURPOSE.\n" 
