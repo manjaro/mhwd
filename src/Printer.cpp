@@ -104,7 +104,7 @@ void Printer::printVersion(std::string versionMhwd, std::string yearCopy) const
 {
     std::cout << "Manjaro Hardware Detection v"<< versionMhwd <<"\n\n" 
             << "Copyright (C) "<< yearCopy <<" Manjaro Linux Developers\n"
-            << "This is free software licensed under GNU GPL v.3\n"
+            << "This is free software licensed under GNU GPL v3.0\n"
             << "FITNESS FOR A PARTICULAR PURPOSE.\n" 
             << std::endl;
 }
