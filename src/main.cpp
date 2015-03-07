@@ -1,6 +1,10 @@
 /*
+ *  This file is part of the mhwd - Manjaro Hardware Detection project
+ *  
  *  mhwd - Manjaro Hardware Detection
  *  Roland Singer <roland@manjaro.org>
+ *  Łukasz Matysiak <december0123@gmail.com>
+ *  Filipe Marques <eagle.software3@gmail.com>
  *
  *  Copyright (C) 2007 Free Software Foundation, Inc.
  *
@@ -17,10 +21,22 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #include "Mhwd.hpp"
+
+#include <iostream>
 
 int main(int argc, char *argv[])
 {
-    Mhwd mhwd;
-    return mhwd.launch(argc, argv);
+    try
+    {
+    	Mhwd mhwd;
+    	mhwd.setVersionMhwd("0.5.2","2012 2013 2014 2015");
+    	return mhwd.launch(argc, argv);
+    }
+    catch(...)
+    {
+    	std::cerr << "Unknown errors occured...";
+    	return -1;
+    }
 }
