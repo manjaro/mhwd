@@ -4,7 +4,7 @@
  *  mhwd - Manjaro Hardware Detection
  *  Roland Singer <roland@manjaro.org>
  *  Łukasz Matysiak <december0123@gmail.com>
- * 	Filipe Marques <eagle.software3@gmail.com>
+ *  Filipe Marques <eagle.software3@gmail.com>
  *
  *  Copyright (C) 2007 Free Software Foundation, Inc.
  *
@@ -50,7 +50,7 @@ class Mhwd
 public:
     Mhwd();
     ~Mhwd() = default;
-	void setVersionMhwd(std::string versionOfSoftware, std::string yearCopyright);
+    void setVersionMhwd(std::string versionOfSoftware, std::string yearCopyright);
     int launch(int argc, char *argv[]);
 
 private:
@@ -73,8 +73,7 @@ private:
     Data data_;
     Printer printer_;
     std::vector<std::string> configs_;
-
-	std::string version_, year_;
+    std::string version_, year_;
 	
     bool performTransaction(std::shared_ptr<Config> config, MHWD::TRANSACTIONTYPE type);
     bool isUserRoot() const;
