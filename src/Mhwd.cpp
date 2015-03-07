@@ -1,7 +1,10 @@
 /*
+ *  This file is part of the mhwd - Manjaro Hardware Detection project
+ *  
  *  mhwd - Manjaro Hardware Detection
  *  Roland Singer <roland@manjaro.org>
  *  Łukasz Matysiak <december0123@gmail.com>
+ * 	Filipe Marques <eagle.software3@gmail.com>
  *
  *  Copyright (C) 2007 Free Software Foundation, Inc.
  *
@@ -715,6 +718,12 @@ bool Mhwd::runScript(std::shared_ptr<Config> config, MHWD::TRANSACTIONTYPE opera
     }
 }
 
+void Mhwd::setVersionMhwd(std::string versionOfSoftware, std::string yearCopyright)
+{
+	version_ = versionOfSoftware;
+	year_ = yearCopyright;
+}
+
 void Mhwd::tryToParseCmdLineOptions(int argc, char* argv[], bool& autoConfigureNonFreeDriver,
 		std::string& operationType, std::string& autoConfigureClassID)
 {
@@ -729,6 +738,10 @@ void Mhwd::tryToParseCmdLineOptions(int argc, char* argv[], bool& autoConfigureN
 		{
 			printer_.printHelp();
 		}
+		else if (("-v" == option) || ("--version" == option))
+        {
+            printer_.printVersion(version_, year_);
+        }
 		else if (("-f" == option) || ("--force" == option))
 		{
 			arguments_.FORCE = true;
