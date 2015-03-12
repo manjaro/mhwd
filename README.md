@@ -11,13 +11,13 @@
 #### For more info about mhwd go to [mhwd wiki page](https://wiki.manjaro.org/index.php?title=Manjaro_Hardware_Detection_Overview).
 
 ## TODO list (mark an x in [x] to say that it's done)
-- [] allow to set the base lib dir
-- [] force to remove db config
-- [] show detailed info for one config
-- [] set architecture from library not from bash
-- [] pass ids and bus ids to script
-- [] don't remove packages on reinstallation...
-- [] add option similar to pacman --root ...
+ - [ ] allow to set the base lib dir
+ - [ ] force to remove db config
+ - [ ] show detailed info for one config
+ - [ ] set architecture from library not from bash
+ - [ ] pass ids and bus ids to script
+ - [ ] don't remove packages on reinstallation...
+ - [ ] add option similar to pacman --root ...
 
 ## Contribute
 
