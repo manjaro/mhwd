@@ -1,4 +1,4 @@
-## **M**anjaro **H**ard**W**are **D**etection (mhwd)
+## Manjaro HardWare Detection (mhwd)
 
 #### Copyright (C) 2012 2013 2014 2015 Manjaro Developers
 #### Project licensed under GNU GPL v.3 - Check COPYING file
@@ -10,7 +10,7 @@
 
 #### For more info about mhwd go to [mhwd wiki page](https://wiki.manjaro.org/index.php?title=Manjaro_Hardware_Detection_Overview).
 
-### TODO list (mark an x in [x] to say that it's done)
+#### TODO list
  - [ ] allow to set the base lib dir
  - [ ] force to remove db config
  - [ ] show detailed info for one config
