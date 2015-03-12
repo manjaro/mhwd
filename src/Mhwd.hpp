@@ -48,7 +48,7 @@
 class Mhwd
 {
 public:
-    Mhwd();
+    Mhwd() = default;
     ~Mhwd() = default;
     void setVersionMhwd(std::string versionOfSoftware, std::string yearCopyright);
     int launch(int argc, char *argv[]);
@@ -77,7 +77,7 @@ private:
 	
     bool performTransaction(std::shared_ptr<Config> config, MHWD::TRANSACTIONTYPE type);
     bool isUserRoot() const;
-    std::string checkEnvironment();
+    std::vector<std::string> checkEnvironment() const;
 
     void printDeviceDetails(std::string type, FILE *f = stdout);
 
@@ -94,7 +94,7 @@ private:
     bool copyFile(const std::string& source, const std::string destination, const mode_t mode =
             S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IROTH);
     bool removeDirectory(const std::string& directory);
-    bool dirExists(const std::string& path);
+    bool dirExists(const std::string& path) const;
     bool createDir(const std::string& path, const mode_t mode =
             S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IROTH | S_IXGRP | S_IXOTH);
 

@@ -42,10 +42,6 @@
 #include <string>
 #include <vector>
 
-Mhwd::Mhwd() : arguments_(), data_(), printer_()
-{
-}
-
 bool Mhwd::performTransaction(std::shared_ptr<Config> config, MHWD::TRANSACTIONTYPE transactionType)
 {
     Transaction transaction (data_, config, transactionType,
@@ -167,29 +163,27 @@ bool Mhwd::isUserRoot() const
     return true;
 }
 
-std::string Mhwd::checkEnvironment()
+std::vector<std::string> Mhwd::checkEnvironment() const
 {
-    std::string missingDir;
-
-    // Check if required directories exists. Otherwise return missing directory...
+	std::vector<std::string> missingDirs;
     if (!dirExists(MHWD_USB_CONFIG_DIR))
     {
-        missingDir = MHWD_USB_CONFIG_DIR;
+    	missingDirs.emplace_back(MHWD_USB_CONFIG_DIR);
     }
     if (!dirExists(MHWD_PCI_CONFIG_DIR))
     {
-        missingDir = MHWD_PCI_CONFIG_DIR;
+    	missingDirs.emplace_back(MHWD_PCI_CONFIG_DIR);
     }
     if (!dirExists(MHWD_USB_DATABASE_DIR))
     {
-        missingDir = MHWD_USB_DATABASE_DIR;
+    	missingDirs.emplace_back(MHWD_USB_DATABASE_DIR);
     }
     if (!dirExists(MHWD_PCI_DATABASE_DIR))
     {
-        missingDir = MHWD_PCI_DATABASE_DIR;
+    	missingDirs.emplace_back(MHWD_PCI_DATABASE_DIR);
     }
 
-    return missingDir;
+    return missingDirs;
 }
 
 void Mhwd::printDeviceDetails(std::string type, FILE *f)
@@ -530,7 +524,7 @@ bool Mhwd::removeDirectory(const std::string& directory)
     }
 }
 
-bool Mhwd::dirExists(const std::string& path)
+bool Mhwd::dirExists(const std::string& path) const
 {
     struct stat filestatus;
     if (0 != stat(path.c_str(), &filestatus))
@@ -956,6 +950,17 @@ bool Mhwd::optionsDontInterfereWithEachOther() const
 
 int Mhwd::launch(int argc, char *argv[])
 {
+    std::vector<std::string> missingDirs { checkEnvironment() };
+    if (!missingDirs.empty())
+    {
+    	printer_.printError("Following directories do not exist:");
+    	for (const auto& dir : missingDirs)
+    	{
+    		printer_.printStatus(dir);
+    	}
+        return 1;
+    }
+
     std::string operationType;
     bool autoConfigureNonFreeDriver = false;
     std::string autoConfigureClassID;
@@ -975,14 +980,6 @@ int Mhwd::launch(int argc, char *argv[])
     if (!optionsDontInterfereWithEachOther())
     {
     	return 1;
-    }
-
-    // Check environment
-    std::string missingDir { checkEnvironment() };
-    if (!missingDir.empty())
-    {
-        printer_.printError("directory '" + missingDir + "' does not exist!");
-        return 1;
     }
 
     // Check for invalid configs
@@ -1180,8 +1177,7 @@ int Mhwd::launch(int argc, char *argv[])
                     	skip = std::find_if(installedConfigs->begin(), installedConfigs->end(),
                     			[&config](const std::shared_ptr<Config>& conf) -> bool {
                     				return conf->name_ == config->name_;
-                    			})
-                    				!= installedConfigs->end();
+                    			}) != installedConfigs->end();
                     }
                     // Print found config
                     if (skip)
