@@ -1,16 +1,16 @@
-# **M**anjaro **H**ard**W**are **D**etection (mhwd)
+## **M**anjaro **H**ard**W**are **D**etection (mhwd)
 
-## Copyright (C) 2012 2013 2014 2015 Manjaro Developers
-## Project licensed under GNU GPL v.3 - Check COPYING file
+#### Copyright (C) 2012 2013 2014 2015 Manjaro Developers
+#### Project licensed under GNU GPL v.3 - Check COPYING file
 
-### The Manjaro HardWare Detection (mhwd) command is a unique feature of [Manjaro Linux](http://manjaro.org/) operating system.
-### There are currently two types of mhwd command:
+#### The Manjaro HardWare Detection (mhwd) command is a unique feature of [Manjaro Linux](http://manjaro.org/) operating system.
+#### There are currently two types of mhwd command:
 1. mhwd: Enables the automatic detection and configuration of computer hardware the system is running on. This includes both hardware connected internally via PCI (e.g. graphics cards), and connected externally via [USB](http://en.wikipedia.org/wiki/USB) (e.g. flashdrives).
 2. mhwd-kernel: Enables the installation and easy management of multiple kernels on your system.
 
 #### For more info about mhwd go to [mhwd wiki page](https://wiki.manjaro.org/index.php?title=Manjaro_Hardware_Detection_Overview).
 
-## TODO list (mark an x in [x] to say that it's done)
+### TODO list (mark an x in [x] to say that it's done)
  - [ ] allow to set the base lib dir
  - [ ] force to remove db config
  - [ ] show detailed info for one config
@@ -19,9 +19,9 @@
  - [ ] don't remove packages on reinstallation...
  - [ ] add option similar to pacman --root ...
 
-## Contribute
+### Contribute
 
-### Code Convention
+#### Code Convention
 
 The code convention used in this project is CamelCase. For example:
 
@@ -41,13 +41,13 @@ void Mhwd::setVersionMhwd(std::string versionOfSoftware, std::string yearCopyrig
 }
 ```
 
-### Software need for coding or testing
+#### Software need for coding or testing
 
 * C++ tool chain: [g++](https://gcc.gnu.org/) or [clang](http://clang.llvm.org/), [cmake](http://www.cmake.org/), [make](http://www.gnu.org/software/make/)
 * Good Knowledge of [C++11](http://isocpp.org/)
 * [git](http://git-scm.com/)
 
-### Building
+#### Building
 
 In a terminal window do:
 
