@@ -225,15 +225,15 @@ std::shared_ptr<Config> Mhwd::getInstalledConfig(const std::string& configName,
         installedConfigs = &data_.installedPCIConfigs;
     }
 
-    for (auto&& installedConfig = installedConfigs->begin();
-            installedConfig != installedConfigs->end(); installedConfig++)
-    {
-        if (configName == (*installedConfig)->name_)
-        {
-            return (*installedConfig);
-        }
-    }
+    auto installedConfig = std::find_if(installedConfigs->begin(), installedConfigs->end(),
+            [configName](const std::shared_ptr<Config>& config) {
+                return configName == config->name_;
+            });
 
+    if (installedConfig != installedConfigs->end())
+    {
+        return *installedConfig;
+    }
     return nullptr;
 }
 
@@ -252,15 +252,14 @@ std::shared_ptr<Config> Mhwd::getDatabaseConfig(const std::string& configName,
         allConfigs = &data_.allPCIConfigs;
     }
 
-    for (auto&& iterator = allConfigs->begin();
-            iterator != allConfigs->end(); ++iterator)
+    auto config = std::find_if(allConfigs->begin(), allConfigs->end(),
+    		[configName](const std::shared_ptr<Config>& config) {
+                return config->name_ == configName;
+            });
+    if (config != allConfigs->end())
     {
-        if (configName == (*iterator)->name_)
-        {
-            return (*iterator);
-        }
+        return *config;
     }
-
     return nullptr;
 }
 
@@ -288,13 +287,14 @@ std::shared_ptr<Config> Mhwd::getAvailableConfig(const std::string& configName,
         }
         else
         {
-            for (auto&& availableConfig = (*device)->availableConfigs_.begin();
-                    availableConfig != (*device)->availableConfigs_.end(); availableConfig++)
+            auto& availableConfigs = (*device)->availableConfigs_;
+            auto availableConfig = std::find_if(availableConfigs.begin(), availableConfigs.end(),
+                    [configName](const std::shared_ptr<Config>& config){
+                        return config->name_ == configName;
+                    });
+            if (availableConfig != availableConfigs.end())
             {
-                if (configName == (*availableConfig)->name_)
-                {
-                    return (*availableConfig);
-                }
+                return *availableConfig;
             }
         }
     }
