@@ -1220,7 +1220,11 @@ int Mhwd::launch(int argc, char *argv[])
     // Transaction
     if (arguments_.INSTALL || arguments_.REMOVE)
     {
-        if (isUserRoot())
+        if (!isUserRoot())
+        {
+            printer_.printError("You cannot perform this operation unless you are root!");
+        }
+        else
         {
             for (auto&& configName = configs_.begin();
                     configName != configs_.end(); configName++)
@@ -1295,10 +1299,6 @@ int Mhwd::launch(int argc, char *argv[])
                     }
                 }
             }
-        }
-        else
-        {
-            printer_.printError("You cannot perform this operation unless you are root!");
         }
     }
     return 0;
