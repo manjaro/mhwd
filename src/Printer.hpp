@@ -54,7 +54,7 @@ private:
     void printLine() const;
 
     const char* CONSOLE_COLOR_RESET {"\033[m"};
-    const char* CONSOLE_MESSAGE_COLOR {"\033[1m\033[31m"};
+    const char* CONSOLE_RED_MESSAGE_COLOR {"\033[1m\033[31m"};
     const char* CONSOLE_TEXT_OUTPUT_COLOR {"\033[0;32m"};
 };
 

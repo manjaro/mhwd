@@ -31,19 +31,19 @@
 
 void Printer::printStatus(std::string statusMsg) const
 {
-    std::cout << CONSOLE_MESSAGE_COLOR << "> "
+    std::cout << CONSOLE_RED_MESSAGE_COLOR << "> "
             << CONSOLE_COLOR_RESET << statusMsg << std::endl;
 }
 
 void Printer::printError(std::string errorMsg) const
 {
-    std::cout << CONSOLE_MESSAGE_COLOR << "Error: "
+    std::cout << CONSOLE_RED_MESSAGE_COLOR << "Error: "
             << CONSOLE_COLOR_RESET << errorMsg << std::endl;
 }
 
 void Printer::printWarning(std::string warningMsg) const
 {
-    std::cout << CONSOLE_MESSAGE_COLOR << "Warning: "
+    std::cout << CONSOLE_RED_MESSAGE_COLOR << "Warning: "
             << CONSOLE_COLOR_RESET << warningMsg << std::endl;
 }
 
