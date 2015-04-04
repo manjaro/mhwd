@@ -41,10 +41,6 @@ Data::Data()
     updateConfigData();
 }
 
-Data::~Data()
-{
-}
-
 void Data::updateInstalledConfigData()
 {
     // Clear config vectors in each device element

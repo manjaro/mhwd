@@ -41,7 +41,7 @@
 class Data {
 public:
     Data();
-    ~Data();
+    ~Data() = default;
 
     struct Environment {
             std::string PMCachePath {MHWD_PM_CACHE_DIR};
