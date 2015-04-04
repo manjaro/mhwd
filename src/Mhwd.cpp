@@ -486,8 +486,7 @@ bool Mhwd::removeDirectory(const std::string& directory)
         struct dirent *dir;
         while ((dir = readdir(d)) != nullptr)
         {
-            std::string filename = std::string(dir->d_name);
-            std::string filepath = directory + "/" + filename;
+            std::string filename {dir->d_name};
 
             if (("." == filename) || (".." == filename) || ("" == filename))
             {
@@ -495,6 +494,7 @@ bool Mhwd::removeDirectory(const std::string& directory)
             }
             else
             {
+                std::string filepath {directory + "/" + filename};
                 struct stat filestatus;
                 lstat(filepath.c_str(), &filestatus);
 
