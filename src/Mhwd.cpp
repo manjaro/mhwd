@@ -424,8 +424,6 @@ bool Mhwd::copyDirectory(const std::string& source, const std::string& destinati
         while ((dir = readdir(d)) != nullptr)
         {
             std::string filename {dir->d_name};
-            std::string sourcePath {source + "/" + filename};
-            std::string destinationPath {destination + "/" + filename};
 
             if (("." == filename) || (".." == filename) || ("" == filename))
             {
@@ -433,6 +431,8 @@ bool Mhwd::copyDirectory(const std::string& source, const std::string& destinati
             }
             else
             {
+                std::string sourcePath {source + "/" + filename};
+                std::string destinationPath {destination + "/" + filename};
                 lstat(sourcePath.c_str(), &filestatus);
 
                 if (S_ISREG(filestatus.st_mode))
