@@ -272,7 +272,7 @@ void Printer::printLine() const
     std::cout << std::setfill('-') << std::setw(80) << "-" << std::setfill(' ') << std::endl;
 }
 
-void Printer::printDeviceDetails(hw_item hw, FILE *f)
+void Printer::printDeviceDetails(hw_item hw, FILE *f) const
 {
     std::unique_ptr<hd_data_t> hd_data{new hd_data_t()};
     hd_t *hd = hd_list(hd_data.get(), hw, 1, nullptr);

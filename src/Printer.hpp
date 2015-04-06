@@ -52,7 +52,7 @@ public:
     void printInstalledConfigs(const std::string& deviceType,
             const std::vector<std::shared_ptr<Config>>& installedConfigs) const;
     void printConfigDetails(const Config& config) const;
-    void printDeviceDetails(hw_item hw, FILE *f = stdout);
+    void printDeviceDetails(hw_item hw, FILE *f = stdout) const;
 private:
     void printLine() const;
 
