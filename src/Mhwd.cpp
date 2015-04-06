@@ -1144,8 +1144,6 @@ int Mhwd::launch(int argc, char *argv[])
                 }
                 else
                 {
-                	bool alreadyInList = std::find(configs_.begin(), configs_.end(), config->name_) != configs_.end();
-
                     // If force is not set then skip found config
                     bool skip = false;
                     if (!arguments_.FORCE)
@@ -1175,6 +1173,7 @@ int Mhwd::launch(int argc, char *argv[])
                                 device->deviceName_);
                     }
 
+                    bool alreadyInList = std::find(configs_.begin(), configs_.end(), config->name_) != configs_.end();
                     if (!alreadyInList && !skip)
                     {
                         configs_.push_back(config->name_);
