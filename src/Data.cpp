@@ -35,8 +35,8 @@
 
 Data::Data()
 {
-    fillDevices("PCI");
-    fillDevices("USB");
+    fillDevices(hw_pci, PCIDevices);
+    fillDevices(hw_usb, USBDevices);
 
     updateConfigData();
 }
@@ -421,22 +421,8 @@ std::vector<std::shared_ptr<Config>> Data::getAllLocalRequirements(std::shared_p
     return requirements;
 }
 
-void Data::fillDevices(std::string type)
+void Data::fillDevices(hw_item hw, std::vector<std::shared_ptr<Device>>& devices)
 {
-    hw_item hw;
-    std::vector<std::shared_ptr<Device>>* devices;
-
-    if ("USB" == type)
-    {
-        hw = hw_usb;
-        devices = &USBDevices;
-    }
-    else
-    {
-        hw = hw_pci;
-        devices = &PCIDevices;
-    }
-
     // Get the hardware devices
     std::unique_ptr<hd_data_t> hd_data{new hd_data_t()};
     hd_t *hd = hd_list(hd_data.get(), hw, 1, nullptr);
@@ -445,7 +431,7 @@ void Data::fillDevices(std::string type)
     for (hd_t *hdIter = hd; hdIter; hdIter = hdIter->next)
     {
         device.reset(new Device());
-        device->type_ = type;
+        device->type_ = (hw == hw_usb ? "USB" : "PCI");
         device->classID_ = from_Hex(hdIter->base_class.id, 2) + from_Hex(hdIter->sub_class.id, 2).toLower();
         device->vendorID_ = from_Hex(hdIter->vendor.id, 4).toLower();
         device->deviceID_ = from_Hex(hdIter->device.id, 4).toLower();
@@ -454,7 +440,7 @@ void Data::fillDevices(std::string type)
         device->deviceName_ = from_CharArray(hdIter->device.name);
         device->sysfsBusID_ = from_CharArray(hdIter->sysfs_bus_id);
         device->sysfsID_ = from_CharArray(hdIter->sysfs_id);
-        devices->emplace_back(device.release());
+        devices.emplace_back(device.release());
     }
 
     hd_free_hd_list(hd);
@@ -503,15 +489,14 @@ std::vector<std::string> Data::getRecursiveDirectoryFileList(const std::string& 
     {
         while (nullptr != (dir = readdir(d)))
         {
-            std::string filename = dir->d_name;
-            std::string filepath = directoryPath + "/" + filename;
-
+            std::string filename {dir->d_name};
             if (("." == filename) || (".." == filename) || ("" == filename))
             {
                 continue;
             }
             else
             {
+                std::string filepath {directoryPath + "/" + filename};
                 struct stat filestatus;
                 lstat(filepath.c_str(), &filestatus);
 
@@ -552,7 +537,7 @@ Vita::string Data::getRightConfigPath(Vita::string str, Vita::string baseConfigP
 
 std::vector<std::string> Data::splitValue(Vita::string str, Vita::string onlyEnding)
 {
-    std::vector<Vita::string> work = str.toLower().explode(" ");
+    std::vector<Vita::string> work {str.toLower().explode(" ")};
     std::vector<std::string> final;
 
     for (auto&& iterator = work.begin(); iterator != work.end();

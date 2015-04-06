@@ -75,7 +75,7 @@ private:
     void getAllDevicesOfConfig(const std::vector<std::shared_ptr<Device>>& devices,
             std::shared_ptr<Config> config, std::vector<std::shared_ptr<Device>>& foundDevices);
     void fillInstalledConfigs(std::string type);
-    void fillDevices(std::string type);
+    void fillDevices(hw_item hw, std::vector<std::shared_ptr<Device>>& devices);
     void fillAllConfigs(std::string type);
     void setMatchingConfigs(const std::vector<std::shared_ptr<Device>>& devices,
             std::vector<std::shared_ptr<Config>>& configs, bool setAsInstalled);
