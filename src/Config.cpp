@@ -30,13 +30,8 @@
 
 Config::Config(std::string configPath, std::string type)
     : type_(type), basePath_(configPath.substr(0, configPath.find_last_of('/'))),
-      configPath_(configPath)
+      configPath_(configPath), hwdIDs_(1)
 {
-    if (hwdIDs_.empty())
-    {
-        Config::HardwareID hwdID;
-        hwdIDs_.push_back(hwdID);
-    }
 }
 
 bool Config::readConfigFile(std::string configPath)

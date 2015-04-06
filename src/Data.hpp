@@ -61,7 +61,6 @@ public:
 
     void updateInstalledConfigData();
     void getAllDevicesOfConfig(std::shared_ptr<Config> config, std::vector<std::shared_ptr<Device>>& foundDevices);
-    bool fillConfig(std::shared_ptr<Config> config, std::string configPath, std::string type);
 
     std::vector<std::shared_ptr<Config>> getAllDependenciesToInstall(std::shared_ptr<Config> config);
     void getAllDependenciesToInstall(std::shared_ptr<Config> config,

@@ -493,23 +493,6 @@ void Data::fillAllConfigs(std::string type)
     }
 }
 
-bool Data::fillConfig(std::shared_ptr<Config> config, std::string configPath, std::string type)
-{
-    config->type_ = type;
-    config->priority_ = 0;
-    config->freedriver_ = true;
-    config->basePath_ = configPath.substr(0, configPath.find_last_of('/'));
-    config->configPath_ = configPath;
-
-    // Add new HardwareIDs group to vector if vector is empty
-    if (config->hwdIDs_.empty())
-    {
-        config->hwdIDs_.emplace_back();
-    }
-
-    return config->readConfigFile(config->configPath_);
-}
-
 std::vector<std::string> Data::getRecursiveDirectoryFileList(const std::string& directoryPath,
         std::string onlyFilename)
 {
