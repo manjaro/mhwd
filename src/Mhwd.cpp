@@ -186,30 +186,6 @@ std::vector<std::string> Mhwd::checkEnvironment() const
     return missingDirs;
 }
 
-void Mhwd::printDeviceDetails(std::string type, FILE *f)
-{
-    hw_item hw;
-    if ("USB" == type)
-    {
-        hw = hw_usb;
-    }
-    else
-    {
-        hw = hw_pci;
-    }
-
-    std::unique_ptr<hd_data_t> hd_data{new hd_data_t()};
-    hd_t *hd = hd_list(hd_data.get(), hw, 1, nullptr);
-
-    for (hd_t* hdIter = hd; hdIter; hdIter = hdIter->next)
-    {
-        hd_dump_entry(hd_data.get(), hdIter, f);
-    }
-
-    hd_free_hd_list(hd);
-    hd_free_hd_data(hd_data.get());
-}
-
 std::shared_ptr<Config> Mhwd::getInstalledConfig(const std::string& configName,
         const std::string& configType)
 {
@@ -1101,7 +1077,7 @@ int Mhwd::launch(int argc, char *argv[])
     {
         if (arguments_.DETAIL)
         {
-            printDeviceDetails("PCI");
+            printer_.printDeviceDetails(hw_pci);
         }
         else
         {
@@ -1112,7 +1088,7 @@ int Mhwd::launch(int argc, char *argv[])
     {
         if (arguments_.DETAIL)
         {
-            printDeviceDetails("USB");
+            printer_.printDeviceDetails(hw_usb);
         }
         else
         {

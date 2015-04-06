@@ -22,8 +22,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <hd.h>
+
 #include <iomanip>
 #include <iostream>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -267,4 +270,18 @@ void Printer::printConfigDetails(const Config& config) const
 void Printer::printLine() const
 {
     std::cout << std::setfill('-') << std::setw(80) << "-" << std::setfill(' ') << std::endl;
+}
+
+void Printer::printDeviceDetails(hw_item hw, FILE *f)
+{
+    std::unique_ptr<hd_data_t> hd_data{new hd_data_t()};
+    hd_t *hd = hd_list(hd_data.get(), hw, 1, nullptr);
+
+    for (hd_t* hdIter = hd; hdIter; hdIter = hdIter->next)
+    {
+        hd_dump_entry(hd_data.get(), hdIter, f);
+    }
+
+    hd_free_hd_list(hd);
+    hd_free_hd_data(hd_data.get());
 }

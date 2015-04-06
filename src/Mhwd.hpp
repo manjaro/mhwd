@@ -79,8 +79,6 @@ private:
     bool isUserRoot() const;
     std::vector<std::string> checkEnvironment() const;
 
-    void printDeviceDetails(std::string type, FILE *f = stdout);
-
     std::shared_ptr<Config> getInstalledConfig(const std::string& configName, const std::string& configType);
     std::shared_ptr<Config> getDatabaseConfig(const std::string& configName, const std::string& configType);
     std::shared_ptr<Config> getAvailableConfig(const std::string& configName, const std::string& configType);
