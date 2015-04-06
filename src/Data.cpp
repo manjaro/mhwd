@@ -22,6 +22,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "Data.hpp"
+
 #include <dirent.h>
 
 #include <algorithm>
@@ -30,8 +32,6 @@
 #include <sstream>
 #include <string>
 #include <vector>
-
-#include "Data.hpp"
 
 Data::Data()
 {

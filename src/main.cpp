@@ -22,9 +22,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Mhwd.hpp"
-
 #include <iostream>
+
+#include "Mhwd.hpp"
 
 int main(int argc, char *argv[])
 {

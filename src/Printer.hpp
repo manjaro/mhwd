@@ -25,6 +25,8 @@
 #ifndef PRINTER_HPP_
 #define PRINTER_HPP_
 
+#include <hd.h>
+
 #include <string>
 #include <vector>
 

@@ -22,17 +22,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "Config.hpp"
+
 #include <fstream>
 #include <string>
 #include <vector>
 
-#include "Config.hpp"
-
 Config::Config(std::string configPath, std::string type)
     : type_(type), basePath_(configPath.substr(0, configPath.find_last_of('/'))),
       configPath_(configPath), hwdIDs_(1)
-{
-}
+{}
 
 bool Config::readConfigFile(std::string configPath)
 {

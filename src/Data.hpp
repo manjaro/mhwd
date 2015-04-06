@@ -34,16 +34,18 @@
 #include <vector>
 
 #include "Config.hpp"
-#include "Device.hpp"
 #include "const.h"
+#include "Device.hpp"
 #include "vita/string.hpp"
 
-class Data {
+class Data
+{
 public:
     Data();
     ~Data() = default;
 
-    struct Environment {
+    struct Environment
+    {
             std::string PMCachePath {MHWD_PM_CACHE_DIR};
             std::string PMConfigPath {MHWD_PM_CONFIG};
             std::string PMRootPath {MHWD_PM_ROOT};

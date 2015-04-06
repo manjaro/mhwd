@@ -23,7 +23,6 @@
  */
 
 #include "Mhwd.hpp"
-#include "vita/string.hpp"
 
 #include <unistd.h>
 #include <sys/stat.h>
@@ -41,6 +40,8 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+
+#include "vita/string.hpp"
 
 bool Mhwd::performTransaction(std::shared_ptr<Config> config, MHWD::TRANSACTIONTYPE transactionType)
 {

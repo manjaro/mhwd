@@ -22,6 +22,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "Printer.hpp"
+
 #include <hd.h>
 
 #include <iomanip>
@@ -29,8 +31,6 @@
 #include <memory>
 #include <string>
 #include <vector>
-
-#include "Printer.hpp"
 
 void Printer::printStatus(std::string statusMsg) const
 {
