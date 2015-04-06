@@ -242,8 +242,8 @@ void Data::getAllDependenciesToInstall(std::shared_ptr<Config> config,
             configDependency != config->dependencies_.end(); ++configDependency)
     {
         auto found = std::find_if(installedConfigs.begin(), installedConfigs.end(),
-                [configDependency](const std::shared_ptr<Config>& rhs) -> bool {
-                    return (rhs->name_ == *configDependency);
+                [configDependency](const std::shared_ptr<Config>& config) -> bool {
+                    return (config->name_ == *configDependency);
                 });
 
         if (found != installedConfigs.end())
@@ -253,8 +253,8 @@ void Data::getAllDependenciesToInstall(std::shared_ptr<Config> config,
         else
         {
             found = std::find_if(dependencies->begin(), dependencies->end(),
-                    [configDependency](const std::shared_ptr<Config>& rhs) -> bool {
-                        return (rhs->name_ == *configDependency);
+                    [configDependency](const std::shared_ptr<Config>& config) -> bool {
+                        return (config->name_ == *configDependency);
                     });
 
             if (found != dependencies->end())
