@@ -36,9 +36,9 @@ Config::Config(std::string configPath, std::string type)
 
 bool Config::readConfigFile(std::string configPath)
 {
-    std::ifstream file(configPath.c_str());
+    std::ifstream file(configPath);
 
-    if (!file.is_open())
+    if (!file)
     {
         return false;
     }
