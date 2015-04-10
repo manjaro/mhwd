@@ -22,16 +22,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Mhwd.hpp"
-
 #include <iostream>
+
+#include "Mhwd.hpp"
 
 int main(int argc, char *argv[])
 {
     try
     {
     	Mhwd mhwd;
-    	mhwd.setVersionMhwd("0.5.2","2012 2013 2014 2015");
+    	mhwd.setVersionMhwd("0.5.3","2012-2015");
     	return mhwd.launch(argc, argv);
     }
     catch(...)

@@ -34,16 +34,18 @@
 #include <vector>
 
 #include "Config.hpp"
-#include "Device.hpp"
 #include "const.h"
+#include "Device.hpp"
 #include "vita/string.hpp"
 
-class Data {
+class Data
+{
 public:
     Data();
-    ~Data();
+    ~Data() = default;
 
-    struct Environment {
+    struct Environment
+    {
             std::string PMCachePath {MHWD_PM_CACHE_DIR};
             std::string PMConfigPath {MHWD_PM_CONFIG};
             std::string PMRootPath {MHWD_PM_ROOT};
@@ -61,7 +63,6 @@ public:
 
     void updateInstalledConfigData();
     void getAllDevicesOfConfig(std::shared_ptr<Config> config, std::vector<std::shared_ptr<Device>>& foundDevices);
-    bool fillConfig(std::shared_ptr<Config> config, std::string configPath, std::string type);
 
     std::vector<std::shared_ptr<Config>> getAllDependenciesToInstall(std::shared_ptr<Config> config);
     void getAllDependenciesToInstall(std::shared_ptr<Config> config,
@@ -76,7 +77,7 @@ private:
     void getAllDevicesOfConfig(const std::vector<std::shared_ptr<Device>>& devices,
             std::shared_ptr<Config> config, std::vector<std::shared_ptr<Device>>& foundDevices);
     void fillInstalledConfigs(std::string type);
-    void fillDevices(std::string type);
+    void fillDevices(hw_item hw, std::vector<std::shared_ptr<Device>>& devices);
     void fillAllConfigs(std::string type);
     void setMatchingConfigs(const std::vector<std::shared_ptr<Device>>& devices,
             std::vector<std::shared_ptr<Config>>& configs, bool setAsInstalled);

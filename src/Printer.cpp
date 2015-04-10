@@ -22,28 +22,31 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "Printer.hpp"
+
+#include <hd.h>
+
 #include <iomanip>
 #include <iostream>
+#include <memory>
 #include <string>
 #include <vector>
 
-#include "Printer.hpp"
-
 void Printer::printStatus(std::string statusMsg) const
 {
-    std::cout << CONSOLE_MESSAGE_COLOR << "> "
+    std::cout << CONSOLE_RED_MESSAGE_COLOR << "> "
             << CONSOLE_COLOR_RESET << statusMsg << std::endl;
 }
 
 void Printer::printError(std::string errorMsg) const
 {
-    std::cout << CONSOLE_MESSAGE_COLOR << "Error: "
+    std::cout << CONSOLE_RED_MESSAGE_COLOR << "Error: "
             << CONSOLE_COLOR_RESET << errorMsg << std::endl;
 }
 
 void Printer::printWarning(std::string warningMsg) const
 {
-    std::cout << CONSOLE_MESSAGE_COLOR << "Warning: "
+    std::cout << CONSOLE_RED_MESSAGE_COLOR << "Warning: "
             << CONSOLE_COLOR_RESET << warningMsg << std::endl;
 }
 
@@ -102,9 +105,9 @@ void Printer::printHelp() const
 
 void Printer::printVersion(std::string versionMhwd, std::string yearCopy) const
 {
-    std::cout << "Manjaro Hardware Detection version "<< versionMhwd <<"\n\n" 
+    std::cout << "Manjaro Hardware Detection v"<< versionMhwd <<"\n\n" 
             << "Copyright (C) "<< yearCopy <<" Manjaro Linux Developers\n"
-            << "This is free software licensed under GNU GPL v.3\n"
+            << "This is free software licensed under GNU GPL v3.0\n"
             << "FITNESS FOR A PARTICULAR PURPOSE.\n" 
             << std::endl;
 }
@@ -267,4 +270,18 @@ void Printer::printConfigDetails(const Config& config) const
 void Printer::printLine() const
 {
     std::cout << std::setfill('-') << std::setw(80) << "-" << std::setfill(' ') << std::endl;
+}
+
+void Printer::printDeviceDetails(hw_item hw, FILE *f) const
+{
+    std::unique_ptr<hd_data_t> hd_data{new hd_data_t()};
+    hd_t *hd = hd_list(hd_data.get(), hw, 1, nullptr);
+
+    for (hd_t* hdIter = hd; hdIter; hdIter = hdIter->next)
+    {
+        hd_dump_entry(hd_data.get(), hdIter, f);
+    }
+
+    hd_free_hd_list(hd);
+    hd_free_hd_data(hd_data.get());
 }

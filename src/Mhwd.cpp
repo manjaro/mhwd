@@ -23,7 +23,6 @@
  */
 
 #include "Mhwd.hpp"
-#include "vita/string.hpp"
 
 #include <unistd.h>
 #include <sys/stat.h>
@@ -42,9 +41,7 @@
 #include <string>
 #include <vector>
 
-Mhwd::Mhwd() : arguments_(), data_(), printer_()
-{
-}
+#include "vita/string.hpp"
 
 bool Mhwd::performTransaction(std::shared_ptr<Config> config, MHWD::TRANSACTIONTYPE transactionType)
 {
@@ -167,53 +164,27 @@ bool Mhwd::isUserRoot() const
     return true;
 }
 
-std::string Mhwd::checkEnvironment()
+std::vector<std::string> Mhwd::checkEnvironment() const
 {
-    std::string missingDir;
-
-    // Check if required directories exists. Otherwise return missing directory...
+	std::vector<std::string> missingDirs;
     if (!dirExists(MHWD_USB_CONFIG_DIR))
     {
-        missingDir = MHWD_USB_CONFIG_DIR;
+    	missingDirs.emplace_back(MHWD_USB_CONFIG_DIR);
     }
     if (!dirExists(MHWD_PCI_CONFIG_DIR))
     {
-        missingDir = MHWD_PCI_CONFIG_DIR;
+    	missingDirs.emplace_back(MHWD_PCI_CONFIG_DIR);
     }
     if (!dirExists(MHWD_USB_DATABASE_DIR))
     {
-        missingDir = MHWD_USB_DATABASE_DIR;
+    	missingDirs.emplace_back(MHWD_USB_DATABASE_DIR);
     }
     if (!dirExists(MHWD_PCI_DATABASE_DIR))
     {
-        missingDir = MHWD_PCI_DATABASE_DIR;
+    	missingDirs.emplace_back(MHWD_PCI_DATABASE_DIR);
     }
 
-    return missingDir;
-}
-
-void Mhwd::printDeviceDetails(std::string type, FILE *f)
-{
-    hw_item hw;
-    if ("USB" == type)
-    {
-        hw = hw_usb;
-    }
-    else
-    {
-        hw = hw_pci;
-    }
-
-    std::unique_ptr<hd_data_t> hd_data{new hd_data_t()};
-    hd_t *hd = hd_list(hd_data.get(), hw, 1, nullptr);
-
-    for (hd_t* hdIter = hd; hdIter; hdIter = hdIter->next)
-    {
-        hd_dump_entry(hd_data.get(), hdIter, f);
-    }
-
-    hd_free_hd_list(hd);
-    hd_free_hd_data(hd_data.get());
+    return missingDirs;
 }
 
 std::shared_ptr<Config> Mhwd::getInstalledConfig(const std::string& configName,
@@ -231,15 +202,15 @@ std::shared_ptr<Config> Mhwd::getInstalledConfig(const std::string& configName,
         installedConfigs = &data_.installedPCIConfigs;
     }
 
-    for (auto&& installedConfig = installedConfigs->begin();
-            installedConfig != installedConfigs->end(); installedConfig++)
-    {
-        if (configName == (*installedConfig)->name_)
-        {
-            return (*installedConfig);
-        }
-    }
+    auto installedConfig = std::find_if(installedConfigs->begin(), installedConfigs->end(),
+            [configName](const std::shared_ptr<Config>& config) {
+                return configName == config->name_;
+            });
 
+    if (installedConfig != installedConfigs->end())
+    {
+        return *installedConfig;
+    }
     return nullptr;
 }
 
@@ -258,15 +229,14 @@ std::shared_ptr<Config> Mhwd::getDatabaseConfig(const std::string& configName,
         allConfigs = &data_.allPCIConfigs;
     }
 
-    for (auto&& iterator = allConfigs->begin();
-            iterator != allConfigs->end(); ++iterator)
+    auto config = std::find_if(allConfigs->begin(), allConfigs->end(),
+    		[configName](const std::shared_ptr<Config>& config) {
+                return config->name_ == configName;
+            });
+    if (config != allConfigs->end())
     {
-        if (configName == (*iterator)->name_)
-        {
-            return (*iterator);
-        }
+        return *config;
     }
-
     return nullptr;
 }
 
@@ -294,13 +264,14 @@ std::shared_ptr<Config> Mhwd::getAvailableConfig(const std::string& configName,
         }
         else
         {
-            for (auto&& availableConfig = (*device)->availableConfigs_.begin();
-                    availableConfig != (*device)->availableConfigs_.end(); availableConfig++)
+            auto& availableConfigs = (*device)->availableConfigs_;
+            auto availableConfig = std::find_if(availableConfigs.begin(), availableConfigs.end(),
+                    [configName](const std::shared_ptr<Config>& config){
+                        return config->name_ == configName;
+                    });
+            if (availableConfig != availableConfigs.end())
             {
-                if (configName == (*availableConfig)->name_)
-                {
-                    return (*availableConfig);
-                }
+                return *availableConfig;
             }
         }
     }
@@ -430,8 +401,6 @@ bool Mhwd::copyDirectory(const std::string& source, const std::string& destinati
         while ((dir = readdir(d)) != nullptr)
         {
             std::string filename {dir->d_name};
-            std::string sourcePath {source + "/" + filename};
-            std::string destinationPath {destination + "/" + filename};
 
             if (("." == filename) || (".." == filename) || ("" == filename))
             {
@@ -439,6 +408,8 @@ bool Mhwd::copyDirectory(const std::string& source, const std::string& destinati
             }
             else
             {
+                std::string sourcePath {source + "/" + filename};
+                std::string destinationPath {destination + "/" + filename};
                 lstat(sourcePath.c_str(), &filestatus);
 
                 if (S_ISREG(filestatus.st_mode))
@@ -492,8 +463,7 @@ bool Mhwd::removeDirectory(const std::string& directory)
         struct dirent *dir;
         while ((dir = readdir(d)) != nullptr)
         {
-            std::string filename = std::string(dir->d_name);
-            std::string filepath = directory + "/" + filename;
+            std::string filename {dir->d_name};
 
             if (("." == filename) || (".." == filename) || ("" == filename))
             {
@@ -501,6 +471,7 @@ bool Mhwd::removeDirectory(const std::string& directory)
             }
             else
             {
+                std::string filepath {directory + "/" + filename};
                 struct stat filestatus;
                 lstat(filepath.c_str(), &filestatus);
 
@@ -530,7 +501,7 @@ bool Mhwd::removeDirectory(const std::string& directory)
     }
 }
 
-bool Mhwd::dirExists(const std::string& path)
+bool Mhwd::dirExists(const std::string& path) const
 {
     struct stat filestatus;
     if (0 != stat(path.c_str(), &filestatus))
@@ -956,6 +927,17 @@ bool Mhwd::optionsDontInterfereWithEachOther() const
 
 int Mhwd::launch(int argc, char *argv[])
 {
+    std::vector<std::string> missingDirs { checkEnvironment() };
+    if (!missingDirs.empty())
+    {
+    	printer_.printError("Following directories do not exist:");
+    	for (const auto& dir : missingDirs)
+    	{
+    		printer_.printStatus(dir);
+    	}
+        return 1;
+    }
+
     std::string operationType;
     bool autoConfigureNonFreeDriver = false;
     std::string autoConfigureClassID;
@@ -975,14 +957,6 @@ int Mhwd::launch(int argc, char *argv[])
     if (!optionsDontInterfereWithEachOther())
     {
     	return 1;
-    }
-
-    // Check environment
-    std::string missingDir { checkEnvironment() };
-    if (!missingDir.empty())
-    {
-        printer_.printError("directory '" + missingDir + "' does not exist!");
-        return 1;
     }
 
     // Check for invalid configs
@@ -1104,7 +1078,7 @@ int Mhwd::launch(int argc, char *argv[])
     {
         if (arguments_.DETAIL)
         {
-            printDeviceDetails("PCI");
+            printer_.printDeviceDetails(hw_pci);
         }
         else
         {
@@ -1115,7 +1089,7 @@ int Mhwd::launch(int argc, char *argv[])
     {
         if (arguments_.DETAIL)
         {
-            printDeviceDetails("USB");
+            printer_.printDeviceDetails(hw_usb);
         }
         else
         {
@@ -1171,8 +1145,6 @@ int Mhwd::launch(int argc, char *argv[])
                 }
                 else
                 {
-                	bool alreadyInList = std::find(configs_.begin(), configs_.end(), config->name_) != configs_.end();
-
                     // If force is not set then skip found config
                     bool skip = false;
                     if (!arguments_.FORCE)
@@ -1180,8 +1152,7 @@ int Mhwd::launch(int argc, char *argv[])
                     	skip = std::find_if(installedConfigs->begin(), installedConfigs->end(),
                     			[&config](const std::shared_ptr<Config>& conf) -> bool {
                     				return conf->name_ == config->name_;
-                    			})
-                    				!= installedConfigs->end();
+                    			}) != installedConfigs->end();
                     }
                     // Print found config
                     if (skip)
@@ -1203,6 +1174,7 @@ int Mhwd::launch(int argc, char *argv[])
                                 device->deviceName_);
                     }
 
+                    bool alreadyInList = std::find(configs_.begin(), configs_.end(), config->name_) != configs_.end();
                     if (!alreadyInList && !skip)
                     {
                         configs_.push_back(config->name_);
@@ -1224,7 +1196,11 @@ int Mhwd::launch(int argc, char *argv[])
     // Transaction
     if (arguments_.INSTALL || arguments_.REMOVE)
     {
-        if (isUserRoot())
+        if (!isUserRoot())
+        {
+            printer_.printError("You cannot perform this operation unless you are root!");
+        }
+        else
         {
             for (auto&& configName = configs_.begin();
                     configName != configs_.end(); configName++)
@@ -1248,7 +1224,7 @@ int Mhwd::launch(int argc, char *argv[])
                     else
                     {
                         config_.reset(new Config(filepath, operationType));
-                        if (!data_.fillConfig(config_, filepath, operationType))
+                        if (!config_->readConfigFile(filepath))
                         {
                             printer_.printError("failed to read custom config '" + filepath + "'!");
                             return 1;
@@ -1299,10 +1275,6 @@ int Mhwd::launch(int argc, char *argv[])
                     }
                 }
             }
-        }
-        else
-        {
-            printer_.printError("You cannot perform this operation unless you are root!");
         }
     }
     return 0;

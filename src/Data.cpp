@@ -22,6 +22,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "Data.hpp"
+
 #include <dirent.h>
 
 #include <algorithm>
@@ -31,18 +33,12 @@
 #include <string>
 #include <vector>
 
-#include "Data.hpp"
-
 Data::Data()
 {
-    fillDevices("PCI");
-    fillDevices("USB");
+    fillDevices(hw_pci, PCIDevices);
+    fillDevices(hw_usb, USBDevices);
 
     updateConfigData();
-}
-
-Data::~Data()
-{
 }
 
 void Data::updateInstalledConfigData()
@@ -133,17 +129,10 @@ void Data::getAllDevicesOfConfig(const std::vector<std::shared_ptr<Device>>& dev
         for (auto&& i_device = devices.begin(); i_device != devices.end();
                 ++i_device)
         {
-            bool found = false;
             // Check class ids
-            for (auto&& classID = hwdID->classIDs.begin();
-                    classID != hwdID->classIDs.end(); ++classID)
-            {
-                if (*classID == "*" || *classID == (*i_device)->classID_)
-                {
-                    found = true;
-                    break;
-                }
-            }
+            bool found = std::find_if(hwdID->classIDs.begin(), hwdID->classIDs.end(), [i_device](const std::string& classID){
+            					return (("*" == classID) || (classID == (*i_device)->classID_));
+            				}) != hwdID->classIDs.end();
 
             if (!found)
             {
@@ -152,19 +141,9 @@ void Data::getAllDevicesOfConfig(const std::vector<std::shared_ptr<Device>>& dev
             else
             {
                 // Check blacklisted class ids
-                found = false;
-
-                for (auto&& blacklistedClassID =
-                        (*hwdID).blacklistedClassIDs.begin();
-                        blacklistedClassID != (*hwdID).blacklistedClassIDs.end();
-                        ++blacklistedClassID)
-                {
-                    if (*blacklistedClassID == (*i_device)->classID_)
-                    {
-                        found = true;
-                        break;
-                    }
-                }
+                found = std::find_if(hwdID->blacklistedClassIDs.begin(), hwdID->blacklistedClassIDs.end(), [i_device](const std::string& blacklistedClassID){
+                				return (blacklistedClassID == (*i_device)->classID_);
+                			}) != hwdID->blacklistedClassIDs.end();
 
                 if (found)
                 {
@@ -173,17 +152,9 @@ void Data::getAllDevicesOfConfig(const std::vector<std::shared_ptr<Device>>& dev
                 else
                 {
                     // Check vendor ids
-                    found = false;
-
-                    for (auto&& vendorID = hwdID->vendorIDs.begin();
-                            vendorID != hwdID->vendorIDs.end(); ++vendorID)
-                    {
-                        if (("*" == *vendorID) || (*vendorID == (*i_device)->vendorID_))
-                        {
-                            found = true;
-                            break;
-                        }
-                    }
+                	found = std::find_if(hwdID->vendorIDs.begin(), hwdID->vendorIDs.end(), [i_device](const std::string& vendorID){
+                	            	return (("*" == vendorID) || (vendorID == (*i_device)->vendorID_));
+                	            }) != hwdID->vendorIDs.end();
 
                     if (!found)
                     {
@@ -192,19 +163,9 @@ void Data::getAllDevicesOfConfig(const std::vector<std::shared_ptr<Device>>& dev
                     else
                     {
                         // Check blacklisted vendor ids
-                        found = false;
-
-                        for (auto&& blacklistedVendorID =
-                                hwdID->blacklistedVendorIDs.begin();
-                                blacklistedVendorID != hwdID->blacklistedVendorIDs.end();
-                                ++blacklistedVendorID)
-                        {
-                            if (*blacklistedVendorID == (*i_device)->vendorID_)
-                            {
-                                found = true;
-                                break;
-                            }
-                        }
+                        found = std::find_if(hwdID->blacklistedVendorIDs.begin(), hwdID->blacklistedVendorIDs.end(), [i_device](const std::string& blacklistedVendorID){
+                        				return (blacklistedVendorID == (*i_device)->vendorID_);
+                        			}) != hwdID->blacklistedVendorIDs.end();
 
                         if (found)
                         {
@@ -213,17 +174,9 @@ void Data::getAllDevicesOfConfig(const std::vector<std::shared_ptr<Device>>& dev
                         else
                         {
                             // Check device ids
-                            found = false;
-
-                            for (auto&& deviceID = hwdID->deviceIDs.begin();
-                                    deviceID != hwdID->deviceIDs.end(); ++deviceID)
-                            {
-                                if (("*" == *deviceID) || (*deviceID == (*i_device)->deviceID_))
-                                {
-                                    found = true;
-                                    break;
-                                }
-                            }
+                        	found = std::find_if(hwdID->deviceIDs.begin(), hwdID->deviceIDs.end(), [i_device](const std::string& deviceID){
+                        	        		return (("*" == deviceID) || (deviceID == (*i_device)->deviceID_));
+                        	            }) != hwdID->deviceIDs.end();
 
                             if (!found)
                             {
@@ -232,20 +185,9 @@ void Data::getAllDevicesOfConfig(const std::vector<std::shared_ptr<Device>>& dev
                             else
                             {
                                 // Check blacklisted device ids
-                                found = false;
-
-                                for (auto&& blacklistedDeviceID =
-                                        hwdID->blacklistedDeviceIDs.begin();
-                                        blacklistedDeviceID != hwdID->blacklistedDeviceIDs.end();
-                                        ++blacklistedDeviceID)
-                                {
-                                    if (*blacklistedDeviceID == (*i_device)->deviceID_)
-                                    {
-                                        found = true;
-                                        break;
-                                    }
-                                }
-
+                                found = std::find_if(hwdID->blacklistedDeviceIDs.begin(), hwdID->blacklistedDeviceIDs.end(), [i_device](const std::string& blacklistedDeviceID){
+                                				return (blacklistedDeviceID == (*i_device)->deviceID_);
+                                			}) != hwdID->blacklistedDeviceIDs.end();
                                 if (found)
                                 {
                                     continue;
@@ -300,8 +242,8 @@ void Data::getAllDependenciesToInstall(std::shared_ptr<Config> config,
             configDependency != config->dependencies_.end(); ++configDependency)
     {
         auto found = std::find_if(installedConfigs.begin(), installedConfigs.end(),
-                [configDependency](const std::shared_ptr<Config>& rhs) -> bool {
-                    return (rhs->name_ == *configDependency);
+                [configDependency](const std::shared_ptr<Config>& config) -> bool {
+                    return (config->name_ == *configDependency);
                 });
 
         if (found != installedConfigs.end())
@@ -311,8 +253,8 @@ void Data::getAllDependenciesToInstall(std::shared_ptr<Config> config,
         else
         {
             found = std::find_if(dependencies->begin(), dependencies->end(),
-                    [configDependency](const std::shared_ptr<Config>& rhs) -> bool {
-                        return (rhs->name_ == *configDependency);
+                    [configDependency](const std::shared_ptr<Config>& config) -> bool {
+                        return (config->name_ == *configDependency);
                     });
 
             if (found != dependencies->end())
@@ -479,22 +421,8 @@ std::vector<std::shared_ptr<Config>> Data::getAllLocalRequirements(std::shared_p
     return requirements;
 }
 
-void Data::fillDevices(std::string type)
+void Data::fillDevices(hw_item hw, std::vector<std::shared_ptr<Device>>& devices)
 {
-    hw_item hw;
-    std::vector<std::shared_ptr<Device>>* devices;
-
-    if ("USB" == type)
-    {
-        hw = hw_usb;
-        devices = &USBDevices;
-    }
-    else
-    {
-        hw = hw_pci;
-        devices = &PCIDevices;
-    }
-
     // Get the hardware devices
     std::unique_ptr<hd_data_t> hd_data{new hd_data_t()};
     hd_t *hd = hd_list(hd_data.get(), hw, 1, nullptr);
@@ -503,7 +431,7 @@ void Data::fillDevices(std::string type)
     for (hd_t *hdIter = hd; hdIter; hdIter = hdIter->next)
     {
         device.reset(new Device());
-        device->type_ = type;
+        device->type_ = (hw == hw_usb ? "USB" : "PCI");
         device->classID_ = from_Hex(hdIter->base_class.id, 2) + from_Hex(hdIter->sub_class.id, 2).toLower();
         device->vendorID_ = from_Hex(hdIter->vendor.id, 4).toLower();
         device->deviceID_ = from_Hex(hdIter->device.id, 4).toLower();
@@ -512,7 +440,7 @@ void Data::fillDevices(std::string type)
         device->deviceName_ = from_CharArray(hdIter->device.name);
         device->sysfsBusID_ = from_CharArray(hdIter->sysfs_bus_id);
         device->sysfsID_ = from_CharArray(hdIter->sysfs_id);
-        devices->emplace_back(device.release());
+        devices.emplace_back(device.release());
     }
 
     hd_free_hd_list(hd);
@@ -551,23 +479,6 @@ void Data::fillAllConfigs(std::string type)
     }
 }
 
-bool Data::fillConfig(std::shared_ptr<Config> config, std::string configPath, std::string type)
-{
-    config->type_ = type;
-    config->priority_ = 0;
-    config->freedriver_ = true;
-    config->basePath_ = configPath.substr(0, configPath.find_last_of('/'));
-    config->configPath_ = configPath;
-
-    // Add new HardwareIDs group to vector if vector is empty
-    if (config->hwdIDs_.empty())
-    {
-        config->hwdIDs_.emplace_back();
-    }
-
-    return config->readConfigFile(config->configPath_);
-}
-
 std::vector<std::string> Data::getRecursiveDirectoryFileList(const std::string& directoryPath,
         std::string onlyFilename)
 {
@@ -578,15 +489,14 @@ std::vector<std::string> Data::getRecursiveDirectoryFileList(const std::string& 
     {
         while (nullptr != (dir = readdir(d)))
         {
-            std::string filename = dir->d_name;
-            std::string filepath = directoryPath + "/" + filename;
-
+            std::string filename {dir->d_name};
             if (("." == filename) || (".." == filename) || ("" == filename))
             {
                 continue;
             }
             else
             {
+                std::string filepath {directoryPath + "/" + filename};
                 struct stat filestatus;
                 lstat(filepath.c_str(), &filestatus);
 
@@ -627,7 +537,7 @@ Vita::string Data::getRightConfigPath(Vita::string str, Vita::string baseConfigP
 
 std::vector<std::string> Data::splitValue(Vita::string str, Vita::string onlyEnding)
 {
-    std::vector<Vita::string> work = str.toLower().explode(" ");
+    std::vector<Vita::string> work {str.toLower().explode(" ")};
     std::vector<std::string> final;
 
     for (auto&& iterator = work.begin(); iterator != work.end();
