@@ -269,7 +269,7 @@ void Printer::printConfigDetails(const Config& config) const
 
 void Printer::printLine() const
 {
-    std::cout << std::setfill('-') << std::setw(80) << "-" << std::setfill(' ') << std::endl;
+    std::cout << std::string(80, '-') << std::endl;
 }
 
 void Printer::printDeviceDetails(hw_item hw, FILE *f) const
