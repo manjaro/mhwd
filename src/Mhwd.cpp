@@ -1,6 +1,6 @@
 /*
  *  This file is part of the mhwd - Manjaro Hardware Detection project
- *  
+ *
  *  mhwd - Manjaro Hardware Detection
  *  Roland Singer <roland@manjaro.org>
  *  Łukasz Matysiak <december0123@gmail.com>
@@ -61,7 +61,7 @@ bool Mhwd::performTransaction(std::shared_ptr<Config> config, MHWD::TRANSACTIONT
                 conflicts += " " + conflictedConfig->name_;
             }
 
-            printer_.printError("config '" + config->name_ + "' conflicts with config(s):" +
+            consoleWriter_.printError("config '" + config->name_ + "' conflicts with config(s):" +
                     conflicts);
             return false;
         }
@@ -76,7 +76,7 @@ bool Mhwd::performTransaction(std::shared_ptr<Config> config, MHWD::TRANSACTIONT
                 dependencies += " " + dependencyConfig->name_;
             }
 
-            printer_.printStatus("Dependencies to install:" + dependencies +
+            consoleWriter_.printStatus("Dependencies to install:" + dependencies +
                     "\nProceed with installation? [Y/n]");
             std::string input;
             std::getline(std::cin, input);
@@ -95,7 +95,7 @@ bool Mhwd::performTransaction(std::shared_ptr<Config> config, MHWD::TRANSACTIONT
                 requirements += " " + requirement->name_;
             }
 
-            printer_.printError("config '" + config->name_ + "' is required by config(s):" +
+            consoleWriter_.printError("config '" + config->name_ + "' is required by config(s):" +
                     requirements);
             return false;
         }
@@ -105,32 +105,32 @@ bool Mhwd::performTransaction(std::shared_ptr<Config> config, MHWD::TRANSACTIONT
 
     switch (status)
     {
-    	case MHWD::STATUS::SUCCESS:
-    		break;
-    	case MHWD::STATUS::ERROR_CONFLICTS:
-    		printer_.printError("config '" + config->name_ +
-    				"' conflicts with installed config(s)!");
-    		break;
-    	case MHWD::STATUS::ERROR_REQUIREMENTS:
-    		printer_.printError("config '" + config->name_ +
-    				"' is required by installed config(s)!");
-    		break;
-    	case MHWD::STATUS::ERROR_NOT_INSTALLED:
-    		printer_.printError("config '" + config->name_ + "' is not installed!");
-    		break;
-    	case MHWD::STATUS::ERROR_ALREADY_INSTALLED:
-            printer_.printWarning("a version of config '" + config->name_ +
-					"' is already installed!\nUse -f/--force to force installation...");
+        case MHWD::STATUS::SUCCESS:
             break;
-    	case MHWD::STATUS::ERROR_NO_MATCH_LOCAL_CONFIG:
-    		printer_.printError("passed config does not match with installed config!");
-    		break;
-    	case MHWD::STATUS::ERROR_SCRIPT_FAILED:
-    		printer_.printError("script failed!");
-    		break;
-    	case MHWD::STATUS::ERROR_SET_DATABASE:
-    		printer_.printError("failed to set database!");
-    		break;
+        case MHWD::STATUS::ERROR_CONFLICTS:
+            consoleWriter_.printError("config '" + config->name_ +
+                    "' conflicts with installed config(s)!");
+            break;
+        case MHWD::STATUS::ERROR_REQUIREMENTS:
+            consoleWriter_.printError("config '" + config->name_ +
+                    "' is required by installed config(s)!");
+            break;
+        case MHWD::STATUS::ERROR_NOT_INSTALLED:
+            consoleWriter_.printError("config '" + config->name_ + "' is not installed!");
+            break;
+        case MHWD::STATUS::ERROR_ALREADY_INSTALLED:
+            consoleWriter_.printWarning("a version of config '" + config->name_ +
+                    "' is already installed!\nUse -f/--force to force installation...");
+            break;
+        case MHWD::STATUS::ERROR_NO_MATCH_LOCAL_CONFIG:
+            consoleWriter_.printError("passed config does not match with installed config!");
+            break;
+        case MHWD::STATUS::ERROR_SCRIPT_FAILED:
+            consoleWriter_.printError("script failed!");
+            break;
+        case MHWD::STATUS::ERROR_SET_DATABASE:
+            consoleWriter_.printError("failed to set database!");
+            break;
     }
 
     data_.updateInstalledConfigData();
@@ -166,22 +166,22 @@ bool Mhwd::isUserRoot() const
 
 std::vector<std::string> Mhwd::checkEnvironment() const
 {
-	std::vector<std::string> missingDirs;
+    std::vector<std::string> missingDirs;
     if (!dirExists(MHWD_USB_CONFIG_DIR))
     {
-    	missingDirs.emplace_back(MHWD_USB_CONFIG_DIR);
+        missingDirs.emplace_back(MHWD_USB_CONFIG_DIR);
     }
     if (!dirExists(MHWD_PCI_CONFIG_DIR))
     {
-    	missingDirs.emplace_back(MHWD_PCI_CONFIG_DIR);
+        missingDirs.emplace_back(MHWD_PCI_CONFIG_DIR);
     }
     if (!dirExists(MHWD_USB_DATABASE_DIR))
     {
-    	missingDirs.emplace_back(MHWD_USB_DATABASE_DIR);
+        missingDirs.emplace_back(MHWD_USB_DATABASE_DIR);
     }
     if (!dirExists(MHWD_PCI_DATABASE_DIR))
     {
-    	missingDirs.emplace_back(MHWD_PCI_DATABASE_DIR);
+        missingDirs.emplace_back(MHWD_PCI_DATABASE_DIR);
     }
 
     return missingDirs;
@@ -230,7 +230,7 @@ std::shared_ptr<Config> Mhwd::getDatabaseConfig(const std::string& configName,
     }
 
     auto config = std::find_if(allConfigs->begin(), allConfigs->end(),
-    		[configName](const std::shared_ptr<Config>& config) {
+            [configName](const std::shared_ptr<Config>& config) {
                 return config->name_ == configName;
             });
     if (config != allConfigs->end())
@@ -306,14 +306,14 @@ MHWD::STATUS Mhwd::performTransaction(const Transaction& transaction)
             }
             else
             {
-                printer_.printMessage(MHWD::MESSAGETYPE::REMOVE_START, installedConfig->name_);
+                consoleWriter_.printMessage(MHWD::MESSAGETYPE::REMOVE_START, installedConfig->name_);
                 if (MHWD::STATUS::SUCCESS != (status = uninstallConfig(installedConfig.get())))
                 {
                     return status;
                 }
                 else
                 {
-                    printer_.printMessage(MHWD::MESSAGETYPE::REMOVE_END, installedConfig->name_);
+                    consoleWriter_.printMessage(MHWD::MESSAGETYPE::REMOVE_END, installedConfig->name_);
                 }
             }
         }
@@ -332,7 +332,7 @@ MHWD::STATUS Mhwd::performTransaction(const Transaction& transaction)
                         dependencyConfig != transaction.dependencyConfigs_.begin() - 1;
                         --dependencyConfig)
                 {
-                    printer_.printMessage(MHWD::MESSAGETYPE::INSTALLDEPENDENCY_START,
+                    consoleWriter_.printMessage(MHWD::MESSAGETYPE::INSTALLDEPENDENCY_START,
                             (*dependencyConfig)->name_);
                     if (MHWD::STATUS::SUCCESS != (status = installConfig((*dependencyConfig))))
                     {
@@ -340,19 +340,19 @@ MHWD::STATUS Mhwd::performTransaction(const Transaction& transaction)
                     }
                     else
                     {
-                        printer_.printMessage(MHWD::MESSAGETYPE::INSTALLDEPENDENCY_END,
+                        consoleWriter_.printMessage(MHWD::MESSAGETYPE::INSTALLDEPENDENCY_END,
                                 (*dependencyConfig)->name_);
                     }
                 }
 
-                printer_.printMessage(MHWD::MESSAGETYPE::INSTALL_START, transaction.config_->name_);
+                consoleWriter_.printMessage(MHWD::MESSAGETYPE::INSTALL_START, transaction.config_->name_);
                 if (MHWD::STATUS::SUCCESS != (status = installConfig(transaction.config_)))
                 {
                     return status;
                 }
                 else
                 {
-                    printer_.printMessage(MHWD::MESSAGETYPE::INSTALL_END,
+                    consoleWriter_.printMessage(MHWD::MESSAGETYPE::INSTALL_END,
                             transaction.config_->name_);
                 }
             }
@@ -439,7 +439,7 @@ bool Mhwd::copyFile(const std::string& source, const std::string destination, co
     std::ofstream dst(destination, std::ios::binary);
     if (!src || !dst)
     {
-    	return false;
+        return false;
     }
 
     dst << src.rdbuf();
@@ -668,7 +668,7 @@ bool Mhwd::runScript(std::shared_ptr<Config> config, MHWD::TRANSACTIONTYPE opera
         char buff[512];
         while (fgets(buff, sizeof(buff), in) != nullptr)
         {
-            printer_.printMessage(MHWD::MESSAGETYPE::CONSOLE_OUTPUT, buff);
+            consoleWriter_.printMessage(MHWD::MESSAGETYPE::CONSOLE_OUTPUT, buff);
         }
 
         int stat = pclose(in);
@@ -691,238 +691,238 @@ bool Mhwd::runScript(std::shared_ptr<Config> config, MHWD::TRANSACTIONTYPE opera
 
 void Mhwd::setVersionMhwd(std::string versionOfSoftware, std::string yearCopyright)
 {
-	version_ = versionOfSoftware;
-	year_ = yearCopyright;
+    version_ = versionOfSoftware;
+    year_ = yearCopyright;
 }
 
 void Mhwd::tryToParseCmdLineOptions(int argc, char* argv[], bool& autoConfigureNonFreeDriver,
-		std::string& operationType, std::string& autoConfigureClassID)
+        std::string& operationType, std::string& autoConfigureClassID)
 {
-	if (argc <= 1)
-	{
-		arguments_.LIST_AVAILABLE = true;
-	}
-	for (int nArg = 1; nArg < argc; ++nArg)
-	{
-		const std::string option{ argv[nArg] };
-		if (("-h" == option) || ("--help" == option))
-		{
-			printer_.printHelp();
-		}
-		else if (("-v" == option) || ("--version" == option))
+    if (argc <= 1)
+    {
+        arguments_.LIST_AVAILABLE = true;
+    }
+    for (int nArg = 1; nArg < argc; ++nArg)
+    {
+        const std::string option{ argv[nArg] };
+        if (("-h" == option) || ("--help" == option))
         {
-            printer_.printVersion(version_, year_);
+            consoleWriter_.printHelp();
         }
-		else if (("-f" == option) || ("--force" == option))
-		{
-			arguments_.FORCE = true;
-		}
-		else if (("-d" == option) || ("--detail" == option))
-		{
-			arguments_.DETAIL = true;
-		}
-		else if (("-la" == option) || ("--listall" == option))
-		{
-			arguments_.LIST_ALL = true;
-		}
-		else if (("-li" == option) || ("--listinstalled" == option))
-		{
-			arguments_.LIST_INSTALLED = true;
-		}
-		else if (("-l" == option) || ("--list" == option))
-		{
-			arguments_.LIST_AVAILABLE = true;
-		}
-		else if (("-lh" == option) || ("--listhardware" == option))
-		{
-			arguments_.LIST_HARDWARE = true;
-		}
-		else if ("--pci" == option)
-		{
-			arguments_.SHOW_PCI = true;
-		}
-		else if ("--usb" == option)
-		{
-			arguments_.SHOW_USB = true;
-		}
-		else if (("-a" == option) || ("--auto" == option))
-		{
-			if ((nArg + 3) >= argc)
-			{
-				throw std::runtime_error{"invalid use of option: -a/--auto\n"};
-			}
-			else
-			{
-				const std::string deviceType{ argv[nArg + 1] };
-				const std::string driverType{ argv[nArg + 2] };
-				const std::string classID{ argv[nArg + 3] };
-				if ((("pci" != deviceType) && ("usb" != deviceType))
-						|| (("free" != driverType) && ("nonfree" != driverType)))
-				{
-					throw std::runtime_error{"invalid use of option: -a/--auto\n"};
-				}
-				else
-				{
-					operationType = Vita::string{ deviceType }.toUpper();
-					autoConfigureNonFreeDriver = ("nonfree" == driverType);
-					autoConfigureClassID = Vita::string(classID).toLower().trim();
-					arguments_.AUTOCONFIGURE = true;
-					nArg += 3;
-				}
-			}
-		}
-		else if (("-ic" == option) || ("--installcustom" == option))
-		{
-			if ((nArg + 1) >= argc)
-			{
-				throw std::runtime_error{"invalid use of option: -ic/--installcustom\n"};
-			}
-			else
-			{
-				const std::string deviceType{ argv[++nArg] };
-				if (("pci" != deviceType) && ("usb" != deviceType))
-				{
-					throw std::runtime_error{"invalid use of option: -ic/--installcustom\n"};
-				}
-				else
-				{
-					operationType = Vita::string{ deviceType }.toUpper();
-					arguments_.CUSTOM_INSTALL = true;
-				}
-			}
-		}
-		else if (("-i" == option) || ("--install" == option))
-		{
-			if ((nArg + 1) >= argc)
-			{
-				throw std::runtime_error{"invalid use of option: -i/--install\n"};
-			}
-			else
-			{
-				const std::string deviceType{ argv[++nArg] };
-				if (("pci" != deviceType) && ("usb" != deviceType))
-				{
-					throw std::runtime_error{"invalid use of option: -i/--install\n"};
-				}
-				else
-				{
-					operationType = Vita::string{ deviceType }.toUpper();
-					arguments_.INSTALL = true;
-				}
-			}
-		}
-		else if (("-r" == option) || ("--remove" == option))
-		{
-			if ((nArg + 1) >= argc)
-			{
-				throw std::runtime_error{"invalid use of option: -r/--remove\n"};
-			}
-			else
-			{
-				const std::string deviceType{ argv[++nArg] };
-				if (("pci" != deviceType) && ("usb" != deviceType))
-				{
-					throw std::runtime_error{"invalid use of option: -r/--remove\n"};
-				}
-				else
-				{
-					operationType = Vita::string{ deviceType }.toUpper();
-					arguments_.REMOVE = true;
-				}
-			}
-		}
-		else if ("--pmcachedir" == option)
-		{
-			if (nArg + 1 >= argc)
-			{
-				throw std::runtime_error{"invalid use of option: --pmcachedir\n"};
-			}
-			else
-			{
-				data_.environment.PMCachePath = Vita::string(argv[++nArg]).trim("\"").trim();
-			}
-		}
-		else if ("--pmconfig" == option)
-		{
-			if (nArg + 1 >= argc)
-			{
-				throw std::runtime_error{"invalid use of option: --pmconfig\n"};
-			}
-			else
-			{
-				data_.environment.PMConfigPath = Vita::string(argv[++nArg]).trim("\"").trim();
-			}
-		}
-		else if ("--pmroot" == option)
-		{
-			if (nArg + 1 >= argc)
-			{
-				throw std::runtime_error{"invalid use of option: --pmroot\n"};
-			}
-			else
-			{
-				data_.environment.PMRootPath = Vita::string(argv[++nArg]).trim("\"").trim();
-			}
-		}
-		else if (arguments_.INSTALL || arguments_.REMOVE)
-		{
-			bool found = false;
-			std::string name;
-			if (arguments_.CUSTOM_INSTALL)
-			{
-				name = std::string{ argv[nArg] };
-			}
-			else
-			{
-				name = Vita::string(argv[nArg]).toLower();
-			}
-			for (const auto& config : configs_)
-			{
-				if (config == name)
-				{
-					found = true;
-					break;
-				}
-			}
-			if (!found)
-			{
-				configs_.push_back(name);
-			}
-		}
-		else
-		{
-			throw std::runtime_error{"invalid option: " + std::string(argv[nArg]) + "\n"};
-		}
-	}
-	if (!arguments_.SHOW_PCI && !arguments_.SHOW_USB)
-	{
-		arguments_.SHOW_USB = true;
-		arguments_.SHOW_PCI = true;
-	}
+        else if (("-v" == option) || ("--version" == option))
+        {
+            consoleWriter_.printVersion(version_, year_);
+        }
+        else if (("-f" == option) || ("--force" == option))
+        {
+            arguments_.FORCE = true;
+        }
+        else if (("-d" == option) || ("--detail" == option))
+        {
+            arguments_.DETAIL = true;
+        }
+        else if (("-la" == option) || ("--listall" == option))
+        {
+            arguments_.LIST_ALL = true;
+        }
+        else if (("-li" == option) || ("--listinstalled" == option))
+        {
+            arguments_.LIST_INSTALLED = true;
+        }
+        else if (("-l" == option) || ("--list" == option))
+        {
+            arguments_.LIST_AVAILABLE = true;
+        }
+        else if (("-lh" == option) || ("--listhardware" == option))
+        {
+            arguments_.LIST_HARDWARE = true;
+        }
+        else if ("--pci" == option)
+        {
+            arguments_.SHOW_PCI = true;
+        }
+        else if ("--usb" == option)
+        {
+            arguments_.SHOW_USB = true;
+        }
+        else if (("-a" == option) || ("--auto" == option))
+        {
+            if ((nArg + 3) >= argc)
+            {
+                throw std::runtime_error{"invalid use of option: -a/--auto\n"};
+            }
+            else
+            {
+                const std::string deviceType{ argv[nArg + 1] };
+                const std::string driverType{ argv[nArg + 2] };
+                const std::string classID{ argv[nArg + 3] };
+                if ((("pci" != deviceType) && ("usb" != deviceType))
+                        || (("free" != driverType) && ("nonfree" != driverType)))
+                {
+                    throw std::runtime_error{"invalid use of option: -a/--auto\n"};
+                }
+                else
+                {
+                    operationType = Vita::string{ deviceType }.toUpper();
+                    autoConfigureNonFreeDriver = ("nonfree" == driverType);
+                    autoConfigureClassID = Vita::string(classID).toLower().trim();
+                    arguments_.AUTOCONFIGURE = true;
+                    nArg += 3;
+                }
+            }
+        }
+        else if (("-ic" == option) || ("--installcustom" == option))
+        {
+            if ((nArg + 1) >= argc)
+            {
+                throw std::runtime_error{"invalid use of option: -ic/--installcustom\n"};
+            }
+            else
+            {
+                const std::string deviceType{ argv[++nArg] };
+                if (("pci" != deviceType) && ("usb" != deviceType))
+                {
+                    throw std::runtime_error{"invalid use of option: -ic/--installcustom\n"};
+                }
+                else
+                {
+                    operationType = Vita::string{ deviceType }.toUpper();
+                    arguments_.CUSTOM_INSTALL = true;
+                }
+            }
+        }
+        else if (("-i" == option) || ("--install" == option))
+        {
+            if ((nArg + 1) >= argc)
+            {
+                throw std::runtime_error{"invalid use of option: -i/--install\n"};
+            }
+            else
+            {
+                const std::string deviceType{ argv[++nArg] };
+                if (("pci" != deviceType) && ("usb" != deviceType))
+                {
+                    throw std::runtime_error{"invalid use of option: -i/--install\n"};
+                }
+                else
+                {
+                    operationType = Vita::string{ deviceType }.toUpper();
+                    arguments_.INSTALL = true;
+                }
+            }
+        }
+        else if (("-r" == option) || ("--remove" == option))
+        {
+            if ((nArg + 1) >= argc)
+            {
+                throw std::runtime_error{"invalid use of option: -r/--remove\n"};
+            }
+            else
+            {
+                const std::string deviceType{ argv[++nArg] };
+                if (("pci" != deviceType) && ("usb" != deviceType))
+                {
+                    throw std::runtime_error{"invalid use of option: -r/--remove\n"};
+                }
+                else
+                {
+                    operationType = Vita::string{ deviceType }.toUpper();
+                    arguments_.REMOVE = true;
+                }
+            }
+        }
+        else if ("--pmcachedir" == option)
+        {
+            if (nArg + 1 >= argc)
+            {
+                throw std::runtime_error{"invalid use of option: --pmcachedir\n"};
+            }
+            else
+            {
+                data_.environment.PMCachePath = Vita::string(argv[++nArg]).trim("\"").trim();
+            }
+        }
+        else if ("--pmconfig" == option)
+        {
+            if (nArg + 1 >= argc)
+            {
+                throw std::runtime_error{"invalid use of option: --pmconfig\n"};
+            }
+            else
+            {
+                data_.environment.PMConfigPath = Vita::string(argv[++nArg]).trim("\"").trim();
+            }
+        }
+        else if ("--pmroot" == option)
+        {
+            if (nArg + 1 >= argc)
+            {
+                throw std::runtime_error{"invalid use of option: --pmroot\n"};
+            }
+            else
+            {
+                data_.environment.PMRootPath = Vita::string(argv[++nArg]).trim("\"").trim();
+            }
+        }
+        else if (arguments_.INSTALL || arguments_.REMOVE)
+        {
+            bool found = false;
+            std::string name;
+            if (arguments_.CUSTOM_INSTALL)
+            {
+                name = std::string{ argv[nArg] };
+            }
+            else
+            {
+                name = Vita::string(argv[nArg]).toLower();
+            }
+            for (const auto& config : configs_)
+            {
+                if (config == name)
+                {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found)
+            {
+                configs_.push_back(name);
+            }
+        }
+        else
+        {
+            throw std::runtime_error{"invalid option: " + std::string(argv[nArg]) + "\n"};
+        }
+    }
+    if (!arguments_.SHOW_PCI && !arguments_.SHOW_USB)
+    {
+        arguments_.SHOW_USB = true;
+        arguments_.SHOW_PCI = true;
+    }
 }
 
 bool Mhwd::optionsDontInterfereWithEachOther() const
 {
-	if (arguments_.INSTALL && arguments_.REMOVE)
-	{
-    	printer_.printError("install and remove options can only be used separately!\n");
-    	printer_.printHelp();
-    	return false;
-	}
-	else if ((arguments_.INSTALL || arguments_.REMOVE) && arguments_.AUTOCONFIGURE)
-	{
-    	printer_.printError("auto option can't be combined with install and remove options!\n");
-    	printer_.printHelp();
-    	return false;
-	}
-	else if ((arguments_.REMOVE || arguments_.INSTALL) && configs_.empty())
-	{
-    	printer_.printError("nothing to do?!\n");
-    	printer_.printHelp();
-    	return false;
-	}
+    if (arguments_.INSTALL && arguments_.REMOVE)
+    {
+        consoleWriter_.printError("install and remove options can only be used separately!\n");
+        consoleWriter_.printHelp();
+        return false;
+    }
+    else if ((arguments_.INSTALL || arguments_.REMOVE) && arguments_.AUTOCONFIGURE)
+    {
+        consoleWriter_.printError("auto option can't be combined with install and remove options!\n");
+        consoleWriter_.printHelp();
+        return false;
+    }
+    else if ((arguments_.REMOVE || arguments_.INSTALL) && configs_.empty())
+    {
+        consoleWriter_.printError("nothing to do?!\n");
+        consoleWriter_.printHelp();
+        return false;
+    }
 
-	return true;
+    return true;
 }
 
 int Mhwd::launch(int argc, char *argv[])
@@ -930,11 +930,11 @@ int Mhwd::launch(int argc, char *argv[])
     std::vector<std::string> missingDirs { checkEnvironment() };
     if (!missingDirs.empty())
     {
-    	printer_.printError("Following directories do not exist:");
-    	for (const auto& dir : missingDirs)
-    	{
-    		printer_.printStatus(dir);
-    	}
+        consoleWriter_.printError("Following directories do not exist:");
+        for (const auto& dir : missingDirs)
+        {
+            consoleWriter_.printStatus(dir);
+        }
         return 1;
     }
 
@@ -944,25 +944,25 @@ int Mhwd::launch(int argc, char *argv[])
 
     try
     {
-    	tryToParseCmdLineOptions(argc, argv, autoConfigureNonFreeDriver, operationType,
-    			autoConfigureClassID);
+        tryToParseCmdLineOptions(argc, argv, autoConfigureNonFreeDriver, operationType,
+                autoConfigureClassID);
     }
     catch(const std::runtime_error& e)
     {
-    	printer_.printError(e.what());
-    	printer_.printHelp();
-    	return 1;
+        consoleWriter_.printError(e.what());
+        consoleWriter_.printHelp();
+        return 1;
     }
 
     if (!optionsDontInterfereWithEachOther())
     {
-    	return 1;
+        return 1;
     }
 
     // Check for invalid configs
     for (auto&& invalidConfig : data_.invalidConfigs)
     {
-        printer_.printWarning("config '" + invalidConfig->configPath_ + "' is invalid!");
+        consoleWriter_.printWarning("config '" + invalidConfig->configPath_ + "' is invalid!");
     }
 
     // > Perform operations:
@@ -972,22 +972,22 @@ int Mhwd::launch(int argc, char *argv[])
     {
         if (!data_.allPCIConfigs.empty())
         {
-            printer_.listConfigs(data_.allPCIConfigs, "All PCI configs:");
+            consoleWriter_.listConfigs(data_.allPCIConfigs, "All PCI configs:");
         }
         else
         {
-            printer_.printWarning("No PCI configs found!");
+            consoleWriter_.printWarning("No PCI configs found!");
         }
     }
     if (arguments_.LIST_ALL && arguments_.SHOW_USB)
     {
         if (!data_.allUSBConfigs.empty())
         {
-            printer_.listConfigs(data_.allUSBConfigs, "All USB configs:");
+            consoleWriter_.listConfigs(data_.allUSBConfigs, "All USB configs:");
         }
         else
         {
-            printer_.printWarning("No USB configs found!");
+            consoleWriter_.printWarning("No USB configs found!");
         }
     }
 
@@ -996,17 +996,17 @@ int Mhwd::launch(int argc, char *argv[])
     {
         if (arguments_.DETAIL)
         {
-            printer_.printInstalledConfigs("PCI", data_.installedPCIConfigs);
+            consoleWriter_.printInstalledConfigs("PCI", data_.installedPCIConfigs);
         }
         else
         {
             if (!data_.installedPCIConfigs.empty())
             {
-                printer_.listConfigs(data_.installedPCIConfigs, "Installed PCI configs:");
+                consoleWriter_.listConfigs(data_.installedPCIConfigs, "Installed PCI configs:");
             }
             else
             {
-                printer_.printWarning("No installed PCI configs!");
+                consoleWriter_.printWarning("No installed PCI configs!");
             }
         }
     }
@@ -1014,17 +1014,17 @@ int Mhwd::launch(int argc, char *argv[])
     {
         if (arguments_.DETAIL)
         {
-            printer_.printInstalledConfigs("USB", data_.installedUSBConfigs);
+            consoleWriter_.printInstalledConfigs("USB", data_.installedUSBConfigs);
         }
         else
         {
             if (!data_.installedUSBConfigs.empty())
             {
-                printer_.listConfigs(data_.installedUSBConfigs, "Installed USB configs:");
+                consoleWriter_.listConfigs(data_.installedUSBConfigs, "Installed USB configs:");
             }
             else
             {
-                printer_.printWarning("No installed USB configs!");
+                consoleWriter_.printWarning("No installed USB configs!");
             }
         }
     }
@@ -1034,7 +1034,7 @@ int Mhwd::launch(int argc, char *argv[])
     {
         if (arguments_.DETAIL)
         {
-            printer_.printAvailableConfigsInDetail("PCI", data_.PCIDevices);
+            consoleWriter_.printAvailableConfigsInDetail("PCI", data_.PCIDevices);
         }
         else
         {
@@ -1042,7 +1042,7 @@ int Mhwd::launch(int argc, char *argv[])
             {
                 if (!PCIDevice->availableConfigs_.empty())
                 {
-                    printer_.listConfigs(PCIDevice->availableConfigs_,
+                    consoleWriter_.listConfigs(PCIDevice->availableConfigs_,
                             PCIDevice->sysfsBusID_ + " (" + PCIDevice->classID_ + ":"
                                     + PCIDevice->vendorID_ + ":" + PCIDevice->deviceID_ + ") "
                                     + PCIDevice->className_ + " " + PCIDevice->vendorName_ + ":");
@@ -1055,7 +1055,7 @@ int Mhwd::launch(int argc, char *argv[])
     {
         if (arguments_.DETAIL)
         {
-            printer_.printAvailableConfigsInDetail("USB", data_.USBDevices);
+            consoleWriter_.printAvailableConfigsInDetail("USB", data_.USBDevices);
         }
 
         else
@@ -1064,10 +1064,10 @@ int Mhwd::launch(int argc, char *argv[])
             {
                 if (!USBdevice->availableConfigs_.empty())
                 {
-                    printer_.listConfigs(USBdevice->availableConfigs_,
+                    consoleWriter_.listConfigs(USBdevice->availableConfigs_,
                             USBdevice->sysfsBusID_ + " (" + USBdevice->classID_ + ":"
-							+ USBdevice->vendorID_ + ":" + USBdevice->deviceID_ + ") "
-							+ USBdevice->className_ + " " + USBdevice->vendorName_ + ":");
+                            + USBdevice->vendorID_ + ":" + USBdevice->deviceID_ + ") "
+                            + USBdevice->className_ + " " + USBdevice->vendorName_ + ":");
                 }
             }
         }
@@ -1078,22 +1078,22 @@ int Mhwd::launch(int argc, char *argv[])
     {
         if (arguments_.DETAIL)
         {
-            printer_.printDeviceDetails(hw_pci);
+            consoleWriter_.printDeviceDetails(hw_pci);
         }
         else
         {
-            printer_.listDevices(data_.PCIDevices, "PCI");
+            consoleWriter_.listDevices(data_.PCIDevices, "PCI");
         }
     }
     if (arguments_.LIST_HARDWARE && arguments_.SHOW_USB)
     {
         if (arguments_.DETAIL)
         {
-            printer_.printDeviceDetails(hw_usb);
+            consoleWriter_.printDeviceDetails(hw_usb);
         }
         else
         {
-            printer_.listDevices(data_.USBDevices, "USB");
+            consoleWriter_.listDevices(data_.USBDevices, "USB");
         }
     }
 
@@ -1136,7 +1136,7 @@ int Mhwd::launch(int argc, char *argv[])
 
                 if (nullptr == config)
                 {
-                    printer_.printWarning(
+                    consoleWriter_.printWarning(
                             "No config found for device: " + device->sysfsBusID_ + " ("
                                     + device->classID_ + ":" + device->vendorID_ + ":"
                                     + device->deviceID_ + ") " + device->className_ + " "
@@ -1149,15 +1149,15 @@ int Mhwd::launch(int argc, char *argv[])
                     bool skip = false;
                     if (!arguments_.FORCE)
                     {
-                    	skip = std::find_if(installedConfigs->begin(), installedConfigs->end(),
-                    			[&config](const std::shared_ptr<Config>& conf) -> bool {
-                    				return conf->name_ == config->name_;
-                    			}) != installedConfigs->end();
+                        skip = std::find_if(installedConfigs->begin(), installedConfigs->end(),
+                                [&config](const std::shared_ptr<Config>& conf) -> bool {
+                                    return conf->name_ == config->name_;
+                                }) != installedConfigs->end();
                     }
                     // Print found config
                     if (skip)
                     {
-                        printer_.printStatus(
+                        consoleWriter_.printStatus(
                                 "Skipping already installed config '" + config->name_ +
                                 "' for device: " + device->sysfsBusID_ + " (" +
                                 device->classID_ + ":" + device->vendorID_ + ":" +
@@ -1166,7 +1166,7 @@ int Mhwd::launch(int argc, char *argv[])
                     }
                     else
                     {
-                        printer_.printStatus(
+                        consoleWriter_.printStatus(
                                 "Using config '" + config->name_ + "' for device: " +
                                 device->sysfsBusID_ + " (" + device->classID_ + ":" +
                                 device->vendorID_ + ":" + device->deviceID_ + ") " +
@@ -1185,7 +1185,7 @@ int Mhwd::launch(int argc, char *argv[])
 
         if (!foundDevice)
         {
-            printer_.printWarning("No device of class " + autoConfigureClassID + " found!");
+            consoleWriter_.printWarning("No device of class " + autoConfigureClassID + " found!");
         }
         else if (!configs_.empty())
         {
@@ -1198,7 +1198,7 @@ int Mhwd::launch(int argc, char *argv[])
     {
         if (!isUserRoot())
         {
-            printer_.printError("You cannot perform this operation unless you are root!");
+            consoleWriter_.printError("You cannot perform this operation unless you are root!");
         }
         else
         {
@@ -1213,12 +1213,12 @@ int Mhwd::launch(int argc, char *argv[])
 
                     if (0 != stat(filepath.c_str(), &filestatus))
                     {
-                        printer_.printError("custom config '" + filepath + "' does not exist!");
+                        consoleWriter_.printError("custom config '" + filepath + "' does not exist!");
                         return 1;
                     }
                     else if (!S_ISREG(filestatus.st_mode))
                     {
-                        printer_.printError("custom config '" + filepath + "' is invalid!");
+                        consoleWriter_.printError("custom config '" + filepath + "' is invalid!");
                         return 1;
                     }
                     else
@@ -1226,7 +1226,7 @@ int Mhwd::launch(int argc, char *argv[])
                         config_.reset(new Config(filepath, operationType));
                         if (!config_->readConfigFile(filepath))
                         {
-                            printer_.printError("failed to read custom config '" + filepath + "'!");
+                            consoleWriter_.printError("failed to read custom config '" + filepath + "'!");
                             return 1;
                         }
 
@@ -1244,12 +1244,12 @@ int Mhwd::launch(int argc, char *argv[])
                         config_ = getDatabaseConfig((*configName), operationType);
                         if (config_ == nullptr)
                         {
-                            printer_.printError("config '" + (*configName) + "' does not exist!");
+                            consoleWriter_.printError("config '" + (*configName) + "' does not exist!");
                             return 1;
                         }
                         else
                         {
-                            printer_.printWarning(
+                            consoleWriter_.printWarning(
                                     "no matching device for config '" + (*configName) + "' found!");
                         }
                     }
@@ -1265,7 +1265,7 @@ int Mhwd::launch(int argc, char *argv[])
 
                     if (nullptr == config_)
                     {
-                        printer_.printError("config '" + (*configName) + "' is not installed!");
+                        consoleWriter_.printError("config '" + (*configName) + "' is not installed!");
                         return 1;
                     }
 

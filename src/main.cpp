@@ -1,6 +1,6 @@
 /*
  *  This file is part of the mhwd - Manjaro Hardware Detection project
- *  
+ *
  *  mhwd - Manjaro Hardware Detection
  *  Roland Singer <roland@manjaro.org>
  *  Łukasz Matysiak <december0123@gmail.com>
@@ -30,13 +30,13 @@ int main(int argc, char *argv[])
 {
     try
     {
-    	Mhwd mhwd;
-    	mhwd.setVersionMhwd("0.5.4","2012-2015");
-    	return mhwd.launch(argc, argv);
+        Mhwd mhwd;
+        mhwd.setVersionMhwd("0.5.4","2012-2015");
+        return mhwd.launch(argc, argv);
     }
     catch(...)
     {
-    	std::cerr << "Unknown errors occured...";
-    	return -1;
+        std::cerr << "Unknown errors occured...";
+        return -1;
     }
 }
