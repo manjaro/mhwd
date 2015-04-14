@@ -4,7 +4,7 @@
  *  mhwd - Manjaro Hardware Detection
  *  Roland Singer <roland@manjaro.org>
  *  Łukasz Matysiak <december0123@gmail.com>
- * 	Filipe Marques <eagle.software3@gmail.com>
+ *  Filipe Marques <eagle.software3@gmail.com>
  *
  *  Copyright (C) 2007 Free Software Foundation, Inc.
  *
@@ -25,6 +25,8 @@
 #ifndef PRINTER_HPP_
 #define PRINTER_HPP_
 
+#include <hd.h>
+
 #include <string>
 #include <vector>
 
@@ -41,7 +43,8 @@ public:
     void printMessage(MHWD::MESSAGETYPE type, std::string str) const;
     void printHelp() const;
     void printVersion(std::string versionMhwd, std::string yearCopy) const;
-	void listDevices(const std::vector<std::shared_ptr<Device>>& devices, std::string typeOfDevice) const;
+    void listDevices(const std::vector<std::shared_ptr<Device>>& devices,
+            std::string typeOfDevice) const;
     void listConfigs(const std::vector<std::shared_ptr<Config>>& configs,
             std::string header) const;
     void printAvailableConfigsInDetail(const std::string& deviceType,
@@ -49,11 +52,12 @@ public:
     void printInstalledConfigs(const std::string& deviceType,
             const std::vector<std::shared_ptr<Config>>& installedConfigs) const;
     void printConfigDetails(const Config& config) const;
+    void printDeviceDetails(hw_item hw, FILE *f = stdout) const;
 private:
     void printLine() const;
 
     const char* CONSOLE_COLOR_RESET {"\033[m"};
-    const char* CONSOLE_MESSAGE_COLOR {"\033[1m\033[31m"};
+    const char* CONSOLE_RED_MESSAGE_COLOR {"\033[1m\033[31m"};
     const char* CONSOLE_TEXT_OUTPUT_COLOR {"\033[0;32m"};
 };
 

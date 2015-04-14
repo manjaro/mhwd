@@ -4,7 +4,7 @@
  *  mhwd - Manjaro Hardware Detection
  *  Roland Singer <roland@manjaro.org>
  *  Łukasz Matysiak <december0123@gmail.com>
- * 	Filipe Marques <eagle.software3@gmail.com>
+ *  Filipe Marques <eagle.software3@gmail.com>
  *
  *  Copyright (C) 2007 Free Software Foundation, Inc.
  *
@@ -48,9 +48,9 @@
 class Mhwd
 {
 public:
-    Mhwd();
+    Mhwd() = default;
     ~Mhwd() = default;
-	void setVersionMhwd(std::string versionOfSoftware, std::string yearCopyright);
+    void setVersionMhwd(std::string versionOfSoftware, std::string yearCopyright);
     int launch(int argc, char *argv[]);
 
 private:
@@ -73,14 +73,11 @@ private:
     Data data_;
     Printer printer_;
     std::vector<std::string> configs_;
-
-	std::string version_, year_;
+    std::string version_, year_;
 	
     bool performTransaction(std::shared_ptr<Config> config, MHWD::TRANSACTIONTYPE type);
     bool isUserRoot() const;
-    std::string checkEnvironment();
-
-    void printDeviceDetails(std::string type, FILE *f = stdout);
+    std::vector<std::string> checkEnvironment() const;
 
     std::shared_ptr<Config> getInstalledConfig(const std::string& configName, const std::string& configType);
     std::shared_ptr<Config> getDatabaseConfig(const std::string& configName, const std::string& configType);
@@ -95,7 +92,7 @@ private:
     bool copyFile(const std::string& source, const std::string destination, const mode_t mode =
             S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IROTH);
     bool removeDirectory(const std::string& directory);
-    bool dirExists(const std::string& path);
+    bool dirExists(const std::string& path) const;
     bool createDir(const std::string& path, const mode_t mode =
             S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IROTH | S_IXGRP | S_IXOTH);
 
