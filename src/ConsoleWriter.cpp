@@ -1,6 +1,6 @@
 /*
  *  This file is part of the mhwd - Manjaro Hardware Detection project
- *  
+ *
  *  mhwd - Manjaro Hardware Detection
  *  Roland Singer <roland@manjaro.org>
  *  Łukasz Matysiak <december0123@gmail.com>
@@ -22,7 +22,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Printer.hpp"
+#include "ConsoleWriter.hpp"
 
 #include <hd.h>
 
@@ -32,56 +32,56 @@
 #include <string>
 #include <vector>
 
-void Printer::printStatus(std::string statusMsg) const
+void ConsoleWriter::printStatus(std::string statusMsg) const
 {
     std::cout << CONSOLE_RED_MESSAGE_COLOR << "> "
             << CONSOLE_COLOR_RESET << statusMsg << std::endl;
 }
 
-void Printer::printError(std::string errorMsg) const
+void ConsoleWriter::printError(std::string errorMsg) const
 {
     std::cout << CONSOLE_RED_MESSAGE_COLOR << "Error: "
             << CONSOLE_COLOR_RESET << errorMsg << std::endl;
 }
 
-void Printer::printWarning(std::string warningMsg) const
+void ConsoleWriter::printWarning(std::string warningMsg) const
 {
     std::cout << CONSOLE_RED_MESSAGE_COLOR << "Warning: "
             << CONSOLE_COLOR_RESET << warningMsg << std::endl;
 }
 
-void Printer::printMessage(MHWD::MESSAGETYPE type, std::string msg) const
+void ConsoleWriter::printMessage(MHWD::MESSAGETYPE type, std::string msg) const
 {
-	switch(type)
-	{
-		case MHWD::MESSAGETYPE::CONSOLE_OUTPUT:
-			std::cout << CONSOLE_TEXT_OUTPUT_COLOR << msg << CONSOLE_COLOR_RESET;
-			break;
-		case MHWD::MESSAGETYPE::INSTALLDEPENDENCY_START:
-			printStatus("Installing dependency " + msg + "...");
-			break;
-		case MHWD::MESSAGETYPE::INSTALLDEPENDENCY_END:
-			printStatus("Successfully installed dependency " + msg);
-			break;
-		case MHWD::MESSAGETYPE::INSTALL_START:
-			printStatus("Installing " + msg + "...");
-			break;
-		case MHWD::MESSAGETYPE::INSTALL_END:
-			printStatus("Successfully installed " + msg);
-			break;
-		case MHWD::MESSAGETYPE::REMOVE_START:
-			printStatus("Removing " + msg + "...");
-			break;
-		case MHWD::MESSAGETYPE::REMOVE_END:
-			printStatus("Successfully removed " + msg);
-			break;
-		default:
-			printError("You shouldn't see this?! Unknown message type!");
-			break;
-	}
+    switch(type)
+    {
+        case MHWD::MESSAGETYPE::CONSOLE_OUTPUT:
+            std::cout << CONSOLE_TEXT_OUTPUT_COLOR << msg << CONSOLE_COLOR_RESET;
+            break;
+        case MHWD::MESSAGETYPE::INSTALLDEPENDENCY_START:
+            printStatus("Installing dependency " + msg + "...");
+            break;
+        case MHWD::MESSAGETYPE::INSTALLDEPENDENCY_END:
+            printStatus("Successfully installed dependency " + msg);
+            break;
+        case MHWD::MESSAGETYPE::INSTALL_START:
+            printStatus("Installing " + msg + "...");
+            break;
+        case MHWD::MESSAGETYPE::INSTALL_END:
+            printStatus("Successfully installed " + msg);
+            break;
+        case MHWD::MESSAGETYPE::REMOVE_START:
+            printStatus("Removing " + msg + "...");
+            break;
+        case MHWD::MESSAGETYPE::REMOVE_END:
+            printStatus("Successfully removed " + msg);
+            break;
+        default:
+            printError("You shouldn't see this?! Unknown message type!");
+            break;
+    }
 }
 
-void Printer::printHelp() const
+void ConsoleWriter::printHelp() const
 {
     std::cout << "Usage: mhwd [OPTIONS] <config(s)>\n\n"
             << "  --pci\t\t\t\t\tlist only pci devices and driver configs\n"
@@ -103,16 +103,16 @@ void Printer::printHelp() const
             << "  --pmroot <path>\t\t\tset package manager root\n" << std::endl;
 }
 
-void Printer::printVersion(std::string versionMhwd, std::string yearCopy) const
+void ConsoleWriter::printVersion(std::string versionMhwd, std::string yearCopy) const
 {
-    std::cout << "Manjaro Hardware Detection v"<< versionMhwd <<"\n\n" 
+    std::cout << "Manjaro Hardware Detection v"<< versionMhwd <<"\n\n"
             << "Copyright (C) "<< yearCopy <<" Manjaro Linux Developers\n"
             << "This is free software licensed under GNU GPL v3.0\n"
-            << "FITNESS FOR A PARTICULAR PURPOSE.\n" 
+            << "FITNESS FOR A PARTICULAR PURPOSE.\n"
             << std::endl;
 }
 
-void Printer::listDevices(const std::vector<std::shared_ptr<Device>>& devices, std::string type) const
+void ConsoleWriter::listDevices(const std::vector<std::shared_ptr<Device>>& devices, std::string type) const
 {
     if (devices.empty())
     {
@@ -142,7 +142,7 @@ void Printer::listDevices(const std::vector<std::shared_ptr<Device>>& devices, s
     }
 }
 
-void Printer::listConfigs(const std::vector<std::shared_ptr<Config>>& configs, std::string header) const
+void ConsoleWriter::listConfigs(const std::vector<std::shared_ptr<Config>>& configs, std::string header) const
 {
     printStatus(header);
     printLine();
@@ -161,7 +161,7 @@ void Printer::listConfigs(const std::vector<std::shared_ptr<Config>>& configs, s
     std::cout << std::endl << std::endl;
 }
 
-void Printer::printAvailableConfigsInDetail(const std::string& deviceType,
+void ConsoleWriter::printAvailableConfigsInDetail(const std::string& deviceType,
         const std::vector<std::shared_ptr<Device>>& devices) const
 {
     bool configFound = false;
@@ -211,7 +211,7 @@ void Printer::printAvailableConfigsInDetail(const std::string& deviceType,
     }
 }
 
-void Printer::printInstalledConfigs(const std::string& deviceType,
+void ConsoleWriter::printInstalledConfigs(const std::string& deviceType,
         const std::vector<std::shared_ptr<Config>>& installedConfigs) const
 {
     if (installedConfigs.empty())
@@ -228,7 +228,7 @@ void Printer::printInstalledConfigs(const std::string& deviceType,
     }
 }
 
-void Printer::printConfigDetails(const Config& config) const
+void ConsoleWriter::printConfigDetails(const Config& config) const
 {
     std::string classids;
     std::string vendorids;
@@ -267,12 +267,12 @@ void Printer::printConfigDetails(const Config& config) const
             << "\n   VENDORIDS:\t" << vendorids << "\n" << std::endl;
 }
 
-void Printer::printLine() const
+void ConsoleWriter::printLine() const
 {
-    std::cout << std::setfill('-') << std::setw(80) << "-" << std::setfill(' ') << std::endl;
+    std::cout << std::string(80, '-') << std::endl;
 }
 
-void Printer::printDeviceDetails(hw_item hw, FILE *f) const
+void ConsoleWriter::printDeviceDetails(hw_item hw, FILE *f) const
 {
     std::unique_ptr<hd_data_t> hd_data{new hd_data_t()};
     hd_t *hd = hd_list(hd_data.get(), hw, 1, nullptr);

@@ -1,6 +1,6 @@
 /*
  *  This file is part of the mhwd - Manjaro Hardware Detection project
- *  
+ *
  *  mhwd - Manjaro Hardware Detection
  *  Roland Singer <roland@manjaro.org>
  *  Łukasz Matysiak <december0123@gmail.com>
@@ -38,10 +38,10 @@
 
 #include "Config.hpp"
 #include "const.h"
+#include "ConsoleWriter.hpp"
 #include "Data.hpp"
 #include "Device.hpp"
 #include "Enums.hpp"
-#include "Printer.hpp"
 #include "vita/string.hpp"
 #include "Transaction.hpp"
 
@@ -71,10 +71,10 @@ private:
     } arguments_;
     std::shared_ptr<Config> config_;
     Data data_;
-    Printer printer_;
+    ConsoleWriter consoleWriter_;
     std::vector<std::string> configs_;
     std::string version_, year_;
-	
+
     bool performTransaction(std::shared_ptr<Config> config, MHWD::TRANSACTIONTYPE type);
     bool isUserRoot() const;
     std::vector<std::string> checkEnvironment() const;
@@ -99,9 +99,9 @@ private:
     MHWD::STATUS installConfig(std::shared_ptr<Config> config);
     MHWD::STATUS uninstallConfig(Config *config);
     bool runScript(std::shared_ptr<Config> config, MHWD::TRANSACTIONTYPE operationType);
-	void tryToParseCmdLineOptions(int argc, char* argv[], bool& autoConfigureNonFreeDriver,
-			std::string& operationType, std::string& autoConfigureClassID);
-	bool optionsDontInterfereWithEachOther() const;
+    void tryToParseCmdLineOptions(int argc, char* argv[], bool& autoConfigureNonFreeDriver,
+            std::string& operationType, std::string& autoConfigureClassID);
+    bool optionsDontInterfereWithEachOther() const;
 };
 
 #endif /* MHWD_HPP_ */
