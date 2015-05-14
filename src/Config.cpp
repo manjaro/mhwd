@@ -1,6 +1,6 @@
 /*
  *  This file is part of the mhwd - Manjaro Hardware Detection project
- *  
+ *
  *  mhwd - Manjaro Hardware Detection
  *  Roland Singer <roland@manjaro.org>
  *  Łukasz Matysiak <december0123@gmail.com>

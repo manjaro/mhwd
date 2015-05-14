@@ -1,6 +1,6 @@
 /*
  *  This file is part of the mhwd - Manjaro Hardware Detection project
- *  
+ *
  *  mhwd - Manjaro Hardware Detection
  *  Roland Singer <roland@manjaro.org>
  *  Łukasz Matysiak <december0123@gmail.com>
@@ -36,7 +36,7 @@ class Transaction
 public:
     Transaction() = delete;
     Transaction(Data data, std::shared_ptr<Config> config, MHWD::TRANSACTIONTYPE type,
-    		bool allowReinstallation);
+            bool allowReinstallation);
 
     bool isAllowedToReinstall() const;
     std::shared_ptr<Config> config_;

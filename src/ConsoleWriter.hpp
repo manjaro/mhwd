@@ -34,7 +34,7 @@
 #include "Device.hpp"
 #include "Enums.hpp"
 
-class Printer
+class ConsoleWriter
 {
 public:
     void printStatus(std::string statusMsg) const;

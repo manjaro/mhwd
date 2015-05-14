@@ -1,6 +1,6 @@
 /*
  *  This file is part of the mhwd - Manjaro Hardware Detection project
- *  
+ *
  *  mhwd - Manjaro Hardware Detection
  *  Roland Singer <roland@manjaro.org>
  *  Łukasz Matysiak <december0123@gmail.com>
@@ -131,8 +131,8 @@ void Data::getAllDevicesOfConfig(const std::vector<std::shared_ptr<Device>>& dev
         {
             // Check class ids
             bool found = std::find_if(hwdID->classIDs.begin(), hwdID->classIDs.end(), [i_device](const std::string& classID){
-            					return (("*" == classID) || (classID == (*i_device)->classID_));
-            				}) != hwdID->classIDs.end();
+                                return (("*" == classID) || (classID == (*i_device)->classID_));
+                            }) != hwdID->classIDs.end();
 
             if (!found)
             {
@@ -142,8 +142,8 @@ void Data::getAllDevicesOfConfig(const std::vector<std::shared_ptr<Device>>& dev
             {
                 // Check blacklisted class ids
                 found = std::find_if(hwdID->blacklistedClassIDs.begin(), hwdID->blacklistedClassIDs.end(), [i_device](const std::string& blacklistedClassID){
-                				return (blacklistedClassID == (*i_device)->classID_);
-                			}) != hwdID->blacklistedClassIDs.end();
+                                return (blacklistedClassID == (*i_device)->classID_);
+                            }) != hwdID->blacklistedClassIDs.end();
 
                 if (found)
                 {
@@ -152,9 +152,9 @@ void Data::getAllDevicesOfConfig(const std::vector<std::shared_ptr<Device>>& dev
                 else
                 {
                     // Check vendor ids
-                	found = std::find_if(hwdID->vendorIDs.begin(), hwdID->vendorIDs.end(), [i_device](const std::string& vendorID){
-                	            	return (("*" == vendorID) || (vendorID == (*i_device)->vendorID_));
-                	            }) != hwdID->vendorIDs.end();
+                    found = std::find_if(hwdID->vendorIDs.begin(), hwdID->vendorIDs.end(), [i_device](const std::string& vendorID){
+                                    return (("*" == vendorID) || (vendorID == (*i_device)->vendorID_));
+                                }) != hwdID->vendorIDs.end();
 
                     if (!found)
                     {
@@ -164,8 +164,8 @@ void Data::getAllDevicesOfConfig(const std::vector<std::shared_ptr<Device>>& dev
                     {
                         // Check blacklisted vendor ids
                         found = std::find_if(hwdID->blacklistedVendorIDs.begin(), hwdID->blacklistedVendorIDs.end(), [i_device](const std::string& blacklistedVendorID){
-                        				return (blacklistedVendorID == (*i_device)->vendorID_);
-                        			}) != hwdID->blacklistedVendorIDs.end();
+                                        return (blacklistedVendorID == (*i_device)->vendorID_);
+                                    }) != hwdID->blacklistedVendorIDs.end();
 
                         if (found)
                         {
@@ -174,9 +174,9 @@ void Data::getAllDevicesOfConfig(const std::vector<std::shared_ptr<Device>>& dev
                         else
                         {
                             // Check device ids
-                        	found = std::find_if(hwdID->deviceIDs.begin(), hwdID->deviceIDs.end(), [i_device](const std::string& deviceID){
-                        	        		return (("*" == deviceID) || (deviceID == (*i_device)->deviceID_));
-                        	            }) != hwdID->deviceIDs.end();
+                            found = std::find_if(hwdID->deviceIDs.begin(), hwdID->deviceIDs.end(), [i_device](const std::string& deviceID){
+                                            return (("*" == deviceID) || (deviceID == (*i_device)->deviceID_));
+                                        }) != hwdID->deviceIDs.end();
 
                             if (!found)
                             {
@@ -186,8 +186,8 @@ void Data::getAllDevicesOfConfig(const std::vector<std::shared_ptr<Device>>& dev
                             {
                                 // Check blacklisted device ids
                                 found = std::find_if(hwdID->blacklistedDeviceIDs.begin(), hwdID->blacklistedDeviceIDs.end(), [i_device](const std::string& blacklistedDeviceID){
-                                				return (blacklistedDeviceID == (*i_device)->deviceID_);
-                                			}) != hwdID->blacklistedDeviceIDs.end();
+                                                return (blacklistedDeviceID == (*i_device)->deviceID_);
+                                            }) != hwdID->blacklistedDeviceIDs.end();
                                 if (found)
                                 {
                                     continue;
@@ -265,7 +265,7 @@ void Data::getAllDependenciesToInstall(std::shared_ptr<Config> config,
             {
                 // Add to vector and check for further subdepends...
                 std::shared_ptr<Config> dependconfig {
-                	getDatabaseConfig((*configDependency), config->type_)};
+                    getDatabaseConfig((*configDependency), config->type_)};
                 if (nullptr == dependconfig)
                 {
                     continue;
@@ -596,7 +596,7 @@ void Data::setMatchingConfigs(const std::vector<std::shared_ptr<Device>>& device
 }
 
 void Data::setMatchingConfig(std::shared_ptr<Config> config,
-		const std::vector<std::shared_ptr<Device>>& devices, bool setAsInstalled)
+        const std::vector<std::shared_ptr<Device>>& devices, bool setAsInstalled)
 {
     std::vector<std::shared_ptr<Device>> foundDevices;
 
@@ -618,7 +618,7 @@ void Data::setMatchingConfig(std::shared_ptr<Config> config,
 }
 
 void Data::addConfigSorted(std::vector<std::shared_ptr<Config>>& configs,
-		std::shared_ptr<Config> config)
+        std::shared_ptr<Config> config)
 {
     for (auto&& iterator = configs.begin();
             iterator != configs.end(); iterator++)
