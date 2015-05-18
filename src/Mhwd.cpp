@@ -552,6 +552,7 @@ MHWD::STATUS Mhwd::installConfig(std::shared_ptr<Config> config)
 MHWD::STATUS Mhwd::uninstallConfig(Config *config)
 {
     std::shared_ptr<Config> installedConfig{getInstalledConfig(config->name_, config->type_)};
+    std::vector<std::shared_ptr<Config>> localRequirements{data_.getAllLocalRequirements(installedConfig)};
 
     // Check if installed
     if (nullptr == installedConfig)
@@ -564,21 +565,25 @@ MHWD::STATUS Mhwd::uninstallConfig(Config *config)
     }
     else
     {
-        // TODO: Should we check for local requirements here?
-
-        // Run script
-        if (!runScript(installedConfig, MHWD::TRANSACTIONTYPE::REMOVE))
+        // Should we check for local requirements here?
+        if(!localRequirements.empty())
         {
-            return MHWD::STATUS::ERROR_SCRIPT_FAILED;
-        }
+            // Run script
+            if (!runScript(installedConfig, MHWD::TRANSACTIONTYPE::REMOVE))
+            {
+                return MHWD::STATUS::ERROR_SCRIPT_FAILED;
+            }
 
-        if (!removeDirectory(installedConfig->basePath_))
-        {
-            return MHWD::STATUS::ERROR_SET_DATABASE;
+            if (!removeDirectory(installedConfig->basePath_))
+            {
+                return MHWD::STATUS::ERROR_SET_DATABASE;
+            }
         }
 
         // Installed config vectors have to be updated manual with updateInstalledConfigData(Data*)
 
+        data_.updateInstalledConfigData();
+        
         return MHWD::STATUS::SUCCESS;
     }
 }
@@ -614,7 +619,7 @@ bool Mhwd::runScript(std::shared_ptr<Config> config, MHWD::TRANSACTIONTYPE opera
     for (auto&& foundDevice = foundDevices.begin();
             foundDevice != foundDevices.end(); ++foundDevice)
     {
-        bool found = false;
+        static bool found = false;
 
         // Check if already in list
         for (auto&& dev = devices.begin(); dev != devices.end(); ++dev)

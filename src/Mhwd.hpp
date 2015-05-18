@@ -83,8 +83,6 @@ private:
     std::shared_ptr<Config> getDatabaseConfig(const std::string& configName, const std::string& configType);
     std::shared_ptr<Config> getAvailableConfig(const std::string& configName, const std::string& configType);
 
-    std::vector<Config*> getAllLocalRequirements(Config *config);
-
     MHWD::STATUS performTransaction(const Transaction& transaction);
     bool proceedWithInstallation(const std::string& input) const;
 
