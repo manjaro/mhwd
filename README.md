@@ -41,6 +41,10 @@ void Mhwd::setVersionMhwd(std::string versionOfSoftware, std::string yearCopyrig
 }
 ```
 
+#### Indentation of Code
+
+Don't use tabs, instead use spaces and count 4 characters.
+
 #### Software need for coding or testing
 
 * C++ tool chain: [g++](https://gcc.gnu.org/) or [clang](http://clang.llvm.org/), [cmake](http://www.cmake.org/), [make](http://www.gnu.org/software/make/)
