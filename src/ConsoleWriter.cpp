@@ -35,19 +35,19 @@
 void ConsoleWriter::printStatus(std::string statusMsg) const
 {
     std::cout << CONSOLE_RED_MESSAGE_COLOR << "> "
-            << CONSOLE_COLOR_RESET << statusMsg << "\n";
+            << CONSOLE_COLOR_RESET << statusMsg << std::endl;
 }
 
 void ConsoleWriter::printError(std::string errorMsg) const
 {
     std::cout << CONSOLE_RED_MESSAGE_COLOR << "Error: "
-            << CONSOLE_COLOR_RESET << errorMsg << "\n";
+            << CONSOLE_COLOR_RESET << errorMsg << std::endl;
 }
 
 void ConsoleWriter::printWarning(std::string warningMsg) const
 {
     std::cout << CONSOLE_RED_MESSAGE_COLOR << "Warning: "
-            << CONSOLE_COLOR_RESET << warningMsg << "\n";
+            << CONSOLE_COLOR_RESET << warningMsg << std::endl;
 }
 
 void ConsoleWriter::printMessage(MHWD::MESSAGETYPE type, std::string msg) const
@@ -100,7 +100,7 @@ void ConsoleWriter::printHelp() const
             << "  -a/--auto <usb/pci> <free/nonfree> <classid>\tauto install configs for classid\n"
             << "  --pmcachedir <path>\t\t\tset package manager cache path\n"
             << "  --pmconfig <path>\t\t\tset package manager config\n"
-            << "  --pmroot <path>\t\t\tset package manager root\n" << "\n";
+            << "  --pmroot <path>\t\t\tset package manager root\n" << std::endl;
 }
 
 void ConsoleWriter::printVersion(std::string& versionMhwd, std::string& yearCopy) const
@@ -109,7 +109,7 @@ void ConsoleWriter::printVersion(std::string& versionMhwd, std::string& yearCopy
             << "Copyright (C) "<< yearCopy <<" Manjaro Linux Developers\n"
             << "This is free software licensed under GNU GPL v3.0\n"
             << "FITNESS FOR A PARTICULAR PURPOSE.\n"
-            << "\n";
+            << std::endl;
 }
 
 void ConsoleWriter::listDevices(const std::vector<std::shared_ptr<Device>>& devices, std::string type) const
@@ -127,7 +127,7 @@ void ConsoleWriter::listDevices(const std::vector<std::shared_ptr<Device>>& devi
                 << std::setw(8) << "CLASS"
                 << std::setw(8) << "VENDOR"
                 << std::setw(8) << "DEVICE"
-                << std::setw(10) << "CONFIGS" << "\n";
+                << std::setw(10) << "CONFIGS" << std::endl;
         printLine();
         for (const auto& device : devices)
         {
@@ -136,9 +136,9 @@ void ConsoleWriter::listDevices(const std::vector<std::shared_ptr<Device>>& devi
                     << std::setw(8) << device->classID_
                     << std::setw(8) << device->vendorID_
                     << std::setw(8) << device->deviceID_
-                    << std::setw(10) << device->availableConfigs_.size() << "\n";
+                    << std::setw(10) << device->availableConfigs_.size() << std::endl;
         }
-        std::cout << "\n\n";
+        std::cout << std::endl << std::endl;
     }
 }
 
@@ -149,16 +149,16 @@ void ConsoleWriter::listConfigs(const std::vector<std::shared_ptr<Config>>& conf
     std::cout << std::setw(22) << "NAME"
             << std::setw(22) << "VERSION"
             << std::setw(20) << "FREEDRIVER"
-            << std::setw(15) << "TYPE" << "\n";
+            << std::setw(15) << "TYPE" << std::endl;
     printLine();
     for (const auto& config : configs)
     {
         std::cout << std::setw(22) << config->name_
                 << std::setw(22) << config->version_
                 << std::setw(20) << std::boolalpha << config->freedriver_
-                << std::setw(15) << config->type_ << "\n";
+                << std::setw(15) << config->type_ << std::endl;
     }
-    std::cout << "\n\n";
+    std::cout << std::endl << std::endl;
 }
 
 void ConsoleWriter::printAvailableConfigsInDetail(const std::string& deviceType,
@@ -182,7 +182,7 @@ void ConsoleWriter::printAvailableConfigsInDetail(const std::string& deviceType,
                     + device->vendorID_ + ":" + device->deviceID_ + ")");
             std::cout << "  " << device->className_
                     << " " << device->vendorName_
-                    << " " << device->deviceName_ << "\n";
+                    << " " << device->deviceName_ << std::endl;
             printLine();
             if (!device->installedConfigs_.empty())
             {
@@ -200,7 +200,7 @@ void ConsoleWriter::printAvailableConfigsInDetail(const std::string& deviceType,
                 {
                     printConfigDetails(*availableConfig);
                 }
-                std::cout << "\n";
+                std::cout << std::endl;
             }
         }
     }
@@ -224,7 +224,7 @@ void ConsoleWriter::printInstalledConfigs(const std::string& deviceType,
         {
             printConfigDetails(*config);
         }
-        std::cout << "\n";
+        std::cout << std::endl;
     }
 }
 
@@ -264,12 +264,12 @@ void ConsoleWriter::printConfigDetails(const Config& config) const
             << "\n   DEPENDS:\t" << (dependencies.empty() ? "-" : dependencies)
             << "\n   CONFLICTS:\t" << (conflicts.empty() ? "-" : conflicts)
             << "\n   CLASSIDS:\t" << classids
-            << "\n   VENDORIDS:\t" << vendorids << "\n\n";
+            << "\n   VENDORIDS:\t" << vendorids << "\n" << std::endl;
 }
 
 void ConsoleWriter::printLine() const
 {
-    std::cout << std::string(80, '-') << "\n";
+    std::cout << std::string(80, '-') << std::endl;
 }
 
 void ConsoleWriter::printDeviceDetails(hw_item hw, FILE *f) const
