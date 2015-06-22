@@ -552,7 +552,7 @@ MHWD::STATUS Mhwd::installConfig(std::shared_ptr<Config> config)
 MHWD::STATUS Mhwd::uninstallConfig(Config *config)
 {
     std::shared_ptr<Config> installedConfig{getInstalledConfig(config->name_, config->type_)};
-
+    
     // Check if installed
     if (nullptr == installedConfig)
     {
@@ -564,8 +564,6 @@ MHWD::STATUS Mhwd::uninstallConfig(Config *config)
     }
     else
     {
-        // TODO: Should we check for local requirements here?
-
         // Run script
         if (!runScript(installedConfig, MHWD::TRANSACTIONTYPE::REMOVE))
         {
@@ -579,6 +577,8 @@ MHWD::STATUS Mhwd::uninstallConfig(Config *config)
 
         // Installed config vectors have to be updated manual with updateInstalledConfigData(Data*)
 
+        data_.updateInstalledConfigData();
+        
         return MHWD::STATUS::SUCCESS;
     }
 }

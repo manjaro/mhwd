@@ -1,7 +1,0 @@
-allow to set the base lib dir
-force to remove db config
-show detailed info for one config
-set architecture from library not from bash
-pass ids and bus ids to script
-don't remove packages on reinstallation...
-add option similar to pacman --root ...
