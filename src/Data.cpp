@@ -325,24 +325,21 @@ std::vector<std::shared_ptr<Config>> Data::getAllLocalRequirements(std::shared_p
     }
 
     // Check if this config is required by another installed config
-    for (auto&& installedConfig = installedConfigs.begin();
-            installedConfig != installedConfigs.end(); ++installedConfig)
+    for (auto& installedConfig : installedConfigs)
     {
-        for (auto&& dependency = (*installedConfig)->dependencies_.begin();
-                dependency != (*installedConfig)->dependencies_.end(); dependency++)
+        for (const auto& dependency : installedConfig->dependencies_)
         {
-            if ((*dependency) == config->name_)
+            if (dependency == config->name_)
             {
-                // Check if already in vector
                 bool found = std::find_if(requirements.begin(), requirements.end(),
                         [&installedConfig](const std::shared_ptr<Config>& req)
                         {
-                            return req->name_ == (*installedConfig)->name_;
+                            return req->name_ == installedConfig->name_;
                         }) != requirements.end();
 
                 if (!found)
                 {
-                    requirements.emplace_back(*installedConfig);
+                    requirements.emplace_back(installedConfig);
                     break;
                 }
             }
@@ -464,39 +461,34 @@ Vita::string Data::getRightConfigPath(Vita::string str, Vita::string baseConfigP
 
 void Data::updateConfigData()
 {
-    // Clear config vectors in each device element
-    for (auto&& PCIDevice = PCIDevices.begin();
-            PCIDevice != PCIDevices.end(); PCIDevice++)
+    for (auto& PCIDevice : PCIDevices)
     {
-        (*PCIDevice)->availableConfigs_.clear();
+        PCIDevice->availableConfigs_.clear();
     }
 
-    for (auto&& USBDevice = USBDevices.begin();
-            USBDevice != USBDevices.end(); USBDevice++)
+    for (auto& USBDevice : USBDevices)
     {
-        (*USBDevice)->availableConfigs_.clear();
+        USBDevice->availableConfigs_.clear();
     }
+
     allPCIConfigs.clear();
     allUSBConfigs.clear();
 
-    // Refill data
     fillAllConfigs("PCI");
     fillAllConfigs("USB");
 
     setMatchingConfigs(PCIDevices, allPCIConfigs, false);
     setMatchingConfigs(USBDevices, allUSBConfigs, false);
 
-    // Update also installed config data
     updateInstalledConfigData();
 }
 
 void Data::setMatchingConfigs(const std::vector<std::shared_ptr<Device>>& devices,
         std::vector<std::shared_ptr<Config>>& configs, bool setAsInstalled)
 {
-    for (auto&& config = configs.begin(); config != configs.end();
-            ++config)
+    for (auto& config : configs)
     {
-        setMatchingConfig((*config), devices, setAsInstalled);
+        setMatchingConfig(config, devices, setAsInstalled);
     }
 }
 
@@ -508,16 +500,15 @@ void Data::setMatchingConfig(std::shared_ptr<Config> config,
     getAllDevicesOfConfig(devices, config, foundDevices);
 
     // Set config to all matching devices
-    for (auto&& foundDevice = foundDevices.begin();
-            foundDevice != foundDevices.end(); ++foundDevice)
+    for (auto& foundDevice : foundDevices)
     {
         if (setAsInstalled)
         {
-            addConfigSorted((*foundDevice)->installedConfigs_, config);
+            addConfigSorted(foundDevice->installedConfigs_, config);
         }
         else
         {
-            addConfigSorted((*foundDevice)->availableConfigs_, config);
+            addConfigSorted(foundDevice->availableConfigs_, config);
         }
     }
 }
