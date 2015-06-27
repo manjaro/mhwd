@@ -88,7 +88,6 @@ private:
             std::string onlyFilename = "");
 
     Vita::string getRightConfigPath(Vita::string str, Vita::string baseConfigPath);
-    std::vector<std::string> splitValue(Vita::string str, Vita::string onlyEnding = "");
     void updateConfigData();
 
     Vita::string from_Hex(uint16_t hexnum, int fill);
