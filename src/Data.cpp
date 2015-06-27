@@ -134,65 +134,41 @@ void Data::getAllDevicesOfConfig(const std::vector<std::shared_ptr<Device>>& dev
                                 return (("*" == classID) || (classID == (*i_device)->classID_));
                             }) != hwdID->classIDs.end();
 
-            if (!found)
-            {
-                continue;
-            }
-            else
+            if (found)
             {
                 // Check blacklisted class ids
                 found = std::find_if(hwdID->blacklistedClassIDs.begin(), hwdID->blacklistedClassIDs.end(), [i_device](const std::string& blacklistedClassID){
                                 return (blacklistedClassID == (*i_device)->classID_);
                             }) != hwdID->blacklistedClassIDs.end();
 
-                if (found)
-                {
-                    continue;
-                }
-                else
+                if (!found)
                 {
                     // Check vendor ids
                     found = std::find_if(hwdID->vendorIDs.begin(), hwdID->vendorIDs.end(), [i_device](const std::string& vendorID){
                                     return (("*" == vendorID) || (vendorID == (*i_device)->vendorID_));
                                 }) != hwdID->vendorIDs.end();
 
-                    if (!found)
-                    {
-                        continue;
-                    }
-                    else
+                    if (found)
                     {
                         // Check blacklisted vendor ids
                         found = std::find_if(hwdID->blacklistedVendorIDs.begin(), hwdID->blacklistedVendorIDs.end(), [i_device](const std::string& blacklistedVendorID){
                                         return (blacklistedVendorID == (*i_device)->vendorID_);
                                     }) != hwdID->blacklistedVendorIDs.end();
 
-                        if (found)
-                        {
-                            continue;
-                        }
-                        else
+                        if (!found)
                         {
                             // Check device ids
                             found = std::find_if(hwdID->deviceIDs.begin(), hwdID->deviceIDs.end(), [i_device](const std::string& deviceID){
                                             return (("*" == deviceID) || (deviceID == (*i_device)->deviceID_));
                                         }) != hwdID->deviceIDs.end();
 
-                            if (!found)
-                            {
-                                continue;
-                            }
-                            else
+                            if (found)
                             {
                                 // Check blacklisted device ids
                                 found = std::find_if(hwdID->blacklistedDeviceIDs.begin(), hwdID->blacklistedDeviceIDs.end(), [i_device](const std::string& blacklistedDeviceID){
                                                 return (blacklistedDeviceID == (*i_device)->deviceID_);
                                             }) != hwdID->blacklistedDeviceIDs.end();
-                                if (found)
-                                {
-                                    continue;
-                                }
-                                else
+                                if (!found)
                                 {
                                     foundDevice = true;
                                     foundDevices.push_back(*i_device);
@@ -244,33 +220,21 @@ void Data::getAllDependenciesToInstall(std::shared_ptr<Config> config,
         auto found = std::find_if(installedConfigs.begin(), installedConfigs.end(),
                 [configDependency](const std::shared_ptr<Config>& config) -> bool {
                     return (config->name_ == *configDependency);
-                });
+                }) != installedConfigs.end();
 
-        if (found != installedConfigs.end())
-        {
-            continue;
-        }
-        else
+        if (!found)
         {
             found = std::find_if(dependencies->begin(), dependencies->end(),
                     [configDependency](const std::shared_ptr<Config>& config) -> bool {
                         return (config->name_ == *configDependency);
-                    });
+                    }) != dependencies->end();
 
-            if (found != dependencies->end())
-            {
-                continue;
-            }
-            else
+            if (!found)
             {
                 // Add to vector and check for further subdepends...
                 std::shared_ptr<Config> dependconfig {
                     getDatabaseConfig((*configDependency), config->type_)};
-                if (nullptr == dependconfig)
-                {
-                    continue;
-                }
-                else
+                if (nullptr != dependconfig)
                 {
                     dependencies->emplace_back(dependconfig);
                     getAllDependenciesToInstall(dependconfig, installedConfigs, dependencies);
@@ -334,11 +298,7 @@ std::vector<std::shared_ptr<Config>> Data::getAllLocalConflicts(std::shared_ptr<
             for (auto&& installedConfig = installedConfigs.begin();
                     installedConfig != installedConfigs.end(); ++installedConfig)
             {
-                if ((*dependencyConflict) != (*installedConfig)->name_)
-                {
-                    continue;
-                }
-                else
+                if ((*dependencyConflict) == (*installedConfig)->name_)
                 {
                     // Check if already in vector
                     bool found = false;
@@ -352,11 +312,7 @@ std::vector<std::shared_ptr<Config>> Data::getAllLocalConflicts(std::shared_ptr<
                         }
                     }
 
-                    if (found)
-                    {
-                        continue;
-                    }
-                    else
+                    if (!found)
                     {
                         conflicts.emplace_back(*installedConfig);
                         break;
@@ -391,11 +347,7 @@ std::vector<std::shared_ptr<Config>> Data::getAllLocalRequirements(std::shared_p
         for (auto&& dependency = (*installedConfig)->dependencies_.begin();
                 dependency != (*installedConfig)->dependencies_.end(); dependency++)
         {
-            if ((*dependency) != config->name_)
-            {
-                continue;
-            }
-            else
+            if ((*dependency) == config->name_)
             {
                 // Check if already in vector
                 bool found = false;
@@ -489,12 +441,8 @@ std::vector<std::string> Data::getRecursiveDirectoryFileList(const std::string& 
     {
         while (nullptr != (dir = readdir(d)))
         {
-            std::string filename {dir->d_name};
-            if (("." == filename) || (".." == filename) || ("" == filename))
-            {
-                continue;
-            }
-            else
+            const std::string filename {dir->d_name};
+            if (("." != filename) && (".." != filename) && ("" != filename))
             {
                 std::string filepath {directoryPath + "/" + filename};
                 struct stat filestatus;
