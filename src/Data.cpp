@@ -210,26 +210,25 @@ void Data::getAllDependenciesToInstall(std::shared_ptr<Config> config,
         std::vector<std::shared_ptr<Config>>& installedConfigs,
         std::vector<std::shared_ptr<Config>> *dependencies)
 {
-    for (auto&& configDependency = config->dependencies_.begin();
-            configDependency != config->dependencies_.end(); ++configDependency)
+    for (const auto& configDependency : config->dependencies_)
     {
         auto found = std::find_if(installedConfigs.begin(), installedConfigs.end(),
                 [configDependency](const std::shared_ptr<Config>& config) -> bool {
-                    return (config->name_ == *configDependency);
+                    return (config->name_ == configDependency);
                 }) != installedConfigs.end();
 
         if (!found)
         {
             found = std::find_if(dependencies->begin(), dependencies->end(),
                     [configDependency](const std::shared_ptr<Config>& config) -> bool {
-                        return (config->name_ == *configDependency);
+                        return (config->name_ == configDependency);
                     }) != dependencies->end();
 
             if (!found)
             {
                 // Add to vector and check for further subdepends...
                 std::shared_ptr<Config> dependconfig {
-                    getDatabaseConfig((*configDependency), config->type_)};
+                    getDatabaseConfig(configDependency, config->type_)};
                 if (nullptr != dependconfig)
                 {
                     dependencies->emplace_back(dependconfig);
@@ -284,32 +283,23 @@ std::vector<std::shared_ptr<Config>> Data::getAllLocalConflicts(std::shared_ptr<
 
     dependencies.emplace_back(config);
 
-    for (auto&& dependency = dependencies.begin();
-            dependency != dependencies.end(); ++dependency)
+    for (const auto& dependency : dependencies)
     {
-        for (auto&& dependencyConflict = (*dependency)->conflicts_.begin();
-                dependencyConflict != (*dependency)->conflicts_.end(); ++dependencyConflict)
+        for (const auto& dependencyConflict : dependency->conflicts_)
         {
-            for (auto&& installedConfig = installedConfigs.begin();
-                    installedConfig != installedConfigs.end(); ++installedConfig)
+            for (auto& installedConfig : installedConfigs)
             {
-                if ((*dependencyConflict) == (*installedConfig)->name_)
+                if (dependencyConflict == installedConfig->name_)
                 {
-                    // Check if already in vector
-                    bool found = false;
-                    for (auto&& conflict = conflicts.begin();
-                            conflict != conflicts.end(); ++conflict)
-                    {
-                        if ((*conflict)->name_ == (*dependencyConflict))
-                        {
-                            found = true;
-                            break;
-                        }
-                    }
+                    bool found = std::find_if(conflicts.begin(), conflicts.end(),
+                            [&dependencyConflict](const std::shared_ptr<Config>& conflict)
+                            {
+                                return conflict->name_ == dependencyConflict;
+                            }) != conflicts.end();
 
                     if (!found)
                     {
-                        conflicts.emplace_back(*installedConfig);
+                        conflicts.emplace_back(installedConfig);
                         break;
                     }
                 }
