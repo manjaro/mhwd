@@ -194,7 +194,6 @@ std::vector<std::shared_ptr<Config>> Data::getAllDependenciesToInstall(
     std::vector<std::shared_ptr<Config>> depends;
     std::vector<std::shared_ptr<Config>> installedConfigs;
 
-    // Get the right configs
     if ("USB" == config->type_)
     {
         installedConfigs = installedUSBConfigs;
@@ -204,7 +203,6 @@ std::vector<std::shared_ptr<Config>> Data::getAllDependenciesToInstall(
         installedConfigs = installedPCIConfigs;
     }
 
-    // Get all depends
     getAllDependenciesToInstall(config, installedConfigs, &depends);
 
     return depends;
@@ -249,7 +247,6 @@ std::shared_ptr<Config> Data::getDatabaseConfig(const std::string configName,
 {
     std::vector<std::shared_ptr<Config>> allConfigs;
 
-    // Get the right configs
     if ("USB" == configType)
     {
         allConfigs = allUSBConfigs;
@@ -259,12 +256,13 @@ std::shared_ptr<Config> Data::getDatabaseConfig(const std::string configName,
         allConfigs = allPCIConfigs;
     }
 
-    for (auto&& config = allConfigs.begin(); config != allConfigs.end();
-            ++config)
+    for (auto& config : allConfigs)
     {
-        if (configName == (*config)->name_)
+
+        if (configName == config->name_)
         {
-            return (*config);
+
+            return config;
         }
     }
 
@@ -277,7 +275,6 @@ std::vector<std::shared_ptr<Config>> Data::getAllLocalConflicts(std::shared_ptr<
     std::vector<std::shared_ptr<Config>> dependencies = getAllDependenciesToInstall(config);
     std::vector<std::shared_ptr<Config>> installedConfigs;
 
-    // Get the right configs
     if ("USB" == config->type_)
     {
         installedConfigs = installedUSBConfigs;
@@ -330,7 +327,6 @@ std::vector<std::shared_ptr<Config>> Data::getAllLocalRequirements(std::shared_p
     std::vector<std::shared_ptr<Config>> requirements;
     std::vector<std::shared_ptr<Config>> installedConfigs;
 
-    // Get the right configs
     if ("USB" == config->type_)
     {
         installedConfigs = installedUSBConfigs;
@@ -566,28 +562,26 @@ void Data::setMatchingConfig(std::shared_ptr<Config> config,
 }
 
 void Data::addConfigSorted(std::vector<std::shared_ptr<Config>>& configs,
-        std::shared_ptr<Config> config)
+        std::shared_ptr<Config> newConfig)
 {
-    for (auto&& iterator = configs.begin();
-            iterator != configs.end(); iterator++)
+    bool found = std::find_if(configs.begin(), configs.end(),
+            [&newConfig](const std::shared_ptr<Config>& config)
+            {
+                return newConfig->name_ == config->name_;
+            }) != configs.end();
+    if (!found)
     {
-        if (config->name_ == (*iterator)->name_)
+        for (auto&& config = configs.begin(); config != configs.end();
+                config++)
         {
-            return;
+            if (newConfig->priority_ > (*config)->priority_)
+            {
+                configs.insert(config, std::shared_ptr<Config>(newConfig));
+                return;
+            }
         }
+        configs.emplace_back(newConfig);
     }
-
-    for (auto&& iterator = configs.begin(); iterator != configs.end();
-            iterator++)
-    {
-        if (config->priority_ > (*iterator)->priority_)
-        {
-            configs.insert(iterator, std::shared_ptr<Config>(config));
-            return;
-        }
-    }
-
-    configs.emplace_back(config);
 }
 
 Vita::string Data::from_Hex(std::uint16_t hexnum, int fill)

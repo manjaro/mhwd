@@ -83,7 +83,7 @@ private:
             std::vector<std::shared_ptr<Config>>& configs, bool setAsInstalled);
     void setMatchingConfig(std::shared_ptr<Config> config, const std::vector<std::shared_ptr<Device>>& devices,
             bool setAsInstalled);
-    void addConfigSorted(std::vector<std::shared_ptr<Config>>& configs, std::shared_ptr<Config> config);
+    void addConfigSorted(std::vector<std::shared_ptr<Config>>& configs, std::shared_ptr<Config> newConfig);
     std::vector<std::string> getRecursiveDirectoryFileList(const std::string& directoryPath,
             std::string onlyFilename = "");
 
