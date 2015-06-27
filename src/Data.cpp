@@ -44,16 +44,15 @@ Data::Data()
 void Data::updateInstalledConfigData()
 {
     // Clear config vectors in each device element
-    for (auto&& PCIDevice = PCIDevices.begin();
-            PCIDevice != PCIDevices.end(); ++PCIDevice)
+
+    for (auto& PCIDevice : PCIDevices)
     {
-        (*PCIDevice)->installedConfigs_.clear();
+        PCIDevice->installedConfigs_.clear();
     }
 
-    for (auto&& USBDevice = USBDevices.begin();
-            USBDevice != USBDevices.end(); ++USBDevice)
+    for (auto& USBDevice : USBDevices)
     {
-        (*USBDevice)->installedConfigs_.clear();
+        USBDevice->installedConfigs_.clear();
     }
 
     installedPCIConfigs.clear();
@@ -83,12 +82,11 @@ void Data::fillInstalledConfigs(std::string type)
         configPaths = getRecursiveDirectoryFileList(MHWD_PCI_DATABASE_DIR, MHWD_CONFIG_NAME);
     }
 
-    for (auto&& configPath = configPaths.begin();
-            configPath != configPaths.end(); ++configPath)
+    for (const auto& configPath : configPaths)
     {
-        Config *config = new Config((*configPath), type);
+        Config *config = new Config(configPath, type);
 
-        if (config->readConfigFile((*configPath)))
+        if (config->readConfigFile(configPath))
         {
             configs->push_back(std::shared_ptr<Config>{config});
         }
@@ -346,16 +344,11 @@ std::vector<std::shared_ptr<Config>> Data::getAllLocalRequirements(std::shared_p
             if ((*dependency) == config->name_)
             {
                 // Check if already in vector
-                bool found = false;
-                for (auto&& requirement = requirements.begin();
-                        requirement != requirements.end(); ++requirement)
-                {
-                    if ((*requirement)->name_ == (*installedConfig)->name_)
-                    {
-                        found = true;
-                        break;
-                    }
-                }
+                bool found = std::find_if(requirements.begin(), requirements.end(),
+                        [&installedConfig](const std::shared_ptr<Config>& req)
+                        {
+                            return req->name_ == (*installedConfig)->name_;
+                        }) != requirements.end();
 
                 if (!found)
                 {
@@ -569,10 +562,10 @@ void Data::addConfigSorted(std::vector<std::shared_ptr<Config>>& configs,
             {
                 return newConfig->name_ == config->name_;
             }) != configs.end();
+
     if (!found)
     {
-        for (auto&& config = configs.begin(); config != configs.end();
-                config++)
+        for (auto&& config = configs.begin(); config != configs.end(); ++config)
         {
             if (newConfig->priority_ > (*config)->priority_)
             {
