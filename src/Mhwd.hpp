@@ -100,6 +100,7 @@ private:
     void tryToParseCmdLineOptions(int argc, char* argv[], bool& autoConfigureNonFreeDriver,
             std::string& operationType, std::string& autoConfigureClassID);
     bool optionsDontInterfereWithEachOther() const;
+    std::string gatherConfigContent(const std::vector<std::shared_ptr<Config>> & config) const;
 };
 
 #endif /* MHWD_HPP_ */

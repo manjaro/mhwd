@@ -54,29 +54,16 @@ bool Mhwd::performTransaction(std::shared_ptr<Config> config, MHWD::TRANSACTIONT
         // Print conflicts
         if (!transaction.conflictedConfigs_.empty())
         {
-            std::string conflicts;
-
-            for (auto&& conflictedConfig : transaction.conflictedConfigs_)
-            {
-                conflicts += " " + conflictedConfig->name_;
-            }
-
             consoleWriter_.printError("config '" + config->name_ + "' conflicts with config(s):" +
-                    conflicts);
+                    gatherConfigContent(transaction.conflictedConfigs_));
             return false;
         }
 
         // Print dependencies
         else if (!transaction.dependencyConfigs_.empty())
         {
-            std::string dependencies;
-
-            for (auto&& dependencyConfig : transaction.dependencyConfigs_)
-            {
-                dependencies += " " + dependencyConfig->name_;
-            }
-
-            consoleWriter_.printStatus("Dependencies to install:" + dependencies +
+            consoleWriter_.printStatus("Dependencies to install:" +
+                    gatherConfigContent(transaction.dependencyConfigs_) +
                     "\nProceed with installation? [Y/n]");
             std::string input;
             std::getline(std::cin, input);
@@ -88,15 +75,8 @@ bool Mhwd::performTransaction(std::shared_ptr<Config> config, MHWD::TRANSACTIONT
         // Print requirements
         if (!transaction.configsRequirements_.empty())
         {
-            std::string requirements;
-
-            for (auto&& requirement : transaction.configsRequirements_)
-            {
-                requirements += " " + requirement->name_;
-            }
-
             consoleWriter_.printError("config '" + config->name_ + "' is required by config(s):" +
-                    requirements);
+                    gatherConfigContent(transaction.configsRequirements_));
             return false;
         }
     }
@@ -1278,4 +1258,14 @@ int Mhwd::launch(int argc, char *argv[])
         }
     }
     return 0;
+}
+
+std::string Mhwd::gatherConfigContent(const std::vector<std::shared_ptr<Config>> & configuration) const
+{
+    std::string config;
+    for (auto&& c : configuration)
+    {
+        config += " " + c->name_;
+    }
+    return config;
 }
