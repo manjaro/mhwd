@@ -213,12 +213,7 @@ bool Config::readConfigFile(std::string configPath)
         }
     }
 
-    if (name_.empty())
-    {
-        return false;
-    }
-
-    return true;
+    return ! name_.empty();
 }
 
 std::vector<std::string> Config::splitValue(Vita::string str, Vita::string onlyEnding)
