@@ -23,6 +23,7 @@
  */
 
 #include "Config.hpp"
+#include "Utils.hpp"
 
 #include <fstream>
 #include <string>
@@ -105,91 +106,72 @@ bool Config::readConfigFile(std::string configPath)
             }
         }
 
-        if (key == "include")
+        switch(MhwdUtils::hash(std::string(key).c_str()))
         {
-            readConfigFile(getRightConfigPath(value, basePath_));
-        }
-        else if (key == "name")
-        {
-            name_ = value.toLower();
-        }
-        else if (key == "version")
-        {
-            version_ = value;
-        }
-        else if (key == "info")
-        {
-            info_ = value;
-        }
-        else if (key == "priority")
-        {
-            priority_ = value.convert<int>();
-        }
-        else if (key == "freedriver")
-        {
-            value = value.toLower();
+            case MhwdUtils::hash_compile_time("include"):
+                readConfigFile(getRightConfigPath(value, basePath_));
+                break;
+            case MhwdUtils::hash_compile_time("name"):
+                name_ = value.toLower();
+                break;
+            case MhwdUtils::hash_compile_time("version"):
+                version_ = value;
+                break;
+            case MhwdUtils::hash_compile_time("info"):
+                info_ = value;
+                break;
+            case MhwdUtils::hash_compile_time("priority"):
+                priority_ = value.convert<int>();
+                break;
+            case MhwdUtils::hash_compile_time("freedriver"):
+                value = value.toLower();
+                freedriver_ = value == "false" ? false : true;
+                break;
+            case MhwdUtils::hash_compile_time("classids"):
+                // Add new HardwareIDs group to vector if vector is not empty
+                if (!hwdIDs_.back().classIDs.empty())
+                {
+                    Config::HardwareID hwdID;
+                    hwdIDs_.push_back(hwdID);
+                }
 
-            if (value == "false")
-            {
-                freedriver_ = false;
-            }
-            else if (value == "true")
-            {
-                freedriver_ = true;
-            }
-        }
-        else if (key == "classids")
-        {
-            // Add new HardwareIDs group to vector if vector is not empty
-            if (!hwdIDs_.back().classIDs.empty())
-            {
-                Config::HardwareID hwdID;
-                hwdIDs_.push_back(hwdID);
-            }
+                hwdIDs_.back().classIDs = splitValue(value);
+                break;
+            case MhwdUtils::hash_compile_time("vendorids"):
+                // Add new HardwareIDs group to vector if vector is not empty
+                if (!hwdIDs_.back().vendorIDs.empty())
+                {
+                    Config::HardwareID hwdID;
+                    hwdIDs_.push_back(hwdID);
+                }
 
-            hwdIDs_.back().classIDs = splitValue(value);
-        }
-        else if (key == "vendorids")
-        {
-            // Add new HardwareIDs group to vector if vector is not empty
-            if (!hwdIDs_.back().vendorIDs.empty())
-            {
-                Config::HardwareID hwdID;
-                hwdIDs_.push_back(hwdID);
-            }
+                hwdIDs_.back().vendorIDs = splitValue(value);
+                break;
+            case MhwdUtils::hash_compile_time("deviceids"):
+                // Add new HardwareIDs group to vector if vector is not empty
+                if (!hwdIDs_.back().deviceIDs.empty())
+                {
+                    Config::HardwareID hwdID;
+                    hwdIDs_.push_back(hwdID);
+                }
 
-            hwdIDs_.back().vendorIDs = splitValue(value);
-        }
-        else if (key == "deviceids")
-        {
-            // Add new HardwareIDs group to vector if vector is not empty
-            if (!hwdIDs_.back().deviceIDs.empty())
-            {
-                Config::HardwareID hwdID;
-                hwdIDs_.push_back(hwdID);
-            }
-
-            hwdIDs_.back().deviceIDs = splitValue(value);
-        }
-        else if (key == "blacklistedclassids")
-        {
-            hwdIDs_.back().blacklistedClassIDs = splitValue(value);
-        }
-        else if (key == "blacklistedvendorids")
-        {
-            hwdIDs_.back().blacklistedVendorIDs = splitValue(value);
-        }
-        else if (key == "blacklisteddeviceids")
-        {
-            hwdIDs_.back().blacklistedDeviceIDs = splitValue(value);
-        }
-        else if (key == "mhwddepends")
-        {
-            dependencies_ = splitValue(value);
-        }
-        else if (key == "mhwdconflicts")
-        {
-            conflicts_ = splitValue(value);
+                hwdIDs_.back().deviceIDs = splitValue(value);
+                break;
+            case MhwdUtils::hash_compile_time("blacklistedclassids"):
+                hwdIDs_.back().blacklistedClassIDs = splitValue(value);
+                break;
+            case MhwdUtils::hash_compile_time("blacklistedvendorids"):
+                hwdIDs_.back().blacklistedVendorIDs = splitValue(value);
+                break;
+            case MhwdUtils::hash_compile_time("blacklisteddeviceids"):
+                hwdIDs_.back().blacklistedDeviceIDs = splitValue(value);
+                break;
+            case MhwdUtils::hash_compile_time("mhwddepends"):
+                dependencies_ = splitValue(value);
+                break;
+            case MhwdUtils::hash_compile_time("mhwdconflicts"):
+                conflicts_ = splitValue(value);
+                break;
         }
     }
 
