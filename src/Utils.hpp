@@ -5,6 +5,7 @@
  *  Roland Singer <roland@manjaro.org>
  *  Łukasz Matysiak <december0123@gmail.com>
  *  Filipe Marques <eagle.software3@gmail.com>
+ *  Oscar Forner Martinez <oscar.forner.martinez@gmail.com>
  *
  *  Copyright (C) 2007 Free Software Foundation, Inc.
  *
