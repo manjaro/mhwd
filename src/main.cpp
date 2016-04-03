@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
     try
     {
         Mhwd mhwd;
-        mhwd.setVersionMhwd("0.5.6","2012-2015");
+        mhwd.setVersionMhwd("0.5.7","2012-2016");
         return mhwd.launch(argc, argv);
     }
     catch(...)
