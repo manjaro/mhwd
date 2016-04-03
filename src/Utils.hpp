@@ -7,7 +7,7 @@
  *  Filipe Marques <eagle.software3@gmail.com>
  *  Oscar Forner Martinez <oscar.forner.martinez@gmail.com>
  *
- *  Copyright (C) 2007 Free Software Foundation, Inc.
+ *  Copyright (C) 2012 - 2016 Manjaro (http://manjaro.org)
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
