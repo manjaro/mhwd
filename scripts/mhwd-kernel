@@ -9,7 +9,7 @@ args_check() {
 }
 
 err() {
-    printf "\e[31mError:\e[0m $1" 1>&2; exit 1
+    printf "\e[31mError:\e[0m $1\n" 1>&2; exit 1
 }
 
 kernel_usage() {
@@ -27,9 +27,9 @@ kernel_install() {
 
     for kernel in "$@"; do
         [[ $kernel = "rmc" ]] && rmc=1 && continue
-        [[ $kernel != linux[0-9][0-9]?([0-9]) && $kernel != linux-rt-*manjaro && $kernel != "rmc" ]] && err "Invalid argument.\nPlease choose one of the $(kernel_repo)\n"
+        [[ $kernel != linux[0-9][0-9]?([0-9]) && $kernel != linux-rt-*manjaro && $kernel != "rmc" ]] && err "Invalid argument.\nPlease choose one of the $(kernel_repo)"
         [[ $current = $kernel ]] && err "You can't reinstall your current kernel. Please use 'pacman -Syu' instead to update."
-        [[ -z $(pacman -Ssq "^$kernel$") ]] && err "Please make sure if the given kernel(s) exist(s).\n$(kernel_repo)\n"
+        [[ -z $(pacman -Ssq "^$kernel$") ]] && err "Please make sure if the given kernel(s) exist(s).\n$(kernel_repo)"
         
         for pkg in $(pacman -Qqs "$current"); do
             pkg=${pkg//$current/$kernel}
@@ -49,7 +49,7 @@ kernel_install() {
     pacman -S "${pkginstall[@]}"
 
     [[ $rmc = 1 && $? = 0 ]] && pacman -R $(pacman -Qqs $current)
-    [[ $rmc = 1 && $? != 0 ]] && { echo ""; err "'rmc' aborted because the kernel failed to install or canceled on removal.\n"; }
+    [[ $rmc = 1 && $? != 0 ]] && { echo ""; err "'rmc' aborted because the kernel failed to install or canceled on removal."; }
 }
 
 kernel_repo() {
@@ -68,10 +68,10 @@ kernel_remove() {
     pkgremove=()
 
     for kernel in "$@"; do
-        [[ -z "$kernel" ]] && err "Invalid argument (use -h for help).\n"
-        [[ $kernel != linux[0-9][0-9]?([0-9]) && $kernel != linux-rt-*manjaro ]] && err "Please enter a valid kernel name.\n$(kernel_list)\n"
-        [[ $current = $kernel ]] && err "You can't remove your current kernel.\n"
-        [[ -z $(pacman -Qqs "^$1$") ]] && err "Kernel not installed.\n$(kernel_list)\n"
+        [[ -z "$kernel" ]] && err "Invalid argument (use -h for help)."
+        [[ $kernel != linux[0-9][0-9]?([0-9]) && $kernel != linux-rt-*manjaro ]] && err "Please enter a valid kernel name.\n$(kernel_list)"
+        [[ $current = $kernel ]] && err "You can't remove your current kernel."
+        [[ -z $(pacman -Qqs "^$1$") ]] && err "Kernel not installed.\n$(kernel_list)"
 
         for pkg in $(pacman -Qqs "$kernel"); do
             pkgremove+=("$pkg")
