@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# rt-basekernels
+rt_base=linux46
+rt_lts_base=linux44
+
 root_check() {
     [[ $EUID != 0 ]] && err "Please run as root."
 }
@@ -82,10 +86,9 @@ kernel_remove() {
 }
 
 IFS=. read -r major minor _ <<< "$(uname -r)"
-basekernel="linux$major$minor"
-current=$basekernel
-[[ $(uname -r) == *rt* ]] && [[ $basekernel == *44 ]] && current=linux-rt-lts-manjaro
-[[ $(uname -r) == *rt* ]] && [[ $basekernel == *46 ]] && current=linux-rt-manjaro
+current="linux$major$minor"
+[[ $(uname -r) == *rt* ]] && [[ $current == $rt_base ]] && current=linux-rt-manjaro
+[[ $(uname -r) == *rt* ]] && [[ $current == $rt_lts_base ]] && current=linux-rt-lts-manjaro
 
 case "$1" in
     -h | --help)            args_check $# 1 1
