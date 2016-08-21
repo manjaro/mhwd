@@ -59,7 +59,7 @@ kernel_repo() {
 }
 
 kernel_list() {
-    printf "\e[32mCurrently running:\e[0m $(uname -r) (${current}\n"
+    printf "\e[32mCurrently running:\e[0m $(uname -r) (${current})\n"
     echo "The following kernels are installed in your system:"
     pacman -Qqs "^linux[0-9-][0-9r]?.*[0-9o]$" | grep -v "r8" | while read -r; do echo "   * $REPLY"; done
 }
