@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# evaluate rt-basekernels if installed
+[[ $(ls /boot/linux*rt-[xi]* 2>/dev/null | wc -l) != 0 ]] && IFS=. read rt_maj rt_min <<< $(cut -f 1-2 -d '.' /boot/linux*rt-[xi]*) && rt_base=linux$rt_maj$rt_min
+[[ $(ls /boot/linux*rt-l* 2>/dev/null | wc -l) != 0 ]] && IFS=. read rtl_maj rtl_min <<< $(cut -f 1-2 -d '.' /boot/linux*rt-l*) && rt_lts_base=linux$rtl_maj$rtl_min
+
 root_check() {
     [[ $EUID != 0 ]] && err "Please run as root."
 }
@@ -9,7 +13,7 @@ args_check() {
 }
 
 err() {
-    echo "Error: $1" 1>&2; exit 1
+    printf "\e[31mError:\e[0m $1\n" 1>&2; exit 1
 }
 
 kernel_usage() {
@@ -27,10 +31,9 @@ kernel_install() {
 
     for kernel in "$@"; do
         [[ $kernel = "rmc" ]] && rmc=1 && continue
-        [[ $kernel != linux[0-9][0-9]?([0-9]) && $kernel != "rmc" ]] && err "Invalid argument (use -h for help)."
-        [[ $kernel != linux[0-9][0-9]?([0-9]) ]] && err "Please enter a valid kernel name."
+        [[ $kernel != linux[0-9][0-9]?([0-9]) && $kernel != linux-rt-*manjaro && $kernel != "rmc" ]] && err "Invalid argument.\nPlease choose one of the $(kernel_repo)"
         [[ $current = $kernel ]] && err "You can't reinstall your current kernel. Please use 'pacman -Syu' instead to update."
-        [[ -z $(pacman -Ssq "^$kernel$") ]] && err "Please make sure if the given kernel(s) exist(s)."
+        [[ -z $(pacman -Ssq "^$kernel$") ]] && err "Please make sure if the given kernel(s) exist(s).\n$(kernel_repo)"
         
         for pkg in $(pacman -Qqs "$current"); do
             pkg=${pkg//$current/$kernel}
@@ -54,24 +57,25 @@ kernel_install() {
 }
 
 kernel_repo() {
-    echo "Available kernels:"
-    pacman -Ss "^linux[0-9][0-9]?([0-9])$" | grep core | while read -r; do echo "   * ${REPLY:5:8}"; done
+    printf "\e[32mavailable kernels:\e[0m\n"
+    pacman -Ssq "^linux[0-9][0-9]?([0-9])$" | while read -r; do echo "   * $REPLY"; done
+    pacman -Ssq "^linux-rt.*([o])$" | while read -r; do echo "   * $REPLY"; done
 }
 
 kernel_list() {
-    echo "Currently running: $(uname -r) (${current})"
+    printf "\e[32mCurrently running:\e[0m $(uname -r) (${current})\n"
     echo "The following kernels are installed in your system:"
-    pacman -Qqs "^linux[0-9][0-9]?([0-9])$" | while read -r; do echo "   * $REPLY"; done
+    pacman -Qqs "^linux[0-9-][0-9r]?.*[0-9o]$" | grep -v "r8" | while read -r; do echo "   * $REPLY"; done
 }
 
 kernel_remove() {
     pkgremove=()
 
     for kernel in "$@"; do
-        [[  -z "$kernel" ]] && err "Invalid argument (use -h for help)."
-        [[ $kernel != linux[0-9][0-9]?([0-9]) ]] && err "Please enter a valid kernel name."
+        [[ -z "$kernel" ]] && err "Invalid argument (use -h for help)."
+        [[ $kernel != linux[0-9][0-9]?([0-9]) && $kernel != linux-rt-*manjaro ]] && err "Please enter a valid kernel name.\n$(kernel_list)"
         [[ $current = $kernel ]] && err "You can't remove your current kernel."
-        [[ -z $(pacman -Qqs "^$1$") ]] && err "Kernel not installed."
+        [[ -z $(pacman -Qqs "^$1$") ]] && err "Kernel not installed.\n$(kernel_list)"
 
         for pkg in $(pacman -Qqs "$kernel"); do
             pkgremove+=("$pkg")
@@ -83,6 +87,8 @@ kernel_remove() {
 
 IFS=. read -r major minor _ <<< "$(uname -r)"
 current="linux$major$minor"
+[[ $(uname -r) == *rt* ]] && [[ $current == $rt_base ]] && current=linux-rt-manjaro
+[[ $(uname -r) == *rt* ]] && [[ $current == $rt_lts_base ]] && current=linux-rt-lts-manjaro
 
 case "$1" in
     -h | --help)            args_check $# 1 1
@@ -105,6 +111,3 @@ case "$1" in
     -*)                     err "Invalid argument (use -h for help)." ;;
     *)                      err "No arguments given (use -h for help)." ;;
 esac
-
-
-
