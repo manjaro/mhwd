@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# rt-basekernels
-rt_base=linux46
-rt_lts_base=linux44
+# evaluate rt-basekernels if installed
+[[ $(ls /boot/linux*rt-[xi]* 2>/dev/null | wc -l) != 0 ]] && IFS=. read rt_maj rt_min <<< $(cut -f 1-2 -d '.' /boot/linux*rt-[xi]*) && rt_base=linux$rt_maj$rt_min
+[[ $(ls /boot/linux*rt-l* 2>/dev/null | wc -l) != 0 ]] && IFS=. read rtl_maj rtl_min <<< $(cut -f 1-2 -d '.' /boot/linux*rt-l*) && rt_lts_base=linux$rtl_maj$rtl_min
 
 root_check() {
     [[ $EUID != 0 ]] && err "Please run as root."
