@@ -192,7 +192,7 @@ print_help()
 	echo "   --help                          show help"
 	echo "   --status                        show current status"
 	echo "   --check                         check for invalid symlinks and repair"
-	echo "   --setgl [mesa/nvidia/catalyst]  set libgl and libglx"
+	echo "   --setgl [mesa/nvidia/catalyst]  set libgl"
 	echo "   --setxorg [PATH]                set xorg configuration file"
 
 	if [ "${ARCH}" == "x86_64" ];then
@@ -291,7 +291,7 @@ if [ "${DEFAULT_IS_LIB32}" != "${MHWD64_IS_LIB32}" ];then
 	fi
 fi
 
-# Set libGl and libglx
+# Set libGl
 if [ "${SETGL}" == "mesa" ] || [ "${SETGL}" == "default" ]; then
 	set_modules
 	set_Gl "/usr/lib/mesa/libGL.so.1.2.0" \
@@ -352,7 +352,7 @@ if [ "${CHECKCONFIG}" == "true" ]; then
 			[ -e "/usr/lib32/mesa/libGLESv2.so.2.0.0" -a ! -e "/usr/lib32/libGLESv2.so" ] || \
 			[ -L "/usr/lib32/libEGL.so" -a ! -e "/usr/lib32/libEGL.so" ] || \
 			[ -e "/usr/lib32/mesa/libEGL.so.1.0.0" -a ! -e "/usr/lib32/libEGL.so" ]; then
-				echo "libGl and libglx symlinks are invalid!"
+				echo "libGl symlinks are invalid!"
 				echo "Falling back to default..."
 				set_modules
 				set_Gl "/usr/lib/mesa/libGL.so.1.2.0" \
@@ -364,22 +364,21 @@ if [ "${CHECKCONFIG}" == "true" ]; then
 						"/usr/lib32/mesa/libGLESv2.so.2.0.0" \
 						"/usr/lib32/mesa/libEGL.so.1.0.0"
 		else
-			echo "libGl and libglx symlinks valid..."
+			echo "libGl symlinks valid..."
 		fi
 	else
 		if [ ! -e "/usr/lib/libGL.so" ] || \
 			[ ! -e "/usr/lib/libGLESv1_CM.so" ] || [ ! -e "/usr/lib/libGLESv2.so" ] || \
 			[ ! -e "/usr/lib/libEGL.so" ]; then
-				echo "libGl and libglx symlinks are invalid!"
+				echo "libGl symlinks are invalid!"
 				echo "Falling back to default..."
 				set_modules
 				set_Gl "/usr/lib/mesa/libGL.so.1.2.0" \
 						"/usr/lib/mesa/libGLESv1_CM.so.1.1.0" \
 						"/usr/lib/mesa/libGLESv2.so.2.0.0" \
-						"/usr/lib/mesa/libEGL.so.1.0.0" \
-						"/usr/lib/xorg/modules/extensions/libglx.xorg"
+						"/usr/lib/mesa/libEGL.so.1.0.0"
 		else
-			echo "libGl and libglx symlinks valid..."
+			echo "libGl symlinks valid..."
 		fi
 	fi
 fi
