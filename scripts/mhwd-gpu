@@ -152,7 +152,19 @@ set_Gl() {
 	fi
 
 	if [ -e "$5" ]; then
-		ln -sf "$5" /usr/lib/xorg/modules/extensions/libglx.so
+		if [ "${SETGL}" == "mesa" ] || [ "${SETGL}" == "default" ]; then
+			mkdir -p /usr/lib/mesa/xorg/
+			ln -sf "$5" /usr/lib/mesa/xorg/libglx.so
+			ln -sf "$5" /usr/lib/mesa/xorg/libglx.so.1
+		elif [ "${SETGL}" == "nvidia" ]; then
+			mkdir -p /usr/lib/nvidia/xorg/
+			ln -sf "$5" /usr/lib/nvidia/xorg/libglx.so
+			ln -sf "$5" /usr/lib/nvidia/xorg/libglx.so.1
+		elif [ "${SETGL}" == "catalyst" ] || [ "${SETGL}" == "ati" ]; then
+			mkdir -p /usr/lib/fglrx/xorg/
+			ln -sf "$5" /usr/lib/fglrx/xorg/libglx.so
+			ln -sf "$5" /usr/lib/fglrx/xorg/libglx.so.1
+		fi
 		echo "libglx: '$5'"
 	else
 		echo "warning: could not find '$5'!"
@@ -307,7 +319,7 @@ if [ "${SETGL}" == "mesa" ] || [ "${SETGL}" == "default" ]; then
 			"/usr/lib/mesa/libGLESv1_CM.so.1.1.0" \
 			"/usr/lib/mesa/libGLESv2.so.2.0.0" \
 			"/usr/lib/mesa/libEGL.so.1.0.0" \
-			"/usr/lib/xorg/modules/extensions/libglx.xorg" \
+			"/usr/lib/xorg/modules/extensions/libglx.so" \
 			"/usr/lib32/mesa/libGL.so.1.2.0" \
 			"/usr/lib32/mesa/libGLESv1_CM.so.1.1.0" \
 			"/usr/lib32/mesa/libGLESv2.so.2.0.0" \
@@ -371,7 +383,7 @@ if [ "${CHECKCONFIG}" == "true" ]; then
 						"/usr/lib/mesa/libGLESv1_CM.so.1.1.0" \
 						"/usr/lib/mesa/libGLESv2.so.2.0.0" \
 						"/usr/lib/mesa/libEGL.so.1.0.0" \
-						"/usr/lib/xorg/modules/extensions/libglx.xorg" \
+						"/usr/lib/xorg/modules/extensions/libglx.so" \
 						"/usr/lib32/mesa/libGL.so.1.2.0" \
 						"/usr/lib32/mesa/libGLESv1_CM.so.1.1.0" \
 						"/usr/lib32/mesa/libGLESv2.so.2.0.0" \
