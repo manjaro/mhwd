@@ -5,26 +5,10 @@
 PARAM=$#
 MHWDXORGCONF="/etc/X11/xorg.conf.d/90-mhwd.conf"
 CHECKCONFIG="false"
-SETGL=""
 SETXORGCONF=""
+SETMOD=""
 ARCH=$(uname -m)
 MODULES_LOAD="/etc/modules-load.d"
-
-# lib32 config true/false
-MHWD64CONF="/etc/mhwd-x86_64.conf"
-
-# source lib32 true/false for x86_64
-if [ "${ARCH}" == "x86_64" ];then
-	if [ -f ${MHWD64CONF} ];then
-		echo "Sourcing ${MHWD64CONF}"
-		. ${MHWD64CONF}
-	else
-		echo "Using default"
-		MHWD64_IS_LIB32="true"
-	fi
-	DEFAULT_IS_LIB32=${MHWD64_IS_LIB32}
-	echo "Default lib32 support: ${DEFAULT_IS_LIB32}"
-fi
 
 # param 1: modules to load
 # param 2: blacklisted modules
@@ -73,91 +57,6 @@ set_xorg()
 	fi
 }
 
-# param 1: libGl path
-# param 2: libGLESv1 path
-# param 3: libGLESv2 path
-# param 4: libEGL path
-# optional param 5: lib32 libGl path
-# optional param 6: lib32 libGLESv1 path
-# optional param 7: lib32 libGLESv2 path
-# optional param 8: lib32 libEGL path
-set_Gl() {
-	if [ -e "$1" ]; then
-		ln -sf "$1" /usr/lib/libGL.so
-		ln -sf "$1" /usr/lib/libGL.so.1
-		ln -sf "$1" /usr/lib/libGL.so.1.2.0
-		echo "libGl: '$1'"
-	else
-		echo "warning: could not find '$1'!"
-	fi
-
-	if [ -e "$2" ]; then
-		ln -sf "$2" /usr/lib/libGLESv1_CM.so
-		ln -sf "$2" /usr/lib/libGLESv1_CM.so.1
-		ln -sf "$2" /usr/lib/libGLESv1_CM.so.1.1.0
-		echo "libGLESv1: '$2'"
-	else
-		echo "warning: could not find '$2'!"
-	fi
-
-	if [ -e "$3" ]; then
-		ln -sf "$3" /usr/lib/libGLESv2.so
-		ln -sf "$3" /usr/lib/libGLESv2.so.2
-		ln -sf "$3" /usr/lib/libGLESv2.so.2.0.0
-		echo "libGLESv2: '$3'"
-	else
-		echo "warning: could not find '$3'!"
-	fi
-
-	if [ -e "$4" ]; then
-		ln -sf "$4" /usr/lib/libEGL.so
-		ln -sf "$4" /usr/lib/libEGL.so.1
-		ln -sf "$4" /usr/lib/libEGL.so.1.0.0
-		echo "libEGL: '$4'"
-	else
-		echo "warning: could not find '$4'!"
-	fi
-
-	if [ "${MHWD64_IS_LIB32}" == "true" ];then
-
-		if [ -e "$5" ]; then
-			ln -sf "$5" /usr/lib32/libGL.so
-			ln -sf "$5" /usr/lib32/libGL.so.1
-			ln -sf "$5" /usr/lib32/libGL.so.1.2.0
-			echo "lib32-libGl: '$5'"
-		fi
-
-		if [ -e "$6" ]; then
-			ln -sf "$6" /usr/lib32/libGLESv1_CM.so
-			ln -sf "$6" /usr/lib32/libGLESv1_CM.so.1
-			ln -sf "$6" /usr/lib32/libGLESv1_CM.so.1.1.0
-			echo "lib32-libGLESv1: '$6'"
-		fi
-
-		if [ -e "$7" ]; then
-			ln -sf "$7" /usr/lib32/libGLESv2.so
-			ln -sf "$7" /usr/lib32/libGLESv2.so.2
-			ln -sf "$7" /usr/lib32/libGLESv2.so.2.0.0
-			echo "lib32-libGLESv2: '$7'"
-		fi
-
-		if [ -e "$8" ]; then
-			ln -sf "$8" /usr/lib32/libEGL.so
-			ln -sf "$8" /usr/lib32/libEGL.so.1
-			ln -sf "$8" /usr/lib32/libEGL.so.1.0.0
-			echo "lib32-libEGL: '$8'"
-		fi
-
-	fi
-}
-
-# param 1: true/false
-set_lib32(){
-	echo "Saving lib32 setting: ${MHWD64CONF}"
-	echo 'MHWD64_IS_LIB32="'$1'"' > ${MHWD64CONF}
-	echo "Has lib32 support: $1"
-}
-
 print_link_destination_if_exists()
 {
 	if [ -e "$1" ]; then
@@ -171,17 +70,6 @@ print_status()
 {
 	echo ":: status"
 
-	if [ "${MHWD64_IS_LIB32}" == "true" ];then
-		print_link_destination_if_exists "/usr/lib32/libGL.so" "  lib32-libGl:"
-		print_link_destination_if_exists "/usr/lib32/libGLESv1_CM.so" "  lib32-libGLESv1:"
-		print_link_destination_if_exists "/usr/lib32/libGLESv2.so" "  lib32-libGLESv2:"
-		print_link_destination_if_exists "/usr/lib32/libEGL.so" "  lib32-libEGL:"
-	fi
-
-	print_link_destination_if_exists "/usr/lib/libGL.so" "  libGl:"
-	print_link_destination_if_exists "/usr/lib/libGLESv1_CM.so" "  libGLESv1:"
-	print_link_destination_if_exists "/usr/lib/libGLESv2.so" "  libGLESv2:"
-	print_link_destination_if_exists "/usr/lib/libEGL.so" "  libEGL:"
 	print_link_destination_if_exists "${MHWDXORGCONF}" "  xorg configuration file:"
 }
 
@@ -189,16 +77,11 @@ print_help()
 {
 	echo "mhwd-gpu [OPTION] [...]"
 	echo ""
-	echo "   --help                          show help"
-	echo "   --status                        show current status"
-	echo "   --check                         check for invalid symlinks and repair"
-	echo "   --setgl [mesa/nvidia/catalyst]  set libgl"
-	echo "   --setxorg [PATH]                set xorg configuration file"
-
-	if [ "${ARCH}" == "x86_64" ];then
-		echo "   --setlib32 [true/false]         set lib32 support"
-	fi
-
+	echo "   --help                      show help"
+	echo "   --status                    show current status"
+	echo "   --check                     check for invalid symlinks and repair"
+	echo "   --setxorg [PATH]            set xorg configuration file"
+	echo "   --setmod [nvidia/catalyst]  set modules"
 	echo ""
 }
 
@@ -207,77 +90,38 @@ if [ "${PARAM}" -lt 1 ]; then
 	exit 0
 fi
 
-if [ "${ARCH}" == "x86_64" ];then
-	for (( I=1; $I <= $PARAM; I++ ));do
-		case "$1" in
-			--help)
-				print_help
-				exit 0
-			;;
-			--status)
-				print_status
-				exit 0
-			;;
-			--check)
-				CHECKCONFIG="true"
-			;;
-			--setgl)
-				shift
-				SETGL="$1"
-			;;
-			--setxorg)
-				shift
-				SETXORGCONF="$1"
-			;;
-			--setlib32)
-				shift
-				MHWD64_IS_LIB32="$1"
-			;;
-			"") ;;
-			*)
-				echo "error: invalid argument: $1"
-				echo ""
-				print_help
-				exit 1
-			;;
-		esac
+for (( I=1; $I <= $PARAM; I++ ));do
+	case "$1" in
+		--help)
+			print_help
+			exit 0
+		;;
+		--status)
+			print_status
+			exit 0
+		;;
+		--check)
+			CHECKCONFIG="true"
+		;;
+		--setxorg)
+			shift
+			SETXORGCONF="$1"
+		;;
+		--setmod)
+			shift
+			SETMOD="$1"
+		;;
+		"") ;;
+		*)
+			echo "error: invalid argument: $1"
+			echo ""
+			print_help
+			exit 1
+		;;
+	esac
 
-		shift
-	done
-else
-	for (( I=1; $I <= $PARAM; I++ ));do
-		case "$1" in
-			--help)
-				print_help
-				exit 0
-			;;
-			--status)
-				print_status
-				exit 0
-			;;
-			--check)
-				CHECKCONFIG="true"
-			;;
-			--setgl)
-				shift
-				SETGL="$1"
-			;;
-			--setxorg)
-				shift
-				SETXORGCONF="$1"
-			;;
-			"") ;;
-			*)
-				echo "error: invalid argument: $1"
-				echo ""
-				print_help
-				exit 1
-			;;
-		esac
-
-		shift
-	done
-fi
+	shift
+done
 
 # Check root
 if [[ $EUID -ne 0 ]]; then
@@ -285,45 +129,13 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
-if [ "${DEFAULT_IS_LIB32}" != "${MHWD64_IS_LIB32}" ];then
-	if [ "${MHWD64_IS_LIB32}" == "true" ] || [ "${MHWD64_IS_LIB32}" == "false" ]; then
-		set_lib32 "${MHWD64_IS_LIB32}"
-	fi
-fi
-
-# Set libGl
-if [ "${SETGL}" == "mesa" ] || [ "${SETGL}" == "default" ]; then
-	set_modules
-	set_Gl "/usr/lib/mesa/libGL.so.1.2.0" \
-			"/usr/lib/mesa/libGLESv1_CM.so.1.1.0" \
-			"/usr/lib/mesa/libGLESv2.so.2.0.0" \
-			"/usr/lib/mesa/libEGL.so.1.0.0" \
-			"/usr/lib32/mesa/libGL.so.1.2.0" \
-			"/usr/lib32/mesa/libGLESv1_CM.so.1.1.0" \
-			"/usr/lib32/mesa/libGLESv2.so.2.0.0" \
-			"/usr/lib32/mesa/libEGL.so.1.0.0"
-elif [ "${SETGL}" == "nvidia" ]; then
+# Set Modules
+if [ "${SETMOD}" == "nvidia" ]; then
 	set_modules "nvidia" "nouveau ttm drm_kms_helper drm"
-	set_Gl "/usr/lib/nvidia/libGL.so" \
-			"/usr/lib/nvidia/libGLESv1_CM.so" \
-			"/usr/lib/nvidia/libGLESv2.so" \
-			"/usr/lib/nvidia/libEGL.so" \
-			"/usr/lib32/nvidia/libGL.so" \
-			"/usr/lib32/nvidia/libGLESv1_CM.so" \
-			"/usr/lib32/nvidia/libGLESv2.so" \
-			"/usr/lib32/nvidia/libEGL.so"
-elif [ "${SETGL}" == "catalyst" ] || [ "${SETGL}" == "ati" ]; then
+elif [ "${SETMOD}" == "catalyst" ] || [ "${SETMOD}" == "ati" ]; then
 	set_modules "fglrx" "radeon"
-	set_Gl "/usr/lib/fglrx/libGL.so" \
-			"/usr/lib/fglrx/libGLESv1_CM.so" \
-			"/usr/lib/fglrx/libGLESv2.so" \
-			"/usr/lib/fglrx/libEGL.so" \
-			"/usr/lib32/fglrx/libGL.so" \
-			"/usr/lib32/fglrx/libGLESv1_CM.so" \
-			"/usr/lib32/fglrx/libGLESv2.so" \
-			"/usr/lib32/fglrx/libEGL.so"
-elif [ "${SETGL}" != "" ]; then
-	echo "error: invalid argument '${SETGL}'"
+elif [ "${SETMOD}" != "" ]; then
+	echo "error: invalid argument '${SETMOD}'"
 	exit 1
 fi
 
@@ -339,46 +151,5 @@ if [ "${CHECKCONFIG}" == "true" ]; then
 		rm "${MHWDXORGCONF}"
 	elif [ -e "${MHWDXORGCONF}" ]; then
 		echo "xorg configuration symlink valid..."
-	fi
-
-	if [ "${MHWD64_IS_LIB32}" == "true" ];then
-		if [ ! -e "/usr/lib/libGL.so" ] || \
-			[ ! -e "/usr/lib/libGLESv1_CM.so" ] || [ ! -e "/usr/lib/libGLESv2.so" ] || [ ! -e "/usr/lib/libEGL.so" ] || \
-			[ -L "/usr/lib32/libGL.so" -a ! -e "/usr/lib32/libGL.so" ] || \
-			[ -e "/usr/lib32/mesa/libGL.so.1.2.0" -a ! -e "/usr/lib32/libGL.so" ] || \
-			[ -L "/usr/lib32/libGLESv1_CM.so" -a ! -e "/usr/lib32/libGLESv1_CM.so" ] || \
-			[ -e "/usr/lib32/mesa/libGLESv1_CM.so.1.1.0" -a ! -e "/usr/lib32/libGLESv1_CM.so" ] || \
-			[ -L "/usr/lib32/libGLESv2.so" -a ! -e "/usr/lib32/libGLESv2.so" ] || \
-			[ -e "/usr/lib32/mesa/libGLESv2.so.2.0.0" -a ! -e "/usr/lib32/libGLESv2.so" ] || \
-			[ -L "/usr/lib32/libEGL.so" -a ! -e "/usr/lib32/libEGL.so" ] || \
-			[ -e "/usr/lib32/mesa/libEGL.so.1.0.0" -a ! -e "/usr/lib32/libEGL.so" ]; then
-				echo "libGl symlinks are invalid!"
-				echo "Falling back to default..."
-				set_modules
-				set_Gl "/usr/lib/mesa/libGL.so.1.2.0" \
-						"/usr/lib/mesa/libGLESv1_CM.so.1.1.0" \
-						"/usr/lib/mesa/libGLESv2.so.2.0.0" \
-						"/usr/lib/mesa/libEGL.so.1.0.0" \
-						"/usr/lib32/mesa/libGL.so.1.2.0" \
-						"/usr/lib32/mesa/libGLESv1_CM.so.1.1.0" \
-						"/usr/lib32/mesa/libGLESv2.so.2.0.0" \
-						"/usr/lib32/mesa/libEGL.so.1.0.0"
-		else
-			echo "libGl symlinks valid..."
-		fi
-	else
-		if [ ! -e "/usr/lib/libGL.so" ] || \
-			[ ! -e "/usr/lib/libGLESv1_CM.so" ] || [ ! -e "/usr/lib/libGLESv2.so" ] || \
-			[ ! -e "/usr/lib/libEGL.so" ]; then
-				echo "libGl symlinks are invalid!"
-				echo "Falling back to default..."
-				set_modules
-				set_Gl "/usr/lib/mesa/libGL.so.1.2.0" \
-						"/usr/lib/mesa/libGLESv1_CM.so.1.1.0" \
-						"/usr/lib/mesa/libGLESv2.so.2.0.0" \
-						"/usr/lib/mesa/libEGL.so.1.0.0"
-		else
-			echo "libGl symlinks valid..."
-		fi
 	fi
 fi

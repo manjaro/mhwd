@@ -3,10 +3,11 @@
  *
  *  mhwd - Manjaro Hardware Detection
  *  Roland Singer <roland@manjaro.org>
+ *  Philip Müller <philm@manjaro.org>
  *  Łukasz Matysiak <december0123@gmail.com>
  *  Filipe Marques <eagle.software3@gmail.com>
  *
- *  Copyright (C) 2012 - 2016 Manjaro (http://manjaro.org)
+ *  Copyright (C) 2012 - 2017 Manjaro (http://manjaro.org)
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -31,7 +32,7 @@ int main(int argc, char *argv[])
     try
     {
         Mhwd mhwd;
-        mhwd.setVersionMhwd("0.5.9","2012-2017");
+        mhwd.setVersionMhwd("0.6.0","2012-2017");
         return mhwd.launch(argc, argv);
     }
     catch(...)
