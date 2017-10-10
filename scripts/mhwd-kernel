@@ -35,7 +35,7 @@ kernel_install() {
         [[ $current = $kernel ]] && err "You can't reinstall your current kernel. Please use 'pacman -Syu' instead to update."
         [[ -z $(pacman -Ssq "^$kernel$") ]] && err "Please make sure if the given kernel(s) exist(s).\n$(kernel_repo)"
         
-        for pkg in $(pacman -Qqs "$current-"); do
+        for pkg in $(pacman -Qqs "$current" | grep -E "^$current$|^$current-\S+$"); do
             pkg=${pkg//$current/$kernel}
             [[ -n $(pacman -Ssq "^$pkg$") ]] && pkginstall+=("$pkg")
         done
@@ -77,7 +77,7 @@ kernel_remove() {
         [[ $current = $kernel ]] && err "You can't remove your current kernel."
         [[ -z $(pacman -Qqs "^$1$") ]] && err "Kernel not installed.\n$(kernel_list)"
 
-        for pkg in $(pacman -Qqs "$kernel-"); do
+        for pkg in $(pacman -Qqs "$kernel" | grep -E "^$kernel$|^$kernel-\S+$"); do
             pkgremove+=("$pkg")
         done
     done
