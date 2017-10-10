@@ -35,9 +35,9 @@ kernel_install() {
         [[ $current = $kernel ]] && err "You can't reinstall your current kernel. Please use 'pacman -Syu' instead to update."
         [[ -z $(pacman -Ssq "^$kernel$") ]] && err "Please make sure if the given kernel(s) exist(s).\n$(kernel_repo)"
         
-        for pkg in $(pacman -Qqs "$current" | grep -E "^$current$|^$current-\S+$"); do
+        for pkg in $(pacman -Qqs "$current"); do
             pkg=${pkg//$current/$kernel}
-            [[ -n $(pacman -Ssq "^$pkg$") ]] && pkginstall+=("$pkg")
+            [[ -n $(pacman -Ssq "^$pkg$" | grep -E "^$pkg$|^$pkg-\S+$") ]] && pkginstall+=("$pkg")
         done
     done
 
