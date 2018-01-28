@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# evaluate rt-basekernels if installed
-[[ $(ls /boot/linux*rt-[xi]* 2>/dev/null | wc -l) != 0 ]] && IFS=. read rt_maj rt_min <<< $(cut -f 1-2 -d '.' /boot/linux*rt-[xi]*) && rt_base=linux$rt_maj$rt_min
-[[ $(ls /boot/linux*rt-l* 2>/dev/null | wc -l) != 0 ]] && IFS=. read rtl_maj rtl_min <<< $(cut -f 1-2 -d '.' /boot/linux*rt-l*) && rt_lts_base=linux$rtl_maj$rtl_min
-
 root_check() {
     [[ $EUID != 0 ]] && err "Please run as root."
 }
@@ -31,7 +27,7 @@ kernel_install() {
 
     for kernel in "$@"; do
         [[ $kernel = "rmc" ]] && rmc=1 && continue
-        [[ $kernel != linux[0-9][0-9]?([0-9]) && $kernel != linux-rt-*manjaro && $kernel != "rmc" ]] && err "Invalid argument.\nPlease choose one of the $(kernel_repo)"
+        [[ $kernel != linux[0-9][0-9]?([0-9]) && $kernel != linux[0-9][0-9]?([0-9])-rt && $kernel != "rmc" ]] && err "Invalid argument.\nPlease choose one of the $(kernel_repo)"
         [[ $current = $kernel ]] && err "You can't reinstall your current kernel. Please use 'pacman -Syu' instead to update."
         [[ -z $(pacman -Ssq "^$kernel$") ]] && err "Please make sure if the given kernel(s) exist(s).\n$(kernel_repo)"
         
@@ -59,13 +55,13 @@ kernel_install() {
 kernel_repo() {
     printf "\e[32mavailable kernels:\e[0m\n"
     pacman -Ssq "^linux[0-9][0-9]?([0-9])$" | while read -r; do echo "   * $REPLY"; done
-    pacman -Ssq "^linux-rt.*([o])$" | while read -r; do echo "   * $REPLY"; done
+    pacman -Ssq "^linux[0-9][0-9]?([0-9])-rt$" | while read -r; do echo "   * $REPLY"; done
 }
 
 kernel_list() {
     printf "\e[32mCurrently running:\e[0m $(uname -r) (${current})\n"
     echo "The following kernels are installed in your system:"
-    pacman -Qqs "^linux[0-9-][0-9r]?.*[0-9o]$" | grep -v "r8" | while read -r; do echo "   * $REPLY"; done
+    pacman -Qqs "^linux[0-9][0-9]?.*[0-9t]$" | while read -r; do echo "   * $REPLY"; done
 }
 
 kernel_remove() {
@@ -73,7 +69,7 @@ kernel_remove() {
 
     for kernel in "$@"; do
         [[ -z "$kernel" ]] && err "Invalid argument (use -h for help)."
-        [[ $kernel != linux[0-9][0-9]?([0-9]) && $kernel != linux-rt-*manjaro ]] && err "Please enter a valid kernel name.\n$(kernel_list)"
+        [[ $kernel != linux[0-9][0-9]?([0-9]) && $kernel != linux[0-9][0-9]?([0-9])-rt ]] && err "Please enter a valid kernel name.\n$(kernel_list)"
         [[ $current = $kernel ]] && err "You can't remove your current kernel."
         [[ -z $(pacman -Qqs "^$1$") ]] && err "Kernel not installed.\n$(kernel_list)"
 
@@ -87,8 +83,6 @@ kernel_remove() {
 
 IFS=. read -r major minor _ <<< "$(uname -r)"
 current="linux$major$minor"
-[[ $(uname -r) == *rt* ]] && [[ $current == $rt_base ]] && current=linux-rt-manjaro
-[[ $(uname -r) == *rt* ]] && [[ $current == $rt_lts_base ]] && current=linux-rt-lts-manjaro
 
 case "$1" in
     -h | --help)            args_check $# 1 1
