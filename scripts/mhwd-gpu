@@ -131,7 +131,7 @@ fi
 
 # Set Modules
 if [ "${SETMOD}" == "nvidia" ]; then
-    set_modules "nvidia" "nouveau nvidiafb rivafb ttm drm_kms_helper drm"
+    set_modules "nvidia" "nouveau ttm drm_kms_helper drm"
 elif [ "${SETMOD}" == "catalyst" ] || [ "${SETMOD}" == "ati" ]; then
     set_modules "fglrx" "radeon"
 elif [ "${SETMOD}" != "" ]; then
