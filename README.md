@@ -1,6 +1,6 @@
 ## Manjaro HardWare Detection (mhwd)
 
-#### Copyright (C) 2012 2013 2014 2015 Manjaro Developers
+#### Copyright © 2012-2018 Manjaro Developers
 #### Project licensed under GNU GPL v.3 - Check COPYING file
 
 #### The Manjaro HardWare Detection (mhwd) command is a unique feature of [Manjaro Linux](http://manjaro.org/) operating system.
